@@ -1,0 +1,9 @@
+terraform {
+  backend "s3" {
+    bucket         = "calavia-eks-infra-production"
+    key            = "terraform.tfstate"
+    region         = "us-west-2"
+    dynamodb_table = "calavia-eks-infra-lock"
+    encrypt        = true
+  }
+}
