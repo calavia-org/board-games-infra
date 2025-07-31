@@ -8,8 +8,8 @@ variable "region" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID"
+variable "domain_name" {
+  description = "Domain name for External DNS"
   type        = string
 }
 

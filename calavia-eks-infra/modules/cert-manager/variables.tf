@@ -8,8 +8,13 @@ variable "region" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "VPC ID"
+variable "domain_name" {
+  description = "Domain name for certificates"
+  type        = string
+}
+
+variable "lets_encrypt_email" {
+  description = "Email for Let's Encrypt certificates"
   type        = string
 }
 

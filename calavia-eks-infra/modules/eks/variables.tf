@@ -1,55 +1,73 @@
 variable "cluster_name" {
-  description = "Nombre del clúster EKS"
+  description = "Name of the EKS cluster"
   type        = string
 }
 
+variable "vpc_id" {
+  description = "ID of the VPC"
+  type        = string
+}
+
+variable "subnet_ids" {
+  description = "List of subnet IDs for the EKS cluster"
+  type        = list(string)
+}
+
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
+}
+
 variable "desired_capacity" {
-  description = "Número deseado de nodos en el clúster"
+  description = "Desired number of nodes"
   type        = number
   default     = 2
 }
 
 variable "max_size" {
-  description = "Número máximo de nodos en el clúster"
+  description = "Maximum number of nodes"
   type        = number
-  default     = 3
+  default     = 10
 }
 
 variable "min_size" {
-  description = "Número mínimo de nodos en el clúster"
+  description = "Minimum number of nodes"
   type        = number
   default     = 1
 }
 
-variable "instance_type" {
-  description = "Tipo de instancia para los nodos del clúster"
-  type        = string
-  default     = "t3.medium"
-}
-
-variable "vpc_id" {
-  description = "ID de la VPC donde se desplegará el clúster"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "Lista de IDs de subredes donde se desplegará el clúster"
+variable "instance_types" {
+  description = "List of instance types for the node group"
   type        = list(string)
+  default     = ["m5.large", "m5.xlarge", "m4.large"]
 }
 
-variable "availability_zones" {
-  description = "Lista de zonas de disponibilidad para el clúster"
+variable "use_spot_instances" {
+  description = "Whether to use spot instances"
+  type        = bool
+  default     = true
+}
+
+variable "kubernetes_version" {
+  description = "Kubernetes version"
+  type        = string
+  default     = "1.28"
+}
+
+variable "security_group_ids" {
+  description = "List of security group IDs"
   type        = list(string)
+  default     = []
 }
 
 variable "enable_monitoring" {
-  description = "Habilitar monitoreo para el clúster"
+  description = "Enable CloudWatch monitoring"
   type        = bool
   default     = true
 }
 
 variable "tags" {
-  description = "Etiquetas para los recursos del clúster"
+  description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
 }

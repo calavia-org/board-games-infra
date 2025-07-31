@@ -1,124 +1,160 @@
-resource "kubectl_manifest" "cert_manager" {
+# Data source for current AWS account ID
+data "aws_caller_identity" "current" {}
+
+# IAM Role for Cert-Manager
+resource "aws_iam_role" "cert_manager" {
+  name = "${var.cluster_name}-cert-manager"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(var.cluster_oidc_issuer_url, "https://", "")}"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(var.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:cert-manager:cert-manager"
+            "${replace(var.cluster_oidc_issuer_url, "https://", "")}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# IAM Policy for Cert-Manager
+resource "aws_iam_policy" "cert_manager" {
+  name        = "${var.cluster_name}-cert-manager-policy"
+  description = "IAM policy for Cert-Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:GetChange"
+        ]
+        Resource = "arn:aws:route53:::change/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZonesByName"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "cert_manager" {
+  policy_arn = aws_iam_policy.cert_manager.arn
+  role       = aws_iam_role.cert_manager.name
+}
+
+# Helm Release for Cert-Manager
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  namespace  = "cert-manager"
+  version    = "v1.13.3"
+
+  create_namespace = true
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.cert_manager.arn
+  }
+
+  depends_on = [aws_iam_role_policy_attachment.cert_manager]
+}
+
+# ClusterIssuer for Let's Encrypt staging
+resource "kubernetes_manifest" "letsencrypt_staging" {
   manifest = {
     apiVersion = "cert-manager.io/v1"
-    kind       = "Issuer"
+    kind       = "ClusterIssuer"
     metadata = {
-      name      = "letsencrypt-prod"
-      namespace = "cert-manager"
+      name = "letsencrypt-staging"
     }
     spec = {
       acme = {
-        config = [
+        server = "https://acme-staging-v02.api.letsencrypt.org/directory"
+        email  = var.lets_encrypt_email
+        privateKeySecretRef = {
+          name = "letsencrypt-staging"
+        }
+        solvers = [
           {
-            http01 = {
-              ingressClassName = "alb"
+            dns01 = {
+              route53 = {
+                region = var.region
+              }
             }
-            domains = ["*.yourdomain.com"]
+            selector = {
+              dnsZones = [var.domain_name]
+            }
           }
         ]
-        email = "your-email@example.com"
-        privateKeySecretRef = {
-          name = "letsencrypt-prod"
-        }
+      }
+    }
+  }
+
+  depends_on = [helm_release.cert_manager]
+}
+
+# ClusterIssuer for Let's Encrypt production
+resource "kubernetes_manifest" "letsencrypt_production" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "letsencrypt-production"
+    }
+    spec = {
+      acme = {
         server = "https://acme-v02.api.letsencrypt.org/directory"
-      }
-    }
-  }
-}
-
-resource "kubectl_manifest" "cert_manager_crd" {
-  manifest = {
-    apiVersion = "apiextensions.k8s.io/v1"
-    kind       = "CustomResourceDefinition"
-    metadata = {
-      name = "certificates.cert-manager.io"
-    }
-    spec = {
-      group = "cert-manager.io"
-      names = {
-        kind     = "Certificate"
-        listKind = "CertificateList"
-        plural   = "certificates"
-        singular = "certificate"
-      }
-      scope = "Namespaced"
-      versions = [
-        {
-          name    = "v1"
-          served  = true
-          storage = true
+        email  = var.lets_encrypt_email
+        privateKeySecretRef = {
+          name = "letsencrypt-production"
         }
-      ]
-    }
-  }
-}
-
-resource "kubectl_manifest" "cert_manager_service_account" {
-  manifest = {
-    apiVersion = "v1"
-    kind       = "ServiceAccount"
-    metadata = {
-      name      = "cert-manager"
-      namespace = "cert-manager"
-    }
-  }
-}
-
-resource "kubectl_manifest" "cert_manager_deployment" {
-  manifest = {
-    apiVersion = "apps/v1"
-    kind       = "Deployment"
-    metadata = {
-      name      = "cert-manager"
-      namespace = "cert-manager"
-    }
-    spec = {
-      replicas = 1
-      selector = {
-        matchLabels = {
-          app = "cert-manager"
-        }
-      }
-      template = {
-        metadata = {
-          labels = {
-            app = "cert-manager"
-          }
-        }
-        spec = {
-          serviceAccountName = "cert-manager"
-          containers = [
-            {
-              name  = "cert-manager"
-              image = "quay.io/jetstack/cert-manager-controller:v1.5.3"
-              args  = ["--v=2"]
+        solvers = [
+          {
+            dns01 = {
+              route53 = {
+                region = var.region
+              }
             }
-          ]
-        }
+            selector = {
+              dnsZones = [var.domain_name]
+            }
+          }
+        ]
       }
     }
   }
-}
 
-resource "kubectl_manifest" "cert_manager_service" {
-  manifest = {
-    apiVersion = "v1"
-    kind       = "Service"
-    metadata = {
-      name      = "cert-manager"
-      namespace = "cert-manager"
-    }
-    spec = {
-      ports = [
-        {
-          port     = 443
-          protocol = "TCP"
-        }
-      ]
-      selector = {
-        app = "cert-manager"
-      }
-      type = "ClusterIP"
-    }
-  }
+  depends_on = [helm_release.cert_manager]
 }
