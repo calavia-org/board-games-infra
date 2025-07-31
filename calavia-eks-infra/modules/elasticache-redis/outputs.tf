@@ -49,5 +49,6 @@ output "subnet_group_name" {
 }
 
 output "redis_cluster_id" {
-  value = aws_elasticache_cluster.redis.id
+  description = "ID of the Redis replication group"
+  value       = aws_elasticache_replication_group.redis.replication_group_id
 }

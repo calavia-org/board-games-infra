@@ -167,7 +167,6 @@ resource "aws_db_subnet_group" "main" {
 
 # ElastiCache Subnet Group para Redis
 resource "aws_elasticache_subnet_group" "main" {
-  name       = "${var.tags.Name}-cache-subnet-group"
+  name       = "${var.cluster_name}-cache-subnet-group"
   subnet_ids = aws_subnet.database[*].id
-}
 }

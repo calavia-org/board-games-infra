@@ -105,6 +105,20 @@ La infraestructura para el servicio de generación de partidas distribuidas mult
   - Reglas de alertas personalizadas para gaming
   - SNS topics para alertas críticas
 
+### 10. 🔐 AWS Secrets Manager
+- **Ubicación**: `modules/secrets-manager/`
+- **Estado**: ✅ Completo
+- **Características**:
+  - Gestión completa de credenciales y tokens
+  - Rotación automática con Lambda functions
+  - PostgreSQL master y app user credentials
+  - Redis auth tokens con rotación
+  - Service Account tokens de Kubernetes
+  - Grafana admin credentials
+  - KMS encryption para todos los secretos
+  - Replicación cross-region automática
+  - Notificaciones de rotación por email/Slack
+
 ## 🔧 Configuración por Ambiente
 
 ### Production
@@ -144,6 +158,17 @@ La infraestructura para el servicio de generación de partidas distribuidas mult
 - ✅ Network ACLs para subnets críticas
 - ✅ Private subnets para workloads
 - ✅ Database subnets aisladas
+
+### 🔑 Gestión Automática de Secretos
+- ✅ AWS Secrets Manager con KMS encryption
+- ✅ Rotación automática de PostgreSQL (30d prod/15d staging)
+- ✅ Rotación automática de Redis auth tokens (30d prod/15d staging)
+- ✅ Rotación automática de Grafana admin (90d prod/30d staging)
+- ✅ Rotación automática de Service Account tokens (90d prod/30d staging)
+- ✅ Lambda functions para rotación personalizada
+- ✅ Notificaciones de rotación por email/Slack
+- ✅ Replicación cross-region de secretos
+- ✅ Rollback automático en caso de falla
 
 ## 📈 Monitoreo y Alertas
 
@@ -239,9 +264,12 @@ Cada módulo incluye:
 
 1. **Configurar Terraform Backend**: Configurar state en Terraform Cloud
 2. **CI/CD Pipeline**: Implementar pipeline para deployments
-3. **Game Server Deploy**: Desplegar aplicaciones de gaming
-4. **Load Testing**: Pruebas de carga y performance
-5. **Disaster Recovery**: Procedimientos de recuperación
+3. **Validar Rotación de Secretos**: Probar rotación automática de credenciales
+4. **Game Server Deploy**: Desplegar aplicaciones de gaming
+5. **Load Testing**: Pruebas de carga y performance
+6. **Disaster Recovery**: Procedimientos de recuperación
+7. **Configurar Notificaciones**: Setup de alertas Slack/Email
+8. **Security Audit**: Revisión completa de seguridad
 
 ## 🏆 Infraestructura Lista
 

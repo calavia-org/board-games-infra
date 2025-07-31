@@ -24,10 +24,10 @@ terraform {
 
   required_version = ">= 1.0.0"
 
-  cloud {
-    organization = "calavia-org"
-    workspaces {
-      tags = ["board-games-infra"]
-    }
-  }
+  # cloud {
+  #   organization = "calavia-org"
+  #   workspaces {
+  #     tags = ["board-games-infra"]
+  #   }
+  # }
 }

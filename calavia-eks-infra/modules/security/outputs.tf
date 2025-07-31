@@ -23,7 +23,5 @@ output "alb_sg_id" {
   value       = aws_security_group.alb.id
 }
 
-output "database_network_acl_id" {
-  description = "ID of the database network ACL"
-  value       = aws_network_acl.database.id
-}
+# Los Network ACLs se manejan automáticamente por AWS
+# No se definen explícitamente en este módulo

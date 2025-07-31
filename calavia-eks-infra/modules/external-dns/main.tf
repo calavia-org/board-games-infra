@@ -1,26 +1,3 @@
-resource "aws_route53_zone" "main" {
-  name = var.domain_name
-}
-
-resource "aws_route53_record" "external_dns" {
-  zone_id = aws_route53_zone.main.zone_id
-  name     = var.fqdn
-  type     = "CNAME"
-  ttl      = 300
-  records  = [var.target]
-}
-
-resource "kubernetes_manifest" "external_dns" {
-  manifest = {
-    apiVersion = "v1"
-    kind       = "ServiceAccount"
-    metadata = {
-      name      = "external-dns"
-      namespace = var.namespace
-    }
-  }
-}
-
 # Data source for current AWS account ID
 data "aws_caller_identity" "current" {}
 
@@ -129,7 +106,7 @@ resource "helm_release" "external_dns" {
   }
 
   set {
-    name  = "serviceAccount.annotations.eks\.amazonaws\.com/role-arn"
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = aws_iam_role.external_dns.arn
   }
 

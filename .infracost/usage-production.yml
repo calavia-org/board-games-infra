@@ -1,0 +1,115 @@
+# Archivo de uso para el entorno de producción
+# Define patrones de uso realistas para cargas de trabajo de producción
+
+version: 0.1
+
+resource_usage:
+  # EKS Cluster
+  aws_eks_cluster.this:
+    operating_system: linux
+    
+  # EKS Node Groups - Configuración robusta para producción
+  aws_eks_node_group.on_demand:
+    operating_system: linux
+    instances:
+      - instance_type: t3.large
+        count: 3  # Alta disponibilidad
+        
+  aws_eks_node_group.spot:
+    operating_system: linux
+    instances:
+      - instance_type: t3.large
+        count: 6  # Más capacidad spot para producción
+      - instance_type: t3.xlarge
+        count: 2  # Nodos más grandes para cargas pesadas
+        
+  # Application Load Balancer - Mayor tráfico en producción
+  aws_lb.main:
+    monthly_data_processed_gb: 1000  # 1TB procesado por mes
+    
+  # RDS PostgreSQL - Configuración robusta para producción
+  aws_db_instance.postgres:
+    monthly_cpu_credit_hrs: 500
+    storage_gb: 200  # Mayor almacenamiento
+    monthly_additional_backup_storage_gb: 50
+    
+  # ElastiCache Redis - Configuración optimizada para producción
+  aws_elasticache_replication_group.redis:
+    monthly_cpu_credit_hrs: 400
+    
+  # VPC Endpoints - Mayor uso en producción
+  aws_vpc_endpoint.secretsmanager:
+    monthly_requests: 100000  # 100k requests por mes
+    
+  aws_vpc_endpoint.kms:
+    monthly_requests: 50000
+    
+  # Lambda Functions para rotación de secretos
+  aws_lambda_function.postgres_rotation:
+    monthly_requests: 2  # Rotación mensual
+    request_duration_ms: 60000  # 60 segundos (base de datos más grande)
+    
+  aws_lambda_function.redis_rotation:
+    monthly_requests: 2
+    request_duration_ms: 20000  # 20 segundos
+    
+  aws_lambda_function.sa_token_rotation:
+    monthly_requests: 1
+    request_duration_ms: 10000  # 10 segundos
+    
+  # CloudWatch Logs - Más logs en producción
+  aws_cloudwatch_log_group.eks_cluster:
+    monthly_gb: 50  # 50GB de logs por mes
+    
+  aws_cloudwatch_log_group.lambda_postgres:
+    monthly_gb: 1
+    
+  aws_cloudwatch_log_group.lambda_redis:
+    monthly_gb: 1
+    
+  aws_cloudwatch_log_group.lambda_sa_token:
+    monthly_gb: 0.5
+    
+  # Logs adicionales de aplicaciones
+  aws_cloudwatch_log_group.application_logs:
+    monthly_gb: 100  # 100GB de logs de aplicaciones
+    
+  # KMS Keys - Mayor uso en producción
+  aws_kms_key.secrets:
+    monthly_requests: 10000  # 10k operaciones
+    
+  aws_kms_key.rds:
+    monthly_requests: 5000
+    
+  aws_kms_key.redis:
+    monthly_requests: 5000
+    
+  # Secrets Manager - Mayor frecuencia de acceso
+  aws_secretsmanager_secret.postgres_credentials:
+    monthly_requests: 10000  # 10k retrievals por mes
+    
+  aws_secretsmanager_secret.redis_credentials:
+    monthly_requests: 10000
+    
+  aws_secretsmanager_secret.grafana_credentials:
+    monthly_requests: 1000
+    
+  # EBS Volumes - Mayor I/O en producción
+  aws_ebs_volume.*:
+    monthly_disk_operations: 10000000  # 10M operaciones por mes
+    
+  # AWS Managed Grafana - Más usuarios en producción
+  aws_grafana_workspace.main:
+    monthly_active_users: 20  # 20 usuarios activos
+    
+  # NAT Gateway - Tráfico de salida estimado
+  aws_nat_gateway.*:
+    monthly_data_processed_gb: 500  # 500GB de tráfico por NAT Gateway
+    
+  # Route53 - Consultas DNS
+  aws_route53_zone.main:
+    monthly_queries: 1000000  # 1M consultas por mes
+    
+  # Certificate Manager - Certificados SSL/TLS
+  aws_acm_certificate.*:
+    certificate_transparency_logs: true

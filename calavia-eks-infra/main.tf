@@ -19,6 +19,16 @@ resource "random_password" "db_password" {
   special = true
 }
 
+resource "random_password" "postgres_password" {
+  length  = 16
+  special = true
+}
+
+resource "random_password" "redis_auth_token" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "grafana_admin_password" {
   length  = 16
   special = true
@@ -116,11 +126,10 @@ module "elasticache_redis" {
 module "alb_ingress" {
   source = "./modules/alb-ingress"
   
-  cluster_name            = module.eks.cluster_name
-  region                  = local.region
-  
-  vpc_id                  = module.vpc.vpc_id
-  cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
+  cluster_name      = module.eks.cluster_name
+  aws_region        = local.region
+  vpc_id            = module.vpc.vpc_id
+  oidc_provider_arn = module.eks.oidc_provider_arn
   
   tags = local.tags
   
@@ -160,6 +169,53 @@ module "cert_manager" {
   depends_on = [module.eks, module.external_dns]
 }
 
+# Deploy secrets management with automatic rotation
+module "secrets_manager" {
+  source = "./modules/secrets-manager"
+  
+  cluster_name         = local.name
+  region              = local.region
+  environment         = var.environment
+  
+  vpc_id              = module.vpc.vpc_id
+  vpc_cidr            = var.vpc_cidr
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  
+  # PostgreSQL Configuration
+  postgres_endpoint   = module.rds_postgres.db_endpoint
+  postgres_port       = module.rds_postgres.db_port
+  postgres_database   = module.rds_postgres.db_name
+  postgres_username   = "postgres"
+  postgres_password   = random_password.postgres_password.result
+  
+  # Redis configuration
+  redis_endpoint      = module.elasticache_redis.redis_primary_endpoint
+  redis_port          = module.elasticache_redis.redis_port
+  redis_auth_token    = random_password.redis_auth_token.result
+  
+  # Grafana Configuration
+  grafana_admin_password = random_password.grafana_admin_password.result
+  grafana_url           = var.enable_external_dns ? "https://grafana.${var.domain_name}" : ""
+  
+  # EKS Configuration
+  eks_cluster_endpoint = module.eks.cluster_endpoint
+  
+  # Rotation Configuration
+  postgres_rotation_days    = var.environment == "production" ? 30 : 15
+  redis_rotation_days      = var.environment == "production" ? 30 : 15
+  grafana_rotation_days    = var.environment == "production" ? 90 : 30
+  sa_token_rotation_days   = var.environment == "production" ? 90 : 30
+  
+  # Notifications
+  enable_rotation_notifications = var.enable_notifications
+  notification_email           = var.notification_email
+  slack_webhook_url           = var.slack_webhook_url
+  
+  tags = local.tags
+  
+  depends_on = [module.rds_postgres, module.elasticache_redis, module.eks]
+}
+
 # Deploy monitoring stack (Prometheus, Grafana, AlertManager)
 module "monitoring" {
   source = "./modules/monitoring"
@@ -173,5 +229,5 @@ module "monitoring" {
   
   tags = local.tags
   
-  depends_on = [module.eks]
+  depends_on = [module.eks, module.secrets_manager]
 }

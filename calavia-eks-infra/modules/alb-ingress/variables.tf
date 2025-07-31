@@ -3,7 +3,7 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "region" {
+variable "aws_region" {
   description = "AWS region"
   type        = string
 }
@@ -13,13 +13,13 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "cluster_oidc_issuer_url" {
-  description = "OIDC issuer URL for the EKS cluster"
+variable "oidc_provider_arn" {
+  description = "ARN of the OIDC provider for the EKS cluster"
   type        = string
 }
 
 variable "tags" {
-  description = "Tags to apply to resources"
+  description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
 }

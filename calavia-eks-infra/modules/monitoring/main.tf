@@ -131,13 +131,14 @@ resource "helm_release" "kube_prometheus_stack" {
   }
 
   values = [templatefile("${path.module}/values.yaml", {
-    cluster_name           = var.cluster_name
-    retention_days         = var.retention_days
-    slack_webhook_url      = var.slack_webhook_url
-    email_notifications    = var.email_notifications
-    prometheus_storage     = var.prometheus_storage_size
-    alertmanager_storage   = var.alertmanager_storage_size
-    grafana_storage        = var.grafana_storage_size
+    cluster_name            = var.cluster_name
+    retention_days          = var.retention_days
+    slack_webhook_url       = var.slack_webhook_url
+    email_notifications     = var.email_notifications
+    prometheus_storage      = var.prometheus_storage_size
+    alertmanager_storage    = var.alertmanager_storage_size
+    grafana_storage         = var.grafana_storage_size
+    grafana_admin_password  = var.grafana_admin_password
   })]
 
   depends_on = [kubernetes_namespace.monitoring]

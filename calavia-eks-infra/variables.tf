@@ -132,3 +132,23 @@ variable "lets_encrypt_email" {
   type        = string
   default     = "admin@example.com"
 }
+
+# Secrets Manager and Notifications Variables
+variable "enable_notifications" {
+  description = "Habilitar notificaciones para rotación de secretos"
+  type        = bool
+  default     = true
+}
+
+variable "notification_email" {
+  description = "Email address para notificaciones de rotación"
+  type        = string
+  default     = "devops@example.com"
+}
+
+variable "slack_webhook_url" {
+  description = "URL del webhook de Slack para notificaciones"
+  type        = string
+  default     = ""
+  sensitive   = true
+}

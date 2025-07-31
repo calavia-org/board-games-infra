@@ -1,0 +1,35 @@
+# Configuración de Infracost para board-games-infra
+version: 0.1
+
+projects:
+  # Staging Environment
+  - path: calavia-eks-infra/environments/staging
+    name: board-games-staging
+    terraform_workspace: staging
+    usage_file: usage-staging.yml
+    
+  # Production Environment  
+  - path: calavia-eks-infra/environments/production
+    name: board-games-production
+    terraform_workspace: production
+    usage_file: usage-production.yml
+
+# Configuración global
+settings:
+  currency: USD
+  
+# Configuración de alertas de costes
+cost_policies:
+  # Alerta si el coste mensual supera el presupuesto
+  - name: monthly_budget_alert
+    threshold: 500  # USD por mes para staging
+    
+  - name: production_budget_alert
+    threshold: 1500  # USD por mes para producción
+    
+# Configuración de reportes
+reporting:
+  slack_webhook_url: ${SLACK_WEBHOOK_URL}
+  email_recipients:
+    - devops@calavia.org
+    - finance@calavia.org

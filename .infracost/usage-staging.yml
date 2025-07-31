@@ -1,0 +1,97 @@
+# Archivo de uso para el entorno de staging
+# Define patrones de uso realistas para calcular costes precisos
+
+version: 0.1
+
+resource_usage:
+  # EKS Cluster
+  aws_eks_cluster.this:
+    operating_system: linux
+    
+  # EKS Node Groups - Configuración conservadora para staging
+  aws_eks_node_group.on_demand:
+    operating_system: linux
+    instances:
+      - instance_type: t3.medium
+        count: 1  # Mínimo para staging
+        
+  aws_eks_node_group.spot:
+    operating_system: linux
+    instances:
+      - instance_type: t3.medium
+        count: 2  # Staging con pocos nodos spot
+        
+  # Application Load Balancer
+  aws_lb.main:
+    monthly_data_processed_gb: 100  # 100GB procesados por mes en staging
+    
+  # RDS PostgreSQL - Configuración básica para staging
+  aws_db_instance.postgres:
+    monthly_cpu_credit_hrs: 150
+    storage_gb: 50
+    monthly_additional_backup_storage_gb: 10
+    
+  # ElastiCache Redis - Configuración mínima para staging
+  aws_elasticache_replication_group.redis:
+    monthly_cpu_credit_hrs: 100
+    
+  # VPC Endpoints
+  aws_vpc_endpoint.secretsmanager:
+    monthly_requests: 10000  # 10k requests por mes
+    
+  aws_vpc_endpoint.kms:
+    monthly_requests: 5000
+    
+  # Lambda Functions para rotación de secretos
+  aws_lambda_function.postgres_rotation:
+    monthly_requests: 2  # Rotación mensual
+    request_duration_ms: 30000  # 30 segundos por rotación
+    
+  aws_lambda_function.redis_rotation:
+    monthly_requests: 2
+    request_duration_ms: 10000  # 10 segundos
+    
+  aws_lambda_function.sa_token_rotation:
+    monthly_requests: 1
+    request_duration_ms: 5000   # 5 segundos
+    
+  # CloudWatch Logs
+  aws_cloudwatch_log_group.eks_cluster:
+    monthly_gb: 5  # 5GB de logs por mes en staging
+    
+  aws_cloudwatch_log_group.lambda_postgres:
+    monthly_gb: 0.1
+    
+  aws_cloudwatch_log_group.lambda_redis: 
+    monthly_gb: 0.1
+    
+  aws_cloudwatch_log_group.lambda_sa_token:
+    monthly_gb: 0.1
+    
+  # KMS Keys
+  aws_kms_key.secrets:
+    monthly_requests: 1000  # 1k operaciones de cifrado/descifrado
+    
+  aws_kms_key.rds:
+    monthly_requests: 500
+    
+  aws_kms_key.redis:
+    monthly_requests: 500
+    
+  # Secrets Manager
+  aws_secretsmanager_secret.postgres_credentials:
+    monthly_requests: 1000  # 1k retrievals por mes
+    
+  aws_secretsmanager_secret.redis_credentials:
+    monthly_requests: 1000
+    
+  aws_secretsmanager_secret.grafana_credentials:
+    monthly_requests: 100
+    
+  # EBS Volumes (para nodos EKS)
+  aws_ebs_volume.*:
+    monthly_disk_operations: 1000000  # 1M operaciones por mes
+    
+  # AWS Managed Grafana
+  aws_grafana_workspace.main:
+    monthly_active_users: 5  # 5 usuarios activos en staging

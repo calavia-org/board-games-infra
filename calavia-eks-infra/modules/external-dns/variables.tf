@@ -23,3 +23,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "namespace" {
+  description = "Kubernetes namespace for External DNS"
+  type        = string
+  default     = "kube-system"
+}

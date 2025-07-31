@@ -1,0 +1,141 @@
+# Configuración de Cron Jobs para Reportes de Costes Automáticos
+# Board Games Infrastructure - Cost Monitoring
+#
+# Para instalar estos cron jobs:
+# 1. Copia este archivo: cp crontab.example /tmp/cost-monitoring-cron
+# 2. Edita las rutas absolutas según tu entorno
+# 3. Instala: crontab /tmp/cost-monitoring-cron
+#
+# Formato: min hour day month dayofweek command
+
+# Variables de entorno para los scripts
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+EMAIL_RECIPIENTS=devops@calavia.org,finance@calavia.org
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
+PROJECT_ROOT=/path/to/board-games-infra
+
+# ============================================================================
+# REPORTES DIARIOS
+# ============================================================================
+
+# Reporte diario de costes - Lunes a Viernes a las 9:00 AM
+0 9 * * 1-5 cd $PROJECT_ROOT && ./scripts/generate-cost-report.sh -f daily -o html -s --trend-analysis
+
+# Verificación de presupuesto diaria - Todos los días a las 10:00 AM
+0 10 * * * cd $PROJECT_ROOT && ./scripts/cost-analysis.sh both --output json > /tmp/daily-cost-check.json && \
+if [ $(cat /tmp/daily-cost-check.json | jq -r '.totalMonthlyCost | tonumber') -gt 1000 ]; then \
+  echo "ALERTA: Costes diarios exceden umbral" | mail -s "Alert: Daily Cost Threshold" $EMAIL_RECIPIENTS; \
+fi
+
+# ============================================================================
+# REPORTES SEMANALES  
+# ============================================================================
+
+# Reporte semanal completo - Lunes a las 8:00 AM
+0 8 * * 1 cd $PROJECT_ROOT && ./scripts/generate-cost-report.sh -f weekly -o html -s --trend-analysis --cost-optimization
+
+# Análisis de tendencias semanal - Viernes a las 5:00 PM
+0 17 * * 5 cd $PROJECT_ROOT && ./scripts/cost-analysis.sh both --compare --output html --save
+
+# ============================================================================
+# REPORTES MENSUALES
+# ============================================================================
+
+# Reporte mensual detallado - Primer día del mes a las 7:00 AM
+0 7 1 * * cd $PROJECT_ROOT && ./scripts/generate-cost-report.sh -f monthly -o html -s --trend-analysis --cost-optimization
+
+# Revisión de presupuestos mensual - Primer día del mes a las 8:00 AM
+0 8 1 * * cd $PROJECT_ROOT && ./scripts/setup-aws-budgets.sh --list > /tmp/monthly-budget-review.txt && \
+mail -s "Monthly Budget Review" -a /tmp/monthly-budget-review.txt $EMAIL_RECIPIENTS < /dev/null
+
+# ============================================================================
+# MANTENIMIENTO Y LIMPIEZA
+# ============================================================================
+
+# Limpiar reportes antiguos - Domingo a las 2:00 AM (mantener últimos 30 días)
+0 2 * * 0 find $PROJECT_ROOT/reports -name "*.html" -mtime +30 -delete
+0 2 * * 0 find $PROJECT_ROOT/reports -name "*.json" -mtime +30 -delete
+
+# Verificar configuración de Infracost - Domingo a las 3:00 AM
+0 3 * * 0 cd $PROJECT_ROOT && infracost configure get api_key > /dev/null 2>&1 || \
+echo "ALERTA: Infracost API key no configurada" | mail -s "Infracost Configuration Alert" $EMAIL_RECIPIENTS
+
+# ============================================================================
+# ALERTAS ESPECIALES
+# ============================================================================
+
+# Verificación de anomalías - Cada 6 horas
+0 */6 * * * cd $PROJECT_ROOT && aws ce get-anomalies \
+--date-interval Start=$(date -d '1 day ago' +%Y-%m-%d),End=$(date +%Y-%m-%d) \
+--max-results 10 --query 'Anomalies[?Impact.MaxImpact >= `50.0`]' --output json > /tmp/anomalies.json && \
+if [ -s /tmp/anomalies.json ] && [ "$(cat /tmp/anomalies.json)" != "[]" ]; then \
+  echo "ALERTA: Anomalías de coste detectadas" | mail -s "Cost Anomaly Alert" -a /tmp/anomalies.json $EMAIL_RECIPIENTS; \
+fi
+
+# Verificación de límites de facturación - Diario a las 11:00 PM
+0 23 * * * cd $PROJECT_ROOT && aws budgets describe-budgets --account-id $(aws sts get-caller-identity --query Account --output text) \
+--query 'Budgets[?BudgetName | starts_with(@, `board-games`)].{Name:BudgetName,Limit:BudgetLimit.Amount,Actual:CalculatedSpend.ActualSpend.Amount}' \
+--output json > /tmp/budget-status.json && \
+python3 -c "
+import json, sys, os
+with open('/tmp/budget-status.json') as f:
+    budgets = json.load(f)
+    alerts = []
+    for budget in budgets:
+        actual = float(budget['Actual'])
+        limit = float(budget['Limit'])
+        if actual > limit * 0.9:
+            alerts.append(f'{budget[\"Name\"]}: ${actual:.2f} of ${limit} (>{90 if actual > limit * 0.9 else 80}%)')
+    if alerts:
+        print('BUDGET ALERTS:')
+        for alert in alerts:
+            print(f'  • {alert}')
+        sys.exit(1)
+" > /tmp/budget-alerts.txt 2>&1 && \
+if [ $? -ne 0 ]; then \
+  mail -s "Budget Threshold Alert" $EMAIL_RECIPIENTS < /tmp/budget-alerts.txt; \
+fi
+
+# ============================================================================
+# REPORTES ESPECIALES - SOLO PRODUCCIÓN
+# ============================================================================
+
+# Análisis de coste por zona de disponibilidad - Miércoles a las 2:00 PM
+0 14 * * 3 cd $PROJECT_ROOT && aws ce get-cost-and-usage \
+--time-period Start=$(date -d '7 days ago' +%Y-%m-%d),End=$(date +%Y-%m-%d) \
+--granularity DAILY \
+--metrics BlendedCost \
+--group-by Type=DIMENSION,Key=AZ \
+--query 'ResultsByTime[*].[TimePeriod.Start,Groups[*].[Keys[0],Metrics.BlendedCost.Amount]]' \
+--output json > /tmp/az-costs.json && \
+echo "Análisis de costes por AZ disponible en /tmp/az-costs.json" | \
+mail -s "Weekly AZ Cost Analysis" -a /tmp/az-costs.json $EMAIL_RECIPIENTS
+
+# ============================================================================
+# CONFIGURACIÓN DE LOGGING
+# ============================================================================
+
+# Log de ejecución de cron jobs
+MAILTO=$EMAIL_RECIPIENTS
+CRON_LOG_LEVEL=1
+
+# ============================================================================
+# NOTAS DE CONFIGURACIÓN
+# ============================================================================
+
+# 1. Asegúrate de que las rutas absolutas sean correctas
+# 2. Configura las variables de entorno EMAIL_RECIPIENTS y SLACK_WEBHOOK_URL
+# 3. Verifica que AWS CLI esté configurado con las credenciales correctas
+# 4. Instala las dependencias: aws-cli, infracost, jq, mail
+# 5. Prueba los scripts manualmente antes de configurar cron
+#
+# Para instalar:
+# crontab -e
+# (copiar el contenido de este archivo, ajustando las rutas)
+#
+# Para verificar cron jobs activos:
+# crontab -l
+#
+# Para ver logs de cron:
+# tail -f /var/log/cron
