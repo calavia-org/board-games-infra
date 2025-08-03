@@ -7,6 +7,9 @@ terraform {
       version = "~> 5.0"
     }
   }
+  
+  # Backend local para CI/CD
+  backend "local" {}
 }
 
 provider "aws" {
