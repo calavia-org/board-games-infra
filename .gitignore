@@ -35,3 +35,9 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Infracost output files
+reports/
+.infracost/usage.gob
+.infracost/pricing.gob
+.infracost/terraform_modules/
