@@ -42,6 +42,7 @@ jobs:
           ref: '${{ github.event.pull_request.base.ref }}'
 
       - name: Verify base branch structure
+        id: check_base
         run: |
           echo "=== Verifying base branch structure ==="
           echo "Current directory: $(pwd)"
@@ -51,8 +52,18 @@ jobs:
           echo "Key files:"
           ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
           ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
+          
+          # Check if infrastructure exists in base branch
+          if [ -d "${TF_ROOT}/environments/staging" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Infrastructure directory exists in base branch"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Infrastructure directory does not exist in base branch (first PR or empty main)"
+          fi
 
       - name: Terraform Init (base)
+        if: steps.check_base.outputs.exists == 'true'
         run: |
           echo "Checking directory structure..."
           ls -la
@@ -66,11 +77,13 @@ jobs:
           terraform init -backend=false
 
       - name: Terraform Validate (base)
+        if: steps.check_base.outputs.exists == 'true'
         run: |
           cd ${TF_ROOT}/environments/staging
           terraform validate
 
       - name: Generate Infracost cost baseline
+        if: steps.check_base.outputs.exists == 'true'
         run: |
           infracost breakdown --path=${TF_ROOT}/environments/staging \
                             --format=json \
@@ -111,11 +124,20 @@ jobs:
 
       - name: Generate Infracost diff
         run: |
-          infracost diff --path=${TF_ROOT}/environments/staging \
-                        --format=json \
-                        --usage-file=.infracost/usage-staging.yml \
-                        --compare-to=/tmp/infracost-base.json \
-                        --out-file=/tmp/infracost.json
+          if [ "${{ steps.check_base.outputs.exists }}" = "true" ]; then
+            echo "Generating diff against base branch..."
+            infracost diff --path=${TF_ROOT}/environments/staging \
+                          --format=json \
+                          --usage-file=.infracost/usage-staging.yml \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+          else
+            echo "No base branch infrastructure found, generating breakdown..."
+            infracost breakdown --path=${TF_ROOT}/environments/staging \
+                              --format=json \
+                              --usage-file=.infracost/usage-staging.yml \
+                              --out-file=/tmp/infracost.json
+          fi
 
       - name: Post Infracost comment
         if: github.event_name == 'pull_request'
@@ -159,6 +181,7 @@ jobs:
           ref: '${{ github.event.pull_request.base.ref }}'
 
       - name: Verify base branch structure (production)
+        id: check_base_prod
         run: |
           echo "=== PRODUCTION BASE BRANCH VERIFICATION ==="
           echo "Current directory: $(pwd)"
@@ -167,8 +190,18 @@ jobs:
           find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
           echo "Detailed directory listing:"
           ls -la
+          
+          # Check if infrastructure exists in base branch
+          if [ -d "${TF_ROOT}/environments/production" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Production infrastructure directory exists in base branch"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Production infrastructure directory does not exist in base branch (first PR or empty main)"
+          fi
 
       - name: Terraform Init (base)
+        if: steps.check_base_prod.outputs.exists == 'true'
         run: |
           echo "Checking directory structure for production..."
           ls -la
@@ -182,11 +215,13 @@ jobs:
           terraform init -backend=false
 
       - name: Terraform Validate (base)
+        if: steps.check_base_prod.outputs.exists == 'true'
         run: |
           cd ${TF_ROOT}/environments/production
           terraform validate
 
       - name: Generate Infracost cost baseline
+        if: steps.check_base_prod.outputs.exists == 'true'
         run: |
           infracost breakdown --path=${TF_ROOT}/environments/production \
                             --format=json \
@@ -226,11 +261,20 @@ jobs:
 
       - name: Generate Infracost diff
         run: |
-          infracost diff --path=${TF_ROOT}/environments/production \
-                        --format=json \
-                        --usage-file=.infracost/usage-production.yml \
-                        --compare-to=/tmp/infracost-base.json \
-                        --out-file=/tmp/infracost.json
+          if [ "${{ steps.check_base_prod.outputs.exists }}" = "true" ]; then
+            echo "Generating diff against base branch..."
+            infracost diff --path=${TF_ROOT}/environments/production \
+                          --format=json \
+                          --usage-file=.infracost/usage-production.yml \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+          else
+            echo "No base branch infrastructure found, generating breakdown..."
+            infracost breakdown --path=${TF_ROOT}/environments/production \
+                              --format=json \
+                              --usage-file=.infracost/usage-production.yml \
+                              --out-file=/tmp/infracost.json
+          fi
 
       - name: Post Infracost comment
         if: github.event_name == 'pull_request'
