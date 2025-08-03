@@ -98,23 +98,33 @@ def set_secret(service, secret_arn, token):
             
             if 'app_user' in username:
                 # For application users, create/update user with limited privileges
-                cursor.execute(f"""
+                query = sql.SQL("""
                     DO $$
                     BEGIN
-                        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '{username}') THEN
-                            CREATE USER "{username}" WITH PASSWORD '{new_password}';
-                            GRANT CONNECT ON DATABASE "{current_secret['dbname']}" TO "{username}";
-                            GRANT USAGE ON SCHEMA public TO "{username}";
-                            GRANT CREATE ON SCHEMA public TO "{username}";
+                        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = {username}) THEN
+                            CREATE USER {username_ident} WITH PASSWORD {new_password};
+                            GRANT CONNECT ON DATABASE {dbname_ident} TO {username_ident};
+                            GRANT USAGE ON SCHEMA public TO {username_ident};
+                            GRANT CREATE ON SCHEMA public TO {username_ident};
                         ELSE
-                            ALTER USER "{username}" WITH PASSWORD '{new_password}';
+                            ALTER USER {username_ident} WITH PASSWORD {new_password};
                         END IF;
                     END
                     $$;
-                """)
+                """).format(
+                    username=sql.Literal(username),
+                    username_ident=sql.Identifier(username),
+                    new_password=sql.Literal(new_password),
+                    dbname_ident=sql.Identifier(current_secret['dbname'])
+                )
+                cursor.execute(query)
             else:
                 # For master user, just change password
-                cursor.execute(f'ALTER USER "{username}" WITH PASSWORD \'{new_password}\'')
+                query = sql.SQL('ALTER USER {username} WITH PASSWORD {new_password}').format(
+                    username=sql.Identifier(username),
+                    new_password=sql.Literal(new_password)
+                )
+                cursor.execute(query)
             
             connection.commit()
             logger.info(f"Successfully updated password for user: {username}")
