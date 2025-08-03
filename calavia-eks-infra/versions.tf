@@ -20,9 +20,13 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.7"
+    }
   }
 
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.5.0"
 
   # cloud {
   #   organization = "calavia-org"
