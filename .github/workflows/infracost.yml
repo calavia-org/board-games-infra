@@ -41,9 +41,28 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      - name: Verify base branch structure
+        run: |
+          echo "=== Verifying base branch structure ==="
+          echo "Current directory: $(pwd)"
+          echo "Branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" | head -20
+          echo "Key files:"
+          ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
+          ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
+
       - name: Terraform Init (base)
         run: |
+          echo "Checking directory structure..."
+          ls -la
+          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
+          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
+          ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
+          
+          echo "Changing to staging directory..."
           cd ${TF_ROOT}/environments/staging
+          echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (base)
@@ -61,9 +80,28 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
 
+      - name: Verify PR branch structure
+        run: |
+          echo "=== Verifying PR branch structure ==="
+          echo "Current directory: $(pwd)"
+          echo "Branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" | head -20
+          echo "Key files:"
+          ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
+          ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
+
       - name: Terraform Init (PR)
         run: |
+          echo "Checking directory structure after PR checkout..."
+          ls -la
+          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
+          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
+          ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
+          
+          echo "Changing to staging directory..."
           cd ${TF_ROOT}/environments/staging
+          echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (PR)
@@ -120,9 +158,27 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      - name: Verify base branch structure (production)
+        run: |
+          echo "=== PRODUCTION BASE BRANCH VERIFICATION ==="
+          echo "Current directory: $(pwd)"
+          echo "Git branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
+          echo "Detailed directory listing:"
+          ls -la
+
       - name: Terraform Init (base)
         run: |
+          echo "Checking directory structure for production..."
+          ls -la
+          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
+          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
+          ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
+          
+          echo "Changing to production directory..."
           cd ${TF_ROOT}/environments/production
+          echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (base)
@@ -140,9 +196,27 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
 
+      - name: Verify PR branch structure (production)
+        run: |
+          echo "=== PRODUCTION PR BRANCH VERIFICATION ==="
+          echo "Current directory: $(pwd)"
+          echo "Git branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
+          echo "Detailed directory listing:"
+          ls -la
+
       - name: Terraform Init (PR)
         run: |
+          echo "Checking directory structure for production after PR checkout..."
+          ls -la
+          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
+          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
+          ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
+          
+          echo "Changing to production directory..."
           cd ${TF_ROOT}/environments/production
+          echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (PR)
