@@ -35,7 +35,7 @@ global:
 alertmanager:
   enabled: true
   alertmanagerSpec:
-    retention: "${retention_days}d"
+    retention: "{{ .Values.retention_days }}d"
     storage:
       volumeClaimTemplate:
         spec:
