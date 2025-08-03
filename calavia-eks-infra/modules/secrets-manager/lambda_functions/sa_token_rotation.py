@@ -286,28 +286,24 @@ def configure_k8s_client_with_token(eks, cluster_name, sa_token):
 
 def get_bearer_token(cluster_name, sts):
     """
-    Generate bearer token for EKS authentication
+    Generate bearer token for EKS authentication using the official AWS method.
     """
     try:
-        # This mimics `aws eks get-token` command
-        token_expiration = 60
-        
-        url = f"https://sts.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15&X-Amz-Algorithm=AWS4-HMAC-SHA256"
-        
-        # Use pre-signed URL method for token generation
-        from botocore.auth import SigV4Auth
-        from botocore.awsrequest import AWSRequest
-        
-        request = AWSRequest(method='GET', url=url)
-        SigV4Auth(sts._get_credentials(), 'sts', sts.meta.region_name).add_auth(request)
-        
-        token = base64.urlsafe_b64encode(
-            f"k8s-aws-v1.{base64.urlsafe_b64encode(request.url.encode()).decode().rstrip('=')}"
-            .encode()
-        ).decode().rstrip('=')
-        
+        # Official AWS EKS token generation method
+        import urllib.parse
+        # The audience is always the cluster name for EKS
+        service_id = "sts"
+        # Presigned URL expires in 60 seconds
+        presigned_url = sts.generate_presigned_url(
+            'get_caller_identity',
+            Params={},
+            ExpiresIn=60,
+            HttpMethod='GET'
+        )
+        # The token must be in the format: k8s-aws-v1.<base64url-encoded-presigned-url-without-padding>
+        encoded_url = base64.urlsafe_b64encode(presigned_url.encode('utf-8')).decode('utf-8').rstrip("=")
+        token = f"k8s-aws-v1.{encoded_url}"
         return token
-        
     except Exception as e:
         logger.error(f"Error generating bearer token: {str(e)}")
         raise e
