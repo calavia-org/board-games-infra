@@ -234,7 +234,7 @@ create_cost_anomaly_detector() {
     
     # Crear detector de anomalías para la aplicación completa
     local detector_arn=$(aws ce create-anomaly-detector \
-        --anomaly-detector MonitorType=DIMENSIONAL,DimensionKey=SERVICE,MatchOptions=EQUALS,Values=AmazonEKS,AmazonRDS,AmazonElastiCache \
+        --anomaly-detector '{"MonitorType":"DIMENSIONAL","DimensionKey":"SERVICE","MatchOptions":["EQUALS"],"Values":["AmazonEKS","AmazonRDS","AmazonElastiCache"]}' \
         --query AnomalyDetectorArn --output text)
     
     if [ -n "$detector_arn" ]; then
