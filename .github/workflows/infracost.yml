@@ -148,6 +148,12 @@ jobs:
                                    --pull-request=${{github.event.pull_request.number}} \
                                    --behavior=update
 
+      - name: Upload staging cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/infracost.json
+
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
@@ -285,6 +291,12 @@ jobs:
                                    --pull-request=${{github.event.pull_request.number}} \
                                    --behavior=update
 
+      - name: Upload production cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/infracost.json
+
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
@@ -309,20 +321,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download staging cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/staging/
+
+      - name: Download production cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/production/
+
       - name: Generate combined cost report
         run: |
-          # Generar reportes individuales
-          infracost breakdown --path=${TF_ROOT}/environments/staging \
-                            --usage-file=.infracost/usage-staging.yml \
-                            --format=json \
-                            --out-file=/tmp/staging-costs.json
-                            
-          infracost breakdown --path=${TF_ROOT}/environments/production \
-                            --usage-file=.infracost/usage-production.yml \
-                            --format=json \
-                            --out-file=/tmp/production-costs.json
+          # List downloaded files for debugging
+          echo "Staging files:"
+          ls -la /tmp/staging/
+          echo "Production files:"
+          ls -la /tmp/production/
           
-          # Combinar reportes
+          # Copy files with proper names
+          cp /tmp/staging/infracost.json /tmp/staging-costs.json
+          cp /tmp/production/infracost.json /tmp/production-costs.json
+          
+          # Combine reports
           infracost output --path="/tmp/staging-costs.json,/tmp/production-costs.json" \
                           --format=slack-message \
                           --out-file=/tmp/slack-message.json
@@ -391,17 +414,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download staging cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/staging/
+
+      - name: Download production cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/production/
+
       - name: Check budget thresholds
         run: |
-          # Verificar costes de staging
-          STAGING_COST=$(infracost breakdown --path=${TF_ROOT}/environments/staging \
-                        --usage-file=.infracost/usage-staging.yml \
-                        --format=json | jq -r '.totalMonthlyCost')
-          
-          # Verificar costes de producción  
-          PRODUCTION_COST=$(infracost breakdown --path=${TF_ROOT}/environments/production \
-                           --usage-file=.infracost/usage-production.yml \
-                           --format=json | jq -r '.totalMonthlyCost')
+          # Extract costs from downloaded reports
+          STAGING_COST=$(cat /tmp/staging/infracost.json | jq -r '.totalMonthlyCost // "0"')
+          PRODUCTION_COST=$(cat /tmp/production/infracost.json | jq -r '.totalMonthlyCost // "0"')
           
           echo "Staging monthly cost: \$${STAGING_COST}"
           echo "Production monthly cost: \$${PRODUCTION_COST}"
