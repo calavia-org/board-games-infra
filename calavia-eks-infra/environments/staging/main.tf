@@ -1,11 +1,33 @@
+# Centralized tagging module for staging
+module "tags" {
+  source = "../../modules/tags"
+  
+  environment             = "staging"
+  owner_email            = var.owner_email
+  project_name           = var.project_name
+  cost_center            = var.cost_center
+  business_unit          = var.business_unit
+  department             = var.department
+  criticality            = "medium"
+  infrastructure_version = var.infrastructure_version
+  
+  additional_tags = {
+    Environment_Type    = "staging"
+    AutoShutdown       = "enabled"
+    DataClassification = "internal"
+  }
+}
+
 resource "aws_vpc" "calavia_vpc" {
-  cidr_block = var.vpc_cidr
-  enable_dns_support = true
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = {
-    Name = "calavia-vpc-staging"
-  }
+  tags = merge(module.tags.tags, {
+    Name      = "calavia-vpc-staging"
+    Component = "networking"
+    Purpose   = "main-vpc-staging"
+  })
 }
 
 resource "aws_subnet" "calavia_subnet" {

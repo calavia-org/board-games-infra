@@ -41,3 +41,13 @@ reports/
 .infracost/usage.gob
 .infracost/pricing.gob
 .infracost/terraform_modules/
+
+# Tag compliance reports
+reports/tag-compliance/
+*.compliance.html
+*.compliance.json
+*.compliance.csv
+
+# Auto-tagger logs
+auto-tagger.log
+tag-*.log
