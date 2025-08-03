@@ -212,7 +212,7 @@ data "aws_region" "current" {}
 # Add region and account info to tags
 locals {
   enriched_tags = merge(local.all_tags, {
-    AWSRegion  = data.aws_region.current.name
+    AWSRegion  = data.aws_region.current.id
     AWSAccount = data.aws_caller_identity.current.account_id
   })
 }

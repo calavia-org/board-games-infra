@@ -17,39 +17,39 @@ variable "availability_zones" {
 }
 
 variable "node_instance_type" {
-  description = "Tipo de instancia para los nodos del clúster"
+  description = "Tipo de instancia para los nodos del clúster - optimizado para producción"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.small"  # Reducido de t3.medium a t3.small (2 vCPUs, 2 GB RAM)
 }
 
 variable "desired_capacity" {
-  description = "Número deseado de nodos en el clúster"
+  description = "Número deseado de nodos en el clúster - optimizado"
   type        = number
-  default     = 3
+  default     = 2  # Reducido de 3 a 2 para ahorrar costes manteniendo HA
 }
 
 variable "max_size" {
-  description = "Número máximo de nodos en el clúster"
+  description = "Número máximo de nodos en el clúster - controlado"
   type        = number
-  default     = 5
+  default     = 4  # Reducido de 5 a 4
 }
 
 variable "min_size" {
-  description = "Número mínimo de nodos en el clúster"
+  description = "Número mínimo de nodos en el clúster - mínimo para HA"
   type        = number
-  default     = 2
+  default     = 2  # Mantenido en 2 para alta disponibilidad
 }
 
 variable "redis_instance_type" {
-  description = "Tipo de instancia para Redis"
+  description = "Tipo de instancia para Redis - optimizado para producción"
   type        = string
-  default     = "cache.t3.micro"
+  default     = "cache.t3.micro"  # Mantenido micro para cargas ligeras
 }
 
 variable "postgres_instance_type" {
-  description = "Tipo de instancia para PostgreSQL"
+  description = "Tipo de instancia para PostgreSQL - optimizado para producción"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t3.small"  # Aumentado a small para mejor rendimiento en producción
 }
 
 variable "db_username" {
@@ -160,4 +160,50 @@ variable "infrastructure_version" {
   description = "Versión de la infraestructura"
   type        = string
   default     = "1.0.0"
+}
+
+# ===================================
+# OPTIMIZACIÓN DE COSTES PRODUCCIÓN
+# ===================================
+
+variable "enable_spot_instances" {
+  description = "Habilitar instancias spot para ahorrar costes"
+  type        = bool
+  default     = true  # Habilitado para ahorrar hasta 70% en compute
+}
+
+variable "spot_instance_percentage" {
+  description = "Porcentaje de instancias spot en el node group"
+  type        = number
+  default     = 50  # 50% spot, 50% on-demand para balance coste/disponibilidad
+}
+
+variable "backup_retention_period" {
+  description = "Período de retención de backups en días"
+  type        = number
+  default     = 7  # Reducido de 30 a 7 días para ahorrar costes
+}
+
+variable "storage_size" {
+  description = "Tamaño de almacenamiento RDS en GB - optimizado"
+  type        = number
+  default     = 20  # Empezar con el mínimo y escalar según necesidad
+}
+
+variable "storage_type" {
+  description = "Tipo de almacenamiento RDS"
+  type        = string
+  default     = "gp3"  # gp3 es más eficiente para volúmenes grandes
+}
+
+variable "allocated_storage_max" {
+  description = "Máximo storage auto-scaling para RDS"
+  type        = number
+  default     = 100  # Limitado a 100GB para controlar costes
+}
+
+variable "enable_performance_insights" {
+  description = "Habilitar Performance Insights (tiene coste adicional)"
+  type        = bool
+  default     = false  # Deshabilitado para ahorrar ~$2.5/mes por DB
 }

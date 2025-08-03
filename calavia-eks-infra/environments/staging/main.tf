@@ -1,8 +1,8 @@
 # Centralized tagging module for staging
 module "tags" {
   source = "../../modules/tags"
-  
-  environment             = "staging"
+
+  environment            = "staging"
   owner_email            = var.owner_email
   project_name           = var.project_name
   cost_center            = var.cost_center
@@ -10,9 +10,9 @@ module "tags" {
   department             = var.department
   criticality            = "medium"
   infrastructure_version = var.infrastructure_version
-  
+
   additional_tags = {
-    Environment_Type    = "staging"
+    Environment_Type   = "staging"
     AutoShutdown       = "enabled"
     DataClassification = "internal"
   }
@@ -31,9 +31,9 @@ resource "aws_vpc" "calavia_vpc" {
 }
 
 resource "aws_subnet" "calavia_subnet" {
-  count = var.subnet_count
-  vpc_id = aws_vpc.calavia_vpc.id
-  cidr_block = element(var.subnet_cidrs, count.index)
+  count             = var.subnet_count
+  vpc_id            = aws_vpc.calavia_vpc.id
+  cidr_block        = element(var.subnet_cidrs, count.index)
   availability_zone = element(var.availability_zones, count.index)
 
   tags = {
@@ -63,7 +63,7 @@ resource "aws_iam_role" "eks_role" {
           Service = "eks.amazonaws.com"
         }
         Effect = "Allow"
-        Sid = ""
+        Sid    = ""
       },
     ]
   })
@@ -75,57 +75,127 @@ resource "aws_iam_role_policy_attachment" "eks_policy" {
 }
 
 resource "aws_db_instance" "calavia_postgres" {
-  identifier = "calavia-postgres-staging"
-  engine     = "postgres"
-  instance_class = "db.t3.micro"
-  allocated_storage = 20
-  db_name = var.db_name
+  identifier        = "calavia-postgres-staging"
+  engine            = "postgres"
+  engine_version    = "14.9"
+  instance_class    = var.postgres_instance_type # db.t3.micro
+  allocated_storage = var.storage_size           # 20 GB mínimo
+  storage_type      = var.storage_type           # gp2 para staging
+
+  # Configuración de base de datos
+  db_name  = var.db_name
   username = var.db_username
   password = var.db_password
-  skip_final_snapshot = true
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
 
-  tags = {
-    Name = "calavia-postgres-staging"
-  }
+  # Configuraciones de coste optimizado para staging
+  multi_az                = var.enable_multi_az         # false para staging
+  backup_retention_period = var.backup_retention_period # 1 día
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "sun:04:00-sun:05:00"
+
+  # Configuraciones de seguridad
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  skip_final_snapshot    = true # Para staging no necesitamos snapshot final
+
+  # Performance Insights deshabilitado para ahorrar costes
+  performance_insights_enabled = false
+
+  tags = merge(module.tags.tags, {
+    Name            = "calavia-postgres-staging"
+    Component       = "database"
+    Purpose         = "staging-game-database"
+    Engine          = "postgresql"
+    EngineVersion   = "14.9"
+    BackupRetention = "1-day"
+    MultiAZ         = "false"
+    StorageType     = var.storage_type
+    CostOptimized   = "true"
+  })
 }
 
 resource "aws_elasticache_cluster" "calavia_redis" {
-  cluster_id = "calavia-redis-staging"
-  engine = "redis"
-  node_type = "cache.t3.micro"
-  num_cache_nodes = 1
-  parameter_group_name = "default.redis3.2"
-  port = 6379
-  subnet_group_name = aws_elasticache_subnet_group.redis_subnet_group.name
+  cluster_id           = "calavia-redis-staging"
+  engine               = "redis"
+  engine_version       = "7.0"
+  node_type            = var.redis_instance_type # cache.t2.micro - la más barata
+  num_cache_nodes      = 1
+  parameter_group_name = "default.redis7"
+  port                 = 6379
+  subnet_group_name    = aws_elasticache_subnet_group.redis_subnet_group.name
+  security_group_ids   = [aws_security_group.redis_sg.id]
 
-  tags = {
-    Name = "calavia-redis-staging"
-  }
+  tags = merge(module.tags.tags, {
+    Name          = "calavia-redis-staging"
+    Component     = "cache"
+    Purpose       = "staging-session-cache"
+    Engine        = "redis"
+    EngineVersion = "7.0"
+    NodeType      = var.redis_instance_type
+    CostOptimized = "true"
+    Encryption    = "disabled"
+  })
 }
 
 resource "aws_elasticache_subnet_group" "redis_subnet_group" {
   name       = "calavia-redis-subnet-group-staging"
   subnet_ids = aws_subnet.calavia_subnet[*].id
 
-  tags = {
-    Name = "calavia-redis-subnet-group-staging"
-  }
+  tags = merge(module.tags.tags, {
+    Name          = "calavia-redis-subnet-group-staging"
+    Component     = "networking"
+    Purpose       = "redis-subnet-group"
+    ResourceType  = "elasticache-subnet-group"
+    CostOptimized = "true"
+  })
 }
 
 resource "aws_security_group" "db_sg" {
   vpc_id = aws_vpc.calavia_vpc.id
 
   ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
     security_groups = [aws_security_group.eks_sg.id]
   }
 
-  tags = {
-    Name = "calavia-db-sg-staging"
+  tags = merge(module.tags.tags, {
+    Name              = "calavia-db-sg-staging"
+    Component         = "database"
+    Purpose           = "postgres-security-group"
+    ResourceType      = "security-group"
+    Protocol          = "tcp"
+    Port              = "5432"
+  })
+}
+
+resource "aws_security_group" "redis_sg" {
+  name_prefix = "calavia-redis-sg-staging"
+  vpc_id      = aws_vpc.calavia_vpc.id
+
+  ingress {
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_sg.id]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(module.tags.tags, {
+    Name              = "calavia-redis-sg-staging"
+    Component         = "cache"
+    Purpose           = "redis-security-group"
+    ResourceType      = "security-group"
+    Protocol          = "tcp"
+    Port              = "6379"
+    CostOptimized     = "true"
+  })
 }
 
 resource "aws_security_group" "eks_sg" {
@@ -138,9 +208,21 @@ resource "aws_security_group" "eks_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "calavia-eks-sg-staging"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = merge(module.tags.tags, {
+    Name              = "calavia-eks-sg-staging"
+    Component         = "compute"
+    Purpose           = "eks-cluster-security-group"
+    ResourceType      = "security-group"
+    Protocol          = "tcp"
+    Port              = "443"
+  })
 }
 
 output "cluster_endpoint" {

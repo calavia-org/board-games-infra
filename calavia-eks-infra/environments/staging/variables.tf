@@ -7,22 +7,55 @@ variable "db_name" {
   description = "Nombre de la base de datos"
   type        = string
   default     = "calavia_db"
-  
+
 }
 variable "subnet_count" {
-  description = "Número de subredes a crear"
+  description = "Número de subredes a crear - reducido para staging"
   type        = number
-  default     = 3
-  
+  default     = 2 # Reducido de 3 a 2 para ahorrar costes de NAT Gateway
 }
+
 variable "subnet_cidrs" {
-  description = "Lista de CIDRs para las subredes"
+  description = "Lista de CIDRs para las subredes - optimizado para staging"
   type        = list(string)
-  default     = [
-    "10.0.0.0/20", 
-    "10.0.16.0/20",
-    "10.0.32.0/20"
+  default = [
+    "10.0.0.0/20", # Subnet 1
+    "10.0.16.0/20" # Subnet 2 - eliminada la tercera para reducir costes
   ]
+}
+
+# ===================================
+# OPTIMIZACIÓN DE COSTES STAGING
+# ===================================
+
+variable "enable_nat_gateway" {
+  description = "Habilitar NAT Gateway - deshabilitado en staging para ahorrar costes"
+  type        = bool
+  default     = false # Deshabilitado para ahorrar ~$45/mes por NAT Gateway
+}
+
+variable "enable_multi_az" {
+  description = "Habilitar Multi-AZ para RDS - deshabilitado en staging"
+  type        = bool
+  default     = false # Deshabilitado para ahorrar ~50% del coste de RDS
+}
+
+variable "backup_retention_period" {
+  description = "Período de retención de backups - reducido para staging"
+  type        = number
+  default     = 1 # Mínimo de 1 día vs 7 días en producción
+}
+
+variable "storage_size" {
+  description = "Tamaño de almacenamiento RDS en GB - mínimo para staging"
+  type        = number
+  default     = 20 # Tamaño mínimo permitido
+}
+
+variable "storage_type" {
+  description = "Tipo de almacenamiento RDS - más económico para staging"
+  type        = string
+  default     = "gp2" # gp2 es más barato que gp3 para volúmenes pequeños
 }
 
 variable "cluster_name" {
@@ -38,45 +71,45 @@ variable "region" {
 }
 
 variable "availability_zones" {
-  description = "Lista de zonas de disponibilidad para el clúster"
+  description = "Lista de zonas de disponibilidad para el clúster - reducidas para staging"
   type        = list(string)
-  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  default     = ["us-west-2a", "us-west-2b"] # Reducido de 3 a 2 AZs
 }
 
 variable "node_instance_type" {
-  description = "Tipo de instancia para los nodos del clúster"
+  description = "Tipo de instancia para los nodos del clúster - usando la más pequeña para staging"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.nano" # La instancia más pequeña disponible (2 vCPUs, 0.5 GB RAM)
 }
 
 variable "desired_capacity" {
-  description = "Número deseado de nodos en el clúster"
+  description = "Número deseado de nodos en el clúster - mínimo para staging"
   type        = number
-  default     = 2
+  default     = 1 # Reducido a 1 para minimizar costes
 }
 
 variable "max_size" {
-  description = "Número máximo de nodos en el clúster"
+  description = "Número máximo de nodos en el clúster - limitado para staging"
   type        = number
-  default     = 3
+  default     = 2 # Reducido para evitar escalado excesivo
 }
 
 variable "min_size" {
-  description = "Número mínimo de nodos en el clúster"
+  description = "Número mínimo de nodos en el clúster - mínimo absoluto"
   type        = number
-  default     = 1
+  default     = 1 # Mínimo de 1 nodo
 }
 
 variable "redis_instance_type" {
-  description = "Tipo de instancia para Redis"
+  description = "Tipo de instancia para Redis - la más pequeña disponible"
   type        = string
-  default     = "cache.t3.micro"
+  default     = "cache.t2.micro" # La más pequeña y económica (1 vCPU, 0.555 GB RAM)
 }
 
 variable "postgres_instance_type" {
-  description = "Tipo de instancia para PostgreSQL"
+  description = "Tipo de instancia para PostgreSQL - la más pequeña disponible"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t3.micro" # La más pequeña para RDS (1 vCPU, 1 GB RAM)
 }
 
 variable "db_username" {
