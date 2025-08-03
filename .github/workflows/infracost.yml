@@ -80,11 +80,21 @@ jobs:
                         --out-file=/tmp/infracost.json
 
       - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
         run: |
           infracost comment github --path=/tmp/infracost.json \
                                    --repo=$GITHUB_REPOSITORY \
                                    --github-token=${{github.token}} \
                                    --pull-request=${{github.event.pull_request.number}} \
+                                   --behavior=update
+
+      - name: Post Infracost comment (commit)
+        if: github.event_name == 'push'
+        run: |
+          infracost comment github --path=/tmp/infracost.json \
+                                   --repo=$GITHUB_REPOSITORY \
+                                   --github-token=${{github.token}} \
+                                   --commit=${{github.sha}} \
                                    --behavior=update
 
   infracost-production:
@@ -149,11 +159,21 @@ jobs:
                         --out-file=/tmp/infracost.json
 
       - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
         run: |
           infracost comment github --path=/tmp/infracost.json \
                                    --repo=$GITHUB_REPOSITORY \
                                    --github-token=${{github.token}} \
                                    --pull-request=${{github.event.pull_request.number}} \
+                                   --behavior=update
+
+      - name: Post Infracost comment (commit)
+        if: github.event_name == 'push'
+        run: |
+          infracost comment github --path=/tmp/infracost.json \
+                                   --repo=$GITHUB_REPOSITORY \
+                                   --github-token=${{github.token}} \
+                                   --commit=${{github.sha}} \
                                    --behavior=update
 
   infracost-summary:
