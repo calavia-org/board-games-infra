@@ -156,7 +156,7 @@ generate_combined_report() {
     infracost breakdown --path $production_path --usage-file $production_usage --format json --out-file /tmp/production.json
     
     # Combinar reportes
-    local combined_cmd="infracost output --path /tmp/staging.json,/tmp/production.json"
+    local combined_cmd="infracost output --path /tmp/staging.json --path /tmp/production.json"
     
     if [ "$save_report" = true ]; then
         local output_file="reports/infracost-combined-$(date +%Y%m%d-%H%M%S)"

@@ -1,0 +1,33 @@
+# Archivo de uso para el entorno de producción
+# Define patrones de uso realistas para cargas de trabajo de producción
+
+version: 0.1
+
+resource_usage:
+  # EKS Cluster - Basado en los recursos reales en main.tf
+  aws_eks_cluster.calavia_eks:
+    operating_system: linux
+    
+  # EKS Node Groups - Configuración robusta para producción
+  aws_eks_node_group.calavia_on_demand:
+    operating_system: linux
+        
+  aws_eks_node_group.calavia_spot:
+    operating_system: linux
+        
+  # Application Load Balancer - Mayor tráfico en producción
+  aws_lb.main:
+    monthly_data_processed_gb: 500  # 500GB procesado por mes
+    
+  # RDS PostgreSQL - Configuración robusta para producción (db.t3.small)
+  aws_db_instance.calavia_postgres:
+    storage_gb: 100  # Mayor almacenamiento para producción
+    monthly_additional_backup_storage_gb: 25
+    
+  # ElastiCache Redis - Configuración optimizada para producción
+  aws_elasticache_cluster.calavia_redis:
+    monthly_cpu_credit_hrs: 200
+    
+  # CloudWatch Logs - Mayor volumen en producción
+  aws_cloudwatch_log_group.eks_cluster:
+    monthly_gb: 10  # 10GB de logs por mes en producción

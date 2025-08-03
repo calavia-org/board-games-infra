@@ -207,3 +207,71 @@ variable "enable_performance_insights" {
   type        = bool
   default     = false  # Deshabilitado para ahorrar ~$2.5/mes por DB
 }
+
+# Variables adicionales requeridas por main.tf
+variable "db_name" {
+  description = "Nombre de la base de datos"
+  type        = string
+  default     = "calavia_production"
+}
+
+variable "enable_multi_az" {
+  description = "Habilitar Multi-AZ para RDS"
+  type        = bool
+  default     = false  # Deshabilitado para ahorrar costes (habilitarlo duplica el coste)
+}
+
+variable "redis_node_type" {
+  description = "Tipo de instancia para Redis"
+  type        = string
+  default     = "cache.t3.micro"
+}
+
+# Variables para node groups
+variable "on_demand_instance_type" {
+  description = "Tipo de instancia para nodos on-demand"
+  type        = string
+  default     = "t3.small"
+}
+
+variable "on_demand_desired_size" {
+  description = "Número deseado de nodos on-demand"
+  type        = number
+  default     = 1  # Mínimo para producción con coste controlado
+}
+
+variable "on_demand_max_size" {
+  description = "Número máximo de nodos on-demand"
+  type        = number
+  default     = 3
+}
+
+variable "on_demand_min_size" {
+  description = "Número mínimo de nodos on-demand"
+  type        = number
+  default     = 1
+}
+
+variable "spot_instance_types" {
+  description = "Tipos de instancia para nodos spot"
+  type        = list(string)
+  default     = ["t3.small", "t3.medium"]
+}
+
+variable "spot_desired_size" {
+  description = "Número deseado de nodos spot"
+  type        = number
+  default     = 1
+}
+
+variable "spot_max_size" {
+  description = "Número máximo de nodos spot"
+  type        = number
+  default     = 4
+}
+
+variable "spot_min_size" {
+  description = "Número mínimo de nodos spot"
+  type        = number
+  default     = 0
+}
