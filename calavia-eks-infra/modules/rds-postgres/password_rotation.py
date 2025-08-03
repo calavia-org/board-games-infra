@@ -66,13 +66,17 @@ def set_secret(service, rds, arn, token):
     secret = json.loads(pending_secret['SecretBinary'] or pending_secret['SecretString'])
     
     # Update RDS password
+    db_instance_identifier = os.environ.get('RDS_INSTANCE_IDENTIFIER')
+    if not db_instance_identifier:
+        logger.error("Environment variable RDS_INSTANCE_IDENTIFIER is not set.")
+        raise ValueError("RDS_INSTANCE_IDENTIFIER environment variable is required")
     rds.modify_db_instance(
-        DBInstanceIdentifier="${cluster_name}-postgres",
+        DBInstanceIdentifier=db_instance_identifier,
         MasterUserPassword=secret['password'],
         ApplyImmediately=True
     )
     
-    logger.info("setSecret: Successfully set password for RDS instance ${cluster_name}-postgres")
+    logger.info("setSecret: Successfully set password for RDS instance %s", db_instance_identifier)
 
 def test_secret(service, arn, token):
     """Test the new secret"""
