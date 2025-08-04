@@ -49,9 +49,9 @@ variable "use_spot_instances" {
 }
 
 variable "kubernetes_version" {
-  description = "Kubernetes version"
+  description = "Kubernetes version - Using latest stable version"
   type        = string
-  default     = "1.28"
+  default     = "1.31"  # Latest stable version (August 2025) - no extended support needed
 }
 
 variable "security_group_ids" {

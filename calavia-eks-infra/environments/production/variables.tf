@@ -17,9 +17,9 @@ variable "availability_zones" {
 }
 
 variable "node_instance_type" {
-  description = "Tipo de instancia para los nodos del clúster - optimizado para producción"
+  description = "Tipo de instancia para los nodos del clúster - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "t3.small"  # Reducido de t3.medium a t3.small (2 vCPUs, 2 GB RAM)
+  default     = "t4g.small"  # Graviton2 ARM64 - mejor rendimiento/coste que t3.small (2 vCPUs, 2 GB RAM)
 }
 
 variable "desired_capacity" {
@@ -41,15 +41,15 @@ variable "min_size" {
 }
 
 variable "redis_instance_type" {
-  description = "Tipo de instancia para Redis - optimizado para producción"
+  description = "Tipo de instancia para Redis - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "cache.t3.micro"  # Mantenido micro para cargas ligeras
+  default     = "cache.t4g.micro"  # Graviton2 ARM64 - mejor eficiencia energética y coste
 }
 
 variable "postgres_instance_type" {
-  description = "Tipo de instancia para PostgreSQL - optimizado para producción"
+  description = "Tipo de instancia para PostgreSQL - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "db.t3.small"  # Aumentado a small para mejor rendimiento en producción
+  default     = "db.t4g.small"  # Graviton2 ARM64 - mejor rendimiento/coste para producción
 }
 
 variable "db_username" {
@@ -222,16 +222,16 @@ variable "enable_multi_az" {
 }
 
 variable "redis_node_type" {
-  description = "Tipo de instancia para Redis"
+  description = "Tipo de instancia para Redis - Graviton2 ARM64"
   type        = string
-  default     = "cache.t3.micro"
+  default     = "cache.t4g.micro"  # Graviton2 ARM64 - mayor eficiencia
 }
 
 # Variables para node groups
 variable "on_demand_instance_type" {
-  description = "Tipo de instancia para nodos on-demand"
+  description = "Tipo de instancia para nodos on-demand - Graviton2 ARM64"
   type        = string
-  default     = "t3.small"
+  default     = "t4g.small"  # Graviton2 ARM64 - mejor eficiencia energética
 }
 
 variable "on_demand_desired_size" {
@@ -253,9 +253,9 @@ variable "on_demand_min_size" {
 }
 
 variable "spot_instance_types" {
-  description = "Tipos de instancia para nodos spot"
+  description = "Tipos de instancia para nodos spot - Graviton2 ARM64"
   type        = list(string)
-  default     = ["t3.small", "t3.medium"]
+  default     = ["t4g.small", "t4g.medium"]  # Graviton2 ARM64 - hasta 40% mejor rendimiento/coste
 }
 
 variable "spot_desired_size" {

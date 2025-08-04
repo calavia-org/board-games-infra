@@ -77,9 +77,9 @@ variable "availability_zones" {
 }
 
 variable "node_instance_type" {
-  description = "Tipo de instancia para los nodos del clúster - usando la más pequeña para staging"
+  description = "Tipo de instancia para los nodos del clúster - usando Graviton2 ARM64 para staging"
   type        = string
-  default     = "t3.nano" # La instancia más pequeña disponible (2 vCPUs, 0.5 GB RAM)
+  default     = "t4g.nano" # Graviton2 ARM64 - 2 vCPUs, 0.5 GB RAM (más eficiente y económico)
 }
 
 variable "desired_capacity" {
@@ -101,15 +101,15 @@ variable "min_size" {
 }
 
 variable "redis_instance_type" {
-  description = "Tipo de instancia para Redis - la más pequeña disponible"
+  description = "Tipo de instancia para Redis - Graviton2 ARM64 para mejor eficiencia"
   type        = string
-  default     = "cache.t2.micro" # La más pequeña y económica (1 vCPU, 0.555 GB RAM)
+  default     = "cache.t4g.micro" # Graviton2 ARM64 - más eficiente y económico que t2.micro
 }
 
 variable "postgres_instance_type" {
-  description = "Tipo de instancia para PostgreSQL - la más pequeña disponible"
+  description = "Tipo de instancia para PostgreSQL - Graviton2 ARM64 para mejor rendimiento por euro"
   type        = string
-  default     = "db.t3.micro" # La más pequeña para RDS (1 vCPU, 1 GB RAM)
+  default     = "db.t4g.micro" # Graviton2 ARM64 - mejor rendimiento por euro que t3.micro
 }
 
 variable "db_username" {

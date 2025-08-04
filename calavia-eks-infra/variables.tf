@@ -43,9 +43,9 @@ variable "min_size" {
 }
 
 variable "instance_types" {
-  description = "Tipos de instancia para los nodos del clúster"
+  description = "Tipos de instancia para los nodos del clúster - Graviton3 ARM64"
   type        = list(string)
-  default     = ["m5.large", "m5.xlarge", "m4.large"]
+  default     = ["m7g.large", "m7g.xlarge", "m6g.large"]  # Graviton3 ARM64 - mejor rendimiento/coste
 }
 
 variable "spot_instance" {
@@ -74,9 +74,9 @@ variable "db_password" {
 }
 
 variable "redis_node_type" {
-  description = "Tipo de nodo para Redis"
+  description = "Tipo de nodo para Redis - Graviton2 ARM64"
   type        = string
-  default     = "cache.t3.micro"
+  default     = "cache.t4g.micro"  # Graviton2 ARM64 - mayor eficiencia energética
 }
 
 variable "postgres_db_name" {
@@ -86,9 +86,9 @@ variable "postgres_db_name" {
 }
 
 variable "postgres_instance_type" {
-  description = "Tipo de instancia para PostgreSQL"
+  description = "Tipo de instancia para PostgreSQL - Graviton2 ARM64"
   type        = string
-  default     = "db.t3.micro"
+  default     = "db.t4g.micro"  # Graviton2 ARM64 - mejor rendimiento por euro
 }
 
 variable "postgres_storage_size" {

@@ -66,7 +66,7 @@ variable "billing_project" {
 variable "infrastructure_version" {
   description = "Version of the infrastructure code"
   type        = string
-  default     = "1.0.0"
+  default     = "2.0.0"  # Updated for EKS 1.31 + Graviton migration
 }
 
 variable "additional_tags" {
@@ -134,7 +134,7 @@ locals {
       CreatedBy     = "terraform"
       CreatedDate   = local.current_date
       Version       = var.infrastructure_version
-      Architecture  = "x86_64"
+      Architecture  = "arm64"  # Updated to ARM64 for Graviton instances
     },
     var.component != "" ? { Component = var.component } : {},
     var.purpose != "" ? { Purpose = var.purpose } : {},

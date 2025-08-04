@@ -263,7 +263,7 @@ resource "aws_eks_addon" "coredns" {
 resource "aws_eks_addon" "kube_proxy" {
   cluster_name = aws_eks_cluster.this.name
   addon_name   = "kube-proxy"
-  addon_version = "v1.28.2-eksbuild.2"
+  addon_version = "v1.31.0-eksbuild.3"  # Updated for EKS 1.31
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -278,7 +278,7 @@ resource "aws_eks_addon" "kube_proxy" {
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.this.name
   addon_name   = "vpc-cni"
-  addon_version = "v1.15.1-eksbuild.1"
+  addon_version = "v1.18.1-eksbuild.1"  # Updated for EKS 1.31 - latest VPC CNI
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -293,7 +293,7 @@ resource "aws_eks_addon" "vpc_cni" {
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name = aws_eks_cluster.this.name
   addon_name   = "aws-ebs-csi-driver"
-  addon_version = "v1.25.0-eksbuild.1"
+  addon_version = "v1.32.0-eksbuild.1"  # Updated for EKS 1.31 - latest EBS CSI driver
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
