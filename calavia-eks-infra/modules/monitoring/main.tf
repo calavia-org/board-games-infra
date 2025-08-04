@@ -82,63 +82,17 @@ resource "helm_release" "kube_prometheus_stack" {
 
   create_namespace = false
 
-  # Prometheus configuration
-  set {
-    name  = "prometheus.prometheusSpec.retention"
-    value = "${var.retention_days}d"
-  }
-
-  set {
-    name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
-    value = var.prometheus_storage_size
-  }
-
-  set {
-    name  = "prometheus.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.prometheus.arn
-  }
-
-  # AlertManager configuration
-  set {
-    name  = "alertmanager.alertmanagerSpec.retention"
-    value = "${var.retention_days}d"
-  }
-
-  set {
-    name  = "alertmanager.alertmanagerSpec.storage.volumeClaimTemplate.spec.resources.requests.storage"
-    value = var.alertmanager_storage_size
-  }
-
-  # Grafana configuration
-  set {
-    name  = "grafana.enabled"
-    value = var.enable_aws_managed_grafana ? "false" : "true"
-  }
-
-  set {
-    name  = "grafana.adminPassword"
-    value = var.grafana_admin_password
-  }
-
-  set {
-    name  = "grafana.persistence.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "grafana.persistence.size"
-    value = var.grafana_storage_size
-  }
-
   values = [templatefile("${path.module}/values.yaml", {
-    cluster_name            = var.cluster_name
-    retention_days          = var.retention_days
-    slack_webhook_url       = var.slack_webhook_url
-    email_notifications     = var.email_notifications
-    prometheus_storage      = var.prometheus_storage_size
-    alertmanager_storage    = var.alertmanager_storage_size
-    grafana_storage         = var.grafana_storage_size
-    grafana_admin_password  = var.grafana_admin_password
+    cluster_name                        = var.cluster_name
+    retention_days                      = var.retention_days
+    slack_webhook_url                   = var.slack_webhook_url
+    email_notifications                 = var.email_notifications
+    prometheus_storage                  = var.prometheus_storage_size
+    alertmanager_storage                = var.alertmanager_storage_size
+    grafana_storage                     = var.grafana_storage_size
+    grafana_admin_password              = var.grafana_admin_password
+    prometheus_service_account_role_arn = aws_iam_role.prometheus.arn
+    enable_grafana                      = !var.enable_aws_managed_grafana
   })]
 
   depends_on = [kubernetes_namespace.monitoring]

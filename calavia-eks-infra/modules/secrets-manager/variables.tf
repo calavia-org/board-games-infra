@@ -184,18 +184,18 @@ variable "environment" {
 variable "custom_rotation_schedules" {
   description = "Custom rotation schedules for different services"
   type = object({
-    database_credentials    = optional(number, 30)
+    database_credentials   = optional(number, 30)
     cache_credentials      = optional(number, 30)
     admin_credentials      = optional(number, 90)
     service_account_tokens = optional(number, 90)
-    api_keys              = optional(number, 60)
+    api_keys               = optional(number, 60)
   })
   default = {
-    database_credentials    = 30
+    database_credentials   = 30
     cache_credentials      = 30
     admin_credentials      = 90
     service_account_tokens = 90
-    api_keys              = 60
+    api_keys               = 60
   }
 }
 
@@ -219,14 +219,14 @@ variable "allowed_rotation_window" {
     end_hour   = number
   })
   default = {
-    start_hour = 2  # 2 AM
-    end_hour   = 4  # 4 AM
+    start_hour = 2 # 2 AM
+    end_hour   = 4 # 4 AM
   }
   validation {
     condition = (
-      var.allowed_rotation_window.start_hour >= 0 && 
+      var.allowed_rotation_window.start_hour >= 0 &&
       var.allowed_rotation_window.start_hour <= 23 &&
-      var.allowed_rotation_window.end_hour >= 0 && 
+      var.allowed_rotation_window.end_hour >= 0 &&
       var.allowed_rotation_window.end_hour <= 23
     )
     error_message = "Rotation window hours must be between 0 and 23."

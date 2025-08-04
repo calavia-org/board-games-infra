@@ -9,7 +9,7 @@ module "tags" {
   business_unit          = var.business_unit
   department             = var.department
   criticality            = "critical"
-  service                = "board-games-platform"  # Main service identifier
+  service                = "board-games-platform" # Main service identifier
   infrastructure_version = var.infrastructure_version
 
   additional_tags = {
@@ -38,10 +38,10 @@ resource "aws_subnet" "calavia_subnet" {
   availability_zone = element(var.availability_zones, count.index)
 
   tags = merge(module.tags.tags, {
-    Name           = "calavia-subnet-production-${count.index}"
-    Component      = "networking"
-    Purpose        = "kubernetes-subnet-${count.index}"
-    SubnetType     = "private"
+    Name             = "calavia-subnet-production-${count.index}"
+    Component        = "networking"
+    Purpose          = "kubernetes-subnet-${count.index}"
+    SubnetType       = "private"
     AvailabilityZone = element(var.availability_zones, count.index)
   })
 }
@@ -58,7 +58,7 @@ resource "aws_eks_cluster" "calavia_eks" {
   tags = merge(module.tags.tags, {
     Name      = var.cluster_name
     Component = "kubernetes"
-    Service   = "container-orchestration-service"  # Main orchestration service
+    Service   = "container-orchestration-service" # Main orchestration service
     Purpose   = "container-orchestration"
   })
 }
@@ -108,8 +108,8 @@ resource "aws_db_instance" "calavia_postgres" {
   maintenance_window      = "sun:04:00-sun:05:00"
 
   # Configuraciones de seguridad
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
-  skip_final_snapshot    = false # Para producción sí necesitamos snapshot final
+  vpc_security_group_ids    = [aws_security_group.db_sg.id]
+  skip_final_snapshot       = false # Para producción sí necesitamos snapshot final
   final_snapshot_identifier = "calavia-postgres-production-final-snapshot"
 
   # Performance Insights habilitado para producción
@@ -118,7 +118,7 @@ resource "aws_db_instance" "calavia_postgres" {
   tags = merge(module.tags.tags, {
     Name           = "calavia-postgres-production"
     Component      = "database"
-    Service        = "user-data-service"  # Specific service using this database
+    Service        = "user-data-service" # Specific service using this database
     Purpose        = "application-data-store"
     BackupSchedule = "daily"
   })
@@ -161,7 +161,7 @@ resource "aws_elasticache_cluster" "calavia_redis" {
   tags = merge(module.tags.tags, {
     Name      = "calavia-redis-production"
     Component = "cache"
-    Service   = "session-cache-service"  # Specific service using this cache
+    Service   = "session-cache-service" # Specific service using this cache
     Purpose   = "application-cache"
   })
 }

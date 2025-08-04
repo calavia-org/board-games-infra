@@ -5,7 +5,7 @@
 This module provides a centralized, consistent tagging strategy for all AWS resources in the Board Games Infrastructure project. It implements a comprehensive tagging taxonomy designed for:
 
 - **Cost Management**: Detailed cost tracking and allocation
-- **Compliance**: Mandatory tags for governance and auditing  
+- **Compliance**: Mandatory tags for governance and auditing
 - **Automation**: Lifecycle management and maintenance automation
 - **Monitoring**: Enhanced observability and alerting
 - **Security**: Resource ownership and access control
@@ -17,7 +17,7 @@ This module provides a centralized, consistent tagging strategy for all AWS reso
 ```hcl
 module "tags" {
   source = "./modules/tags"
-  
+
   environment  = "production"
   owner_email  = "devops@calavia.org"
   component    = "database"
@@ -28,7 +28,7 @@ module "tags" {
 # Apply tags to resources
 resource "aws_rds_db_instance" "game_db" {
   # ... other configuration ...
-  
+
   tags = module.tags.tags
 }
 ```
@@ -38,7 +38,7 @@ resource "aws_rds_db_instance" "game_db" {
 ```hcl
 module "database_tags" {
   source = "./modules/tags"
-  
+
   environment           = var.environment
   owner_email          = "database-team@calavia.org"
   component            = "database"
@@ -46,7 +46,7 @@ module "database_tags" {
   criticality          = "critical"
   maintenance_window   = "Sunday-03:00"
   expiry_date          = "2026-12-31"
-  
+
   additional_tags = {
     DatabaseEngine    = "postgresql"
     BackupRetention   = "30-days"
@@ -63,18 +63,21 @@ resource "aws_rds_db_instance" "main" {
 ## Tag Categories
 
 ### Mandatory Tags (Always Applied)
+
 - `Environment`: Environment name
-- `Project`: Project identifier  
+- `Project`: Project identifier
 - `Owner`: Responsible team/person
 - `CostCenter`: Billing cost center
-- `ManagedBy`: Management tool (terraform)
+- `ManagedBy`: Management tool (Terraform)
 
 ### Business Tags
+
 - `BusinessUnit`: Business unit name
 - `Department`: Responsible department
 - `Criticality`: Resource criticality level
 
-### Technical Tags  
+### Technical Tags
+
 - `CreatedBy`: Creation source
 - `CreatedDate`: Creation timestamp
 - `Version`: Infrastructure version
@@ -83,26 +86,32 @@ resource "aws_rds_db_instance" "main" {
 - `Purpose`: Resource purpose
 
 ### Lifecycle Tags
+
 - `MaintenanceWindow`: Maintenance schedule
 - `ExpiryDate`: Resource expiration (optional)
 
 ### Cost Management Tags
+
 - `BillingProject`: Billing project code
 - `BudgetAlerts`: Budget alerting status
 - `CostOptimization`: Optimization status
 
 ### Environment-Specific Tags
+
 Production:
+
 - `Backup`: required
-- `Monitoring`: enhanced  
+- `Monitoring`: enhanced
 - `ReservedInstance`: candidate
 
 Staging:
+
 - `Backup`: weekly
 - `Monitoring`: standard
 - `ScheduleShutdown`: enabled
 
 Development/Testing:
+
 - `Backup`: optional
 - `Monitoring`: basic
 - `ScheduleShutdown`: enabled
@@ -118,6 +127,7 @@ Development/Testing:
 ## Validation
 
 The module includes validation for:
+
 - Environment values
 - Email format for owner
 - Criticality levels
@@ -128,17 +138,18 @@ The module includes validation for:
 ## Examples
 
 ### Database with Full Tagging
+
 ```hcl
 module "db_tags" {
   source = "./modules/tags"
-  
+
   environment        = "production"
   owner_email       = "database@calavia.org"
   component         = "database"
   purpose           = "user-data-storage"
   criticality       = "critical"
   maintenance_window = "Sunday-02:00"
-  
+
   additional_tags = {
     Engine           = "postgresql"
     Version          = "14.9"
@@ -149,16 +160,17 @@ module "db_tags" {
 ```
 
 ### EKS Cluster Tagging
+
 ```hcl
 module "eks_tags" {
   source = "./modules/tags"
-  
+
   environment  = var.environment
   owner_email  = "platform@calavia.org"
   component    = "container-orchestration"
   purpose      = "kubernetes-cluster"
   criticality  = "critical"
-  
+
   additional_tags = {
     KubernetesVersion = "1.27"
     NodeGroups       = "3"
@@ -179,15 +191,121 @@ module "eks_tags" {
 ## Integration with Cost Management
 
 The tagging strategy integrates with:
+
 - AWS Cost Explorer filters
 - AWS Budgets
 - Infracost analysis
 - Custom cost reporting scripts
 
 Example Cost Explorer filter:
+
 ```bash
 aws ce get-cost-and-usage \
   --group-by Type=TAG,Key=Environment \
   --group-by Type=TAG,Key=Component \
   --filter-by Tags,Key=Project,Values=board-games
 ```
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge with the standard tags | `map(string)` | `{}` | no |
+| <a name="input_billing_project"></a> [billing\_project](#input\_billing\_project) | Billing project identifier | `string` | `"BG-2025-Q3"` | no |
+| <a name="input_business_unit"></a> [business\_unit](#input\_business\_unit) | Business unit name | `string` | `"Gaming-Platform"` | no |
+| <a name="input_component"></a> [component](#input\_component) | Component or service type | `string` | `""` | no |
+| <a name="input_cost_center"></a> [cost\_center](#input\_cost\_center) | Cost center code for billing purposes | `string` | `"CC-001-GAMING"` | no |
+| <a name="input_criticality"></a> [criticality](#input\_criticality) | Resource criticality level | `string` | `"medium"` | no |
+| <a name="input_department"></a> [department](#input\_department) | Department responsible for the resource | `string` | `"Engineering"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (production, staging, development, testing) | `string` | n/a | yes |
+| <a name="input_expiry_date"></a> [expiry\_date](#input\_expiry\_date) | Resource expiry date in YYYY-MM-DD format (optional) | `string` | `""` | no |
+| <a name="input_infrastructure_version"></a> [infrastructure\_version](#input\_infrastructure\_version) | Version of the infrastructure code | `string` | `"2.0.0"` | no |
+| <a name="input_maintenance_window"></a> [maintenance\_window](#input\_maintenance\_window) | Maintenance window in format WEEKDAY-HH:MM | `string` | `"Sunday-03:00"` | no |
+| <a name="input_owner_email"></a> [owner\_email](#input\_owner\_email) | Email of the team/person responsible for the resource | `string` | n/a | yes |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the project | `string` | `"board-games"` | no |
+| <a name="input_purpose"></a> [purpose](#input\_purpose) | Purpose or description of the resource | `string` | `""` | no |
+| <a name="input_service"></a> [service](#input\_service) | Service or application name that uses this resource | `string` | `"board-games-platform"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cost_tags"></a> [cost\_tags](#output\_cost\_tags) | Tags specific for cost management |
+| <a name="output_enriched_tags"></a> [enriched\_tags](#output\_enriched\_tags) | Tags enriched with AWS account and region information |
+| <a name="output_mandatory_tags"></a> [mandatory\_tags](#output\_mandatory\_tags) | Only mandatory tags |
+| <a name="output_monitoring_tags"></a> [monitoring\_tags](#output\_monitoring\_tags) | Tags for monitoring and alerting |
+| <a name="output_tags"></a> [tags](#output\_tags) | Complete set of tags for resources |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge with the standard tags | `map(string)` | `{}` | no |
+| <a name="input_billing_project"></a> [billing\_project](#input\_billing\_project) | Billing project identifier | `string` | `"BG-2025-Q3"` | no |
+| <a name="input_business_unit"></a> [business\_unit](#input\_business\_unit) | Business unit name | `string` | `"Gaming-Platform"` | no |
+| <a name="input_component"></a> [component](#input\_component) | Component or service type | `string` | `""` | no |
+| <a name="input_cost_center"></a> [cost\_center](#input\_cost\_center) | Cost center code for billing purposes | `string` | `"CC-001-GAMING"` | no |
+| <a name="input_criticality"></a> [criticality](#input\_criticality) | Resource criticality level | `string` | `"medium"` | no |
+| <a name="input_department"></a> [department](#input\_department) | Department responsible for the resource | `string` | `"Engineering"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (production, staging, development, testing) | `string` | n/a | yes |
+| <a name="input_expiry_date"></a> [expiry\_date](#input\_expiry\_date) | Resource expiry date in YYYY-MM-DD format (optional) | `string` | `""` | no |
+| <a name="input_infrastructure_version"></a> [infrastructure\_version](#input\_infrastructure\_version) | Version of the infrastructure code | `string` | `"2.0.0"` | no |
+| <a name="input_maintenance_window"></a> [maintenance\_window](#input\_maintenance\_window) | Maintenance window in format WEEKDAY-HH:MM | `string` | `"Sunday-03:00"` | no |
+| <a name="input_owner_email"></a> [owner\_email](#input\_owner\_email) | Email of the team/person responsible for the resource | `string` | n/a | yes |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the project | `string` | `"board-games"` | no |
+| <a name="input_purpose"></a> [purpose](#input\_purpose) | Purpose or description of the resource | `string` | `""` | no |
+| <a name="input_service"></a> [service](#input\_service) | Service or application name that uses this resource | `string` | `"board-games-platform"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cost_tags"></a> [cost\_tags](#output\_cost\_tags) | Tags specific for cost management |
+| <a name="output_enriched_tags"></a> [enriched\_tags](#output\_enriched\_tags) | Tags enriched with AWS account and region information |
+| <a name="output_mandatory_tags"></a> [mandatory\_tags](#output\_mandatory\_tags) | Only mandatory tags |
+| <a name="output_monitoring_tags"></a> [monitoring\_tags](#output\_monitoring\_tags) | Tags for monitoring and alerting |
+| <a name="output_tags"></a> [tags](#output\_tags) | Complete set of tags for resources |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->

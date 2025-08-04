@@ -7,11 +7,11 @@ resource_usage:
   # EKS Cluster
   aws_eks_cluster.calavia_eks:
     operating_system: linux
-    
+
   # RDS PostgreSQL - Solo configuración básica
   aws_db_instance.calavia_postgres:
     backup_retention_period: 7
-    
+
   # ElastiCache Redis - Configuración básica
   aws_elasticache_cluster.calavia_redis:
     node_type: cache.t2.micro

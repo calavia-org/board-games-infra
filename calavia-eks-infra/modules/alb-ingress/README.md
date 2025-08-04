@@ -1,6 +1,7 @@
 # Documentación del Módulo ALB Ingress
 
-Este módulo configura un Ingress Controller basado en AWS Application Load Balancer (ALB) para gestionar el tráfico de las aplicaciones desplegadas en el clúster EKS. 
+Este módulo configura un Ingress Controller basado en AWS Application Load Balancer (ALB) para gestionar el
+tráfico de las aplicaciones desplegadas en el clúster EKS.
 
 ## Requisitos
 
@@ -56,3 +57,65 @@ module "alb_ingress" {
 ## Contribuciones
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request si deseas mejorar este módulo.
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [AWS\_region](#input\_aws\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_oidc_provider_arn"></a> [oidc\_provider\_arn](#input\_oidc\_provider\_arn) | ARN of the OIDC provider for the EKS cluster | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+| <a name="input_vpc_id"></a> [VPC\_id](#input\_vpc\_id) | VPC ID | `string` | n/a | yes |
+
+## Outputs
+
+No outputs.
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [AWS\_region](#input\_aws\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_oidc_provider_arn"></a> [oidc\_provider\_arn](#input\_oidc\_provider\_arn) | ARN of the OIDC provider for the EKS cluster | `string` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+| <a name="input_vpc_id"></a> [VPC\_id](#input\_vpc\_id) | VPC ID | `string` | n/a | yes |
+
+## Outputs
+
+No outputs.
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->

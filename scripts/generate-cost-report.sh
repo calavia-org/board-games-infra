@@ -53,7 +53,7 @@ get_aws_costs() {
     local end_date=$2
     local granularity=$3
     local group_by=$4
-    
+
     aws ce get-cost-and-usage \
         --time-period Start=$start_date,End=$end_date \
         --granularity $granularity \
@@ -66,9 +66,9 @@ get_aws_costs() {
 generate_infracost_report() {
     local env=$1
     local output_file=$2
-    
+
     echo -e "${BLUE}Generando reporte Infracost para $env...${NC}"
-    
+
     infracost breakdown \
         --path "$TF_ROOT/environments/$env" \
         --usage-file "$PROJECT_ROOT/.infracost/usage-$env.yml" \
@@ -79,9 +79,9 @@ generate_infracost_report() {
 analyze_cost_trends() {
     local frequency=$1
     local output_dir=$2
-    
+
     echo -e "${BLUE}Realizando análisis de tendencias ($frequency)...${NC}"
-    
+
     # Calcular fechas según frecuencia
     local days_back
     case $frequency in
@@ -90,13 +90,13 @@ analyze_cost_trends() {
         "monthly") days_back=90 ;;
         *) days_back=7 ;;
     esac
-    
+
     local start_date=$(date -d "$days_back days ago" +%Y-%m-%d)
     local end_date=$(date +%Y-%m-%d)
-    
+
     # Obtener datos de costes reales de AWS
     local cost_data=$(get_aws_costs $start_date $end_date "DAILY" "SERVICE")
-    
+
     # Generar análisis de tendencias
     cat > "$output_dir/trend-analysis.json" << EOF
 {
@@ -113,21 +113,21 @@ EOF
 
 generate_optimization_recommendations() {
     local output_dir=$1
-    
+
     echo -e "${BLUE}Generando recomendaciones de optimización...${NC}"
-    
+
     # Obtener recomendaciones de AWS Cost Explorer
     local recommendations=$(aws ce get-rightsizing-recommendation \
         --service EC2-Instance \
         --query 'RightsizingRecommendations[*].[CurrentInstance.InstanceName,RightsizingType,TargetInstances[0].EstimatedMonthlySavings.Value]' \
         --output json 2>/dev/null || echo "[]")
-    
+
     # Obtener recomendaciones de Trusted Advisor (si está disponible)
     local trusted_advisor=$(aws support describe-trusted-advisor-checks \
         --language en \
         --query 'checks[?category==`cost_optimizing`].[name,id]' \
         --output json 2>/dev/null || echo "[]")
-    
+
     cat > "$output_dir/optimization-recommendations.json" << EOF
 {
     "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -160,12 +160,12 @@ generate_html_report() {
     local output_file=$2
     local include_trends=$3
     local include_optimization=$4
-    
+
     echo -e "${BLUE}Generando reporte HTML...${NC}"
-    
+
     local report_title="Board Games Infrastructure - Cost Report ($frequency)"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S UTC')
-    
+
     cat > "$output_file" << EOF
 <!DOCTYPE html>
 <html lang="es">
@@ -288,23 +288,23 @@ EOF
 send_report() {
     local report_file=$1
     local frequency=$2
-    
+
     if [ -n "$EMAIL_RECIPIENTS" ] && command -v mail &> /dev/null; then
         echo -e "${BLUE}Enviando reporte por email...${NC}"
-        
+
         local subject="Board Games Infrastructure - Cost Report ($frequency)"
         echo "Reporte de costes adjunto." | mail -s "$subject" -A "$report_file" "$EMAIL_RECIPIENTS"
-        
+
         echo -e "${GREEN}✓ Reporte enviado por email${NC}"
     fi
-    
+
     if [ -n "$SLACK_WEBHOOK" ]; then
         echo -e "${BLUE}Enviando notificación a Slack...${NC}"
-        
+
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"📊 Nuevo reporte de costes disponible ($frequency): $(basename $report_file)\"}" \
             "$SLACK_WEBHOOK"
-        
+
         echo -e "${GREEN}✓ Notificación enviada a Slack${NC}"
     fi
 }
@@ -315,7 +315,7 @@ main() {
     local send_report_flag=false
     local include_trends=false
     local include_optimization=false
-    
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help)
@@ -353,30 +353,30 @@ main() {
                 ;;
         esac
     done
-    
+
     echo -e "${GREEN}🏗️  Generador de Reportes de Costes - Board Games Infrastructure${NC}"
     echo -e "${BLUE}Frecuencia: $frequency | Formato: $output_format${NC}"
     echo ""
-    
+
     setup_directories
-    
+
     local timestamp=$(date +%Y%m%d-%H%M%S)
     local output_dir="$REPORTS_DIR/$frequency"
     local report_file="$output_dir/cost-report-$timestamp.$output_format"
-    
+
     # Generar reportes de Infracost
     generate_infracost_report "staging" "$output_dir/infracost-staging-$timestamp.json"
     generate_infracost_report "production" "$output_dir/infracost-production-$timestamp.json"
-    
+
     # Análisis adicionales
     if [ "$include_trends" = true ]; then
         analyze_cost_trends "$frequency" "$output_dir"
     fi
-    
+
     if [ "$include_optimization" = true ]; then
         generate_optimization_recommendations "$output_dir"
     fi
-    
+
     # Generar reporte principal
     case $output_format in
         "html")
@@ -386,12 +386,12 @@ main() {
             echo -e "${YELLOW}Formato $output_format aún no implementado completamente${NC}"
             ;;
     esac
-    
+
     # Enviar reporte si se solicita
     if [ "$send_report_flag" = true ]; then
         send_report "$report_file" "$frequency"
     fi
-    
+
     echo -e "${GREEN}✅ Reporte generado: $report_file${NC}"
 }
 

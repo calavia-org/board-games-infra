@@ -48,12 +48,12 @@ alertmanager:
     logFormat: logfmt
     logLevel: info
     portName: web
-  
+
   config:
     global:
       smtp_smarthost: 'localhost:587'
       smtp_from: 'alertmanager@${cluster_name}.local'
-    
+
     route:
       group_by: ['alertname']
       group_wait: 10s
@@ -61,42 +61,47 @@ alertmanager:
       repeat_interval: 1h
       receiver: 'web.hook'
       routes:
-      - match:
-          alertname: Watchdog
-        receiver: 'null'
-      - match_re:
-          severity: critical|warning
-        receiver: 'critical-alerts'
-    
+        - match:
+            alertname: Watchdog
+          receiver: 'null'
+        - match_re:
+            severity: critical|warning
+          receiver: 'critical-alerts'
+
     receivers:
-    - name: 'null'
-    - name: 'web.hook'
-      webhook_configs:
-      - url: 'http://example.com/'
-    - name: 'critical-alerts'
-      email_configs:
-      - to: '${email_notifications}'
-        subject: '[${cluster_name}] Alert: {{ .GroupLabels.alertname }}'
-        body: |
-          {{ range .Alerts }}
-          Alert: {{ .Annotations.summary }}
-          Description: {{ .Annotations.description }}
-          {{ end }}
-%{ if slack_webhook_url != "" }
-      slack_configs:
-      - api_url: '${slack_webhook_url}'
-        channel: '#alerts'
-        title: '[${cluster_name}] Alert'
-        text: |
-          {{ range .Alerts }}
-          *Alert:* {{ .Annotations.summary }}
-          *Description:* {{ .Annotations.description }}
-          *Severity:* {{ .Labels.severity }}
-          {{ end }}
-%{ endif }
+      - name: 'null'
+      - name: 'web.hook'
+        webhook_configs:
+          - url: 'http://example.com/'
+      - name: 'critical-alerts'
+        email_configs:
+          - to: '${email_notifications}'
+            subject: '[${cluster_name}] Alert: {{ .GroupLabels.alertname }}'
+            body: |
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              {{ end }}
+        # Slack configuration (conditional)
+        slack_configs:
+          - api_url: '${slack_webhook_url}'
+            channel: '#alerts'
+            title: '[${cluster_name}] Alert'
+            text: |
+              {{ range .Alerts }}
+              *Alert:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Severity:* {{ .Labels.severity }}
+              {{ end }}
 
 prometheus:
   enabled: true
+
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: ${prometheus_service_account_role_arn}
+
   prometheusSpec:
     retention: "${retention_days}d"
     retentionSize: "45GB"
@@ -107,7 +112,7 @@ prometheus:
     scrapeInterval: 30s
     evaluationInterval: 30s
     enableAdminAPI: false
-    
+
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -116,7 +121,7 @@ prometheus:
           resources:
             requests:
               storage: ${prometheus_storage}
-    
+
     ruleSelector: {}
     ruleNamespaceSelector: {}
     ruleSelectorNilUsesHelmValues: false
@@ -126,7 +131,7 @@ prometheus:
     podMonitorSelector: {}
     podMonitorNamespaceSelector: {}
     podMonitorSelectorNilUsesHelmValues: false
-    
+
     resources:
       requests:
         memory: 2Gi
@@ -136,35 +141,35 @@ prometheus:
         cpu: 2000m
 
     additionalScrapeConfigs:
-    - job_name: 'kubernetes-pods'
-      kubernetes_sd_configs:
-      - role: pod
-      relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-        action: keep  
-        regex: true
-      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-        action: replace
-        target_label: __metrics_path__
-        regex: (.+)
-      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-        action: replace
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
         regex: ([^:]+)(?::\d+)?;(\d+)
         replacement: $1:$2
         target_label: __address__
 
 grafana:
-  enabled: true
+  enabled: ${enable_grafana}
   adminPassword: ${grafana_admin_password}
-  
+
   persistence:
     enabled: true
     type: pvc
     storageClassName: gp2
     accessModes:
-    - ReadWriteOnce
+      - ReadWriteOnce
     size: ${grafana_storage}
-  
+
   resources:
     requests:
       memory: 256Mi
@@ -172,20 +177,20 @@ grafana:
     limits:
       memory: 512Mi
       cpu: 200m
-  
+
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-      - name: 'default'
-        orgId: 1
-        folder: ''
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards/default
-  
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+
   dashboards:
     default:
       kubernetes-cluster-monitoring:
@@ -209,11 +214,11 @@ grafana:
     datasources.yaml:
       apiVersion: 1
       datasources:
-      - name: Prometheus
-        type: prometheus
-        url: http://kube-prometheus-stack-prometheus:9090
-        access: proxy
-        isDefault: true
+        - name: Prometheus
+          type: prometheus
+          url: http://kube-prometheus-stack-prometheus:9090
+          access: proxy
+          isDefault: true
 
 kubeApiServer:
   enabled: true

@@ -78,15 +78,14 @@ resource "helm_release" "cert_manager" {
 
   create_namespace = true
 
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
-
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.cert_manager.arn
-  }
+  values = [
+    <<-EOF
+    installCRDs: true
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: ${aws_iam_role.cert_manager.arn}
+    EOF
+  ]
 
   depends_on = [aws_iam_role_policy_attachment.cert_manager]
 }

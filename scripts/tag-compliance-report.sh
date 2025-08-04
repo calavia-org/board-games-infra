@@ -23,7 +23,7 @@ NC='\033[0m' # No Color
 # Tags obligatorios definidos en el módulo
 MANDATORY_TAGS=(
     "Environment"
-    "Project" 
+    "Project"
     "Owner"
     "CostCenter"
     "ManagedBy"
@@ -116,14 +116,14 @@ EOF
 # Verificar dependencias
 check_dependencies() {
     local deps=("aws" "jq")
-    
+
     for dep in "${deps[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             log_error "Dependencia requerida no encontrada: $dep"
             exit 1
         fi
     done
-    
+
     # Verificar credenciales AWS
     if ! aws sts get-caller-identity &> /dev/null; then
         log_error "AWS CLI no configurado o credenciales inválidas"
@@ -135,17 +135,17 @@ check_dependencies() {
 get_resources_with_tags() {
     local resource_type="$1"
     local region="${2:-}"
-    
+
     local aws_cmd="aws resourcegroupstaggingapi get-resources"
-    
+
     if [[ -n "$resource_type" ]]; then
         aws_cmd="$aws_cmd --resource-type-filters $resource_type"
     fi
-    
+
     if [[ -n "$region" ]]; then
         aws_cmd="$aws_cmd --region $region"
     fi
-    
+
     $aws_cmd --output json 2>/dev/null || echo '{"ResourceTagMappingList": []}'
 }
 
@@ -153,17 +153,17 @@ get_resources_with_tags() {
 check_resource_compliance() {
     local resource_arn="$1"
     local resource_tags="$2"
-    
+
     local missing_tags=()
     local compliant=true
-    
+
     for tag in "${MANDATORY_TAGS[@]}"; do
         if ! echo "$resource_tags" | jq -e --arg tag "$tag" '.[] | select(.Key == $tag)' > /dev/null; then
             missing_tags+=("$tag")
             compliant=false
         fi
     done
-    
+
     # Retornar resultado en JSON
     jq -n \
         --arg arn "$resource_arn" \
@@ -184,45 +184,45 @@ generate_compliance_report() {
     local output_file="$2"
     local environment_filter="$3"
     local resource_type_filter="$4"
-    
+
     log_info "Iniciando auditoría de tags..."
-    
+
     # Crear directorio de reportes
     mkdir -p "$REPORTS_DIR"
-    
+
     local temp_file=$(mktemp)
     local results_file="$REPORTS_DIR/compliance-results-$TIMESTAMP.json"
-    
+
     # Array para almacenar resultados
     echo '[]' > "$temp_file"
-    
+
     local total_resources=0
     local compliant_resources=0
     local non_compliant_resources=0
-    
+
     # Tipos de recursos a procesar
     local types_to_check=("${RESOURCE_TYPES[@]}")
     if [[ -n "$resource_type_filter" ]]; then
         types_to_check=("$resource_type_filter")
     fi
-    
+
     log_info "Auditando ${#types_to_check[@]} tipos de recursos..."
-    
+
     for resource_type in "${types_to_check[@]}"; do
         log_info "Procesando: $resource_type"
-        
+
         # Obtener recursos de este tipo
         local resources_json=$(get_resources_with_tags "$resource_type")
-        
+
         # Procesar cada recurso
         while IFS= read -r resource_line; do
             if [[ -z "$resource_line" || "$resource_line" == "null" ]]; then
                 continue
             fi
-            
+
             local resource_arn=$(echo "$resource_line" | jq -r '.ResourceARN')
             local resource_tags=$(echo "$resource_line" | jq '.Tags')
-            
+
             # Filtrar por environment si se especifica
             if [[ -n "$environment_filter" ]]; then
                 local env_tag=$(echo "$resource_tags" | jq -r --arg env "$environment_filter" '.[] | select(.Key == "Environment") | .Value')
@@ -230,16 +230,16 @@ generate_compliance_report() {
                     continue
                 fi
             fi
-            
+
             # Verificar compliance
             local compliance_result=$(check_resource_compliance "$resource_arn" "$resource_tags")
-            
+
             # Agregar tipo de recurso al resultado
             compliance_result=$(echo "$compliance_result" | jq --arg type "$resource_type" '. + {resourceType: $type}')
-            
+
             # Agregar al archivo temporal
             jq --argjson new "$compliance_result" '. + [$new]' "$temp_file" > "${temp_file}.tmp" && mv "${temp_file}.tmp" "$temp_file"
-            
+
             # Contar estadísticas
             ((total_resources++))
             if [[ $(echo "$compliance_result" | jq -r '.compliant') == "true" ]]; then
@@ -247,16 +247,16 @@ generate_compliance_report() {
             else
                 ((non_compliant_resources++))
             fi
-            
+
         done < <(echo "$resources_json" | jq -c '.ResourceTagMappingList[]?')
     done
-    
+
     # Calcular métricas
     local compliance_percentage=0
     if [[ $total_resources -gt 0 ]]; then
         compliance_percentage=$(( (compliant_resources * 100) / total_resources ))
     fi
-    
+
     # Crear reporte final
     local report_data=$(jq -n \
         --argjson total "$total_resources" \
@@ -281,10 +281,10 @@ generate_compliance_report() {
             },
             resources: $resources
         }')
-    
+
     # Guardar resultados JSON
     echo "$report_data" > "$results_file"
-    
+
     # Generar output según formato
     case "$format" in
         "json")
@@ -300,12 +300,12 @@ generate_compliance_report() {
             generate_table_report "$report_data" "$output_file"
             ;;
     esac
-    
+
     # Limpiar archivo temporal
     rm -f "$temp_file"
-    
+
     log_success "Reporte generado: $results_file"
-    
+
     # Mostrar resumen
     echo
     log_info "📊 RESUMEN DE COMPLIANCE"
@@ -315,7 +315,7 @@ generate_compliance_report() {
     echo "Recursos no conformes: $non_compliant_resources"
     echo "Porcentaje de compliance: ${compliance_percentage}%"
     echo
-    
+
     if [[ $compliance_percentage -lt 95 ]]; then
         log_warning "⚠️  Compliance por debajo del objetivo (95%)"
         log_info "Considera ejecutar con --fix-mode para corregir tags faltantes"
@@ -328,7 +328,7 @@ generate_compliance_report() {
 generate_table_report() {
     local report_data="$1"
     local output_file="$2"
-    
+
     {
         echo "🏷️  TAG COMPLIANCE REPORT"
         echo "========================="
@@ -344,13 +344,13 @@ generate_table_report() {
         echo
         echo "NON-COMPLIANT RESOURCES:"
         echo "========================"
-        
+
         echo "$report_data" | jq -r '
-            .resources[] | 
-            select(.compliant == false) | 
+            .resources[] |
+            select(.compliant == false) |
             "\(.resourceType)\n  ARN: \(.resourceArn)\n  Missing Tags: \(.missingTags | join(", "))\n"
         '
-        
+
     } | if [[ -n "$output_file" ]]; then tee "$output_file"; else cat; fi
 }
 
@@ -358,9 +358,9 @@ generate_table_report() {
 generate_html_report() {
     local report_data="$1"
     local output_file="$2"
-    
+
     local html_file="${output_file:-$REPORTS_DIR/compliance-report-$TIMESTAMP.html}"
-    
+
     cat > "$html_file" << EOF
 <!DOCTYPE html>
 <html lang="es">
@@ -397,7 +397,7 @@ generate_html_report() {
     <div class="container">
         <h1>🏷️ Tag Compliance Report</h1>
         <p class="timestamp">Generated: $(date) | Board Games Infrastructure</p>
-        
+
         <div class="summary">
             <div class="metric">
                 <div class="metric-value">$(echo "$report_data" | jq -r '.metadata.totalResources')</div>
@@ -437,7 +437,7 @@ $(echo "$report_data" | jq -r '.metadata.mandatoryTags[] | "<li>" + . + "</li>"'
             </thead>
             <tbody>
 $(echo "$report_data" | jq -r '
-    .resources[] | 
+    .resources[] |
     "<tr>" +
     "<td class=\"resource-type\">" + .resourceType + "</td>" +
     "<td style=\"font-family: monospace; font-size: 0.8em; word-break: break-all;\">" + .resourceArn + "</td>" +
@@ -448,7 +448,7 @@ $(echo "$report_data" | jq -r '
 ')
             </tbody>
         </table>
-        
+
         <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 6px;">
             <h3>🔧 Recommendations</h3>
             <ul>
@@ -462,7 +462,7 @@ $(echo "$report_data" | jq -r '
 </body>
 </html>
 EOF
-    
+
     log_success "Reporte HTML generado: $html_file"
 }
 
@@ -470,7 +470,7 @@ EOF
 generate_json_report() {
     local report_data="$1"
     local output_file="$2"
-    
+
     local json_file="${output_file:-$REPORTS_DIR/compliance-report-$TIMESTAMP.json}"
     echo "$report_data" | jq '.' > "$json_file"
     log_success "Reporte JSON generado: $json_file"
@@ -480,13 +480,13 @@ generate_json_report() {
 generate_csv_report() {
     local report_data="$1"
     local output_file="$2"
-    
+
     local csv_file="${output_file:-$REPORTS_DIR/compliance-report-$TIMESTAMP.csv}"
-    
+
     {
         echo "ResourceType,ResourceARN,Compliant,MissingTags,ExistingTags"
         echo "$report_data" | jq -r '
-            .resources[] | 
+            .resources[] |
             [
                 .resourceType,
                 .resourceArn,
@@ -496,7 +496,7 @@ generate_csv_report() {
             ] | @csv
         '
     } > "$csv_file"
-    
+
     log_success "Reporte CSV generado: $csv_file"
 }
 
@@ -505,14 +505,14 @@ send_email_report() {
     local report_file="$1"
     local email="$2"
     local format="$3"
-    
+
     if ! command -v mail &> /dev/null; then
         log_warning "Comando 'mail' no disponible. Instala mailutils para envío de emails."
         return 1
     fi
-    
+
     local subject="Tag Compliance Report - $(date +%Y-%m-%d)"
-    
+
     case "$format" in
         "html")
             mail -s "$subject" -a "Content-Type: text/html" "$email" < "$report_file"
@@ -521,7 +521,7 @@ send_email_report() {
             mail -s "$subject" "$email" < "$report_file"
             ;;
     esac
-    
+
     log_success "Reporte enviado por email a: $email"
 }
 
@@ -531,12 +531,12 @@ fix_mode() {
     log_warning "ADVERTENCIA: Esta función aplicará tags a recursos AWS reales"
     read -p "¿Continuar? (y/N): " -n 1 -r
     echo
-    
+
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         log_info "Operación cancelada"
         exit 0
     fi
-    
+
     # TODO: Implementar lógica de corrección interactiva
     log_info "Función en desarrollo. Por ahora, usa el módulo de tags en Terraform."
 }
@@ -551,7 +551,7 @@ main() {
     local fix_mode_enabled=false
     local environment_filter=""
     local resource_type_filter=""
-    
+
     # Parsear argumentos
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -598,19 +598,19 @@ main() {
                 ;;
         esac
     done
-    
+
     # Verificar dependencias
     check_dependencies
-    
+
     # Modo de corrección
     if [[ $fix_mode_enabled == true ]]; then
         fix_mode
         exit 0
     fi
-    
+
     # Generar reporte
     generate_compliance_report "$format" "$output_file" "$environment_filter" "$resource_type_filter"
-    
+
     # Enviar por email si se especifica
     if [[ -n "$email" && -n "$output_file" ]]; then
         send_email_report "$output_file" "$email" "$format"

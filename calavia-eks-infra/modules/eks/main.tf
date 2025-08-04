@@ -121,7 +121,7 @@ resource "aws_cloudwatch_log_group" "cluster" {
 
 # KMS Key para cifrado de secretos EKS
 resource "aws_kms_key" "eks" {
-  description         = "EKS Secret Encryption Key for ${var.cluster_name}"
+  description             = "EKS Secret Encryption Key for ${var.cluster_name}"
   deletion_window_in_days = 7
 
   tags = merge(var.tags, {
@@ -136,8 +136,8 @@ resource "aws_kms_alias" "eks" {
 
 # Launch Template para nodos spot/on-demand
 resource "aws_launch_template" "eks_nodes" {
-  name_prefix   = "${var.cluster_name}-node-"
-  description   = "Launch template for EKS managed node group"
+  name_prefix = "${var.cluster_name}-node-"
+  description = "Launch template for EKS managed node group"
 
   vpc_security_group_ids = var.security_group_ids
 
@@ -246,9 +246,9 @@ resource "aws_iam_openid_connect_provider" "cluster" {
 
 # EKS Addons
 resource "aws_eks_addon" "coredns" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "coredns"
-  addon_version = "v1.10.1-eksbuild.5"
+  cluster_name                = aws_eks_cluster.this.name
+  addon_name                  = "coredns"
+  addon_version               = "v1.10.1-eksbuild.5"
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -261,9 +261,9 @@ resource "aws_eks_addon" "coredns" {
 }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "kube-proxy"
-  addon_version = "v1.31.0-eksbuild.3"  # Updated for EKS 1.31
+  cluster_name                = aws_eks_cluster.this.name
+  addon_name                  = "kube-proxy"
+  addon_version               = "v1.31.0-eksbuild.3" # Updated for EKS 1.31
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -276,9 +276,9 @@ resource "aws_eks_addon" "kube_proxy" {
 }
 
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "vpc-cni"
-  addon_version = "v1.18.1-eksbuild.1"  # Updated for EKS 1.31 - latest VPC CNI
+  cluster_name                = aws_eks_cluster.this.name
+  addon_name                  = "vpc-cni"
+  addon_version               = "v1.18.1-eksbuild.1" # Updated for EKS 1.31 - latest VPC CNI
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 
@@ -291,9 +291,9 @@ resource "aws_eks_addon" "vpc_cni" {
 }
 
 resource "aws_eks_addon" "ebs_csi" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name   = "aws-ebs-csi-driver"
-  addon_version = "v1.32.0-eksbuild.1"  # Updated for EKS 1.31 - latest EBS CSI driver
+  cluster_name                = aws_eks_cluster.this.name
+  addon_name                  = "aws-ebs-csi-driver"
+  addon_version               = "v1.32.0-eksbuild.1" # Updated for EKS 1.31 - latest EBS CSI driver
   resolve_conflicts_on_create = "OVERWRITE"
   resolve_conflicts_on_update = "OVERWRITE"
 

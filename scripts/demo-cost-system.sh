@@ -6,7 +6,6 @@
 set -e
 
 # Colores
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -28,7 +27,7 @@ show_section() {
 simulate_command() {
     local cmd=$1
     local description=$2
-    
+
     echo -e "${YELLOW}▶ $description${NC}"
     echo -e "${BLUE}  Comando: $cmd${NC}"
     echo -e "${GREEN}  ✓ Simulación exitosa${NC}"
@@ -88,15 +87,15 @@ main() {
     show_section "🔧 1. ANÁLISIS DE COSTES LOCAL"
     simulate_command "./scripts/cost-analysis.sh both" "Analizando costes de ambos entornos"
     show_cost_table
-    
+
     show_section "📊 2. CONFIGURACIÓN DE PRESUPUESTOS AWS"
     simulate_command "./scripts/setup-aws-budgets.sh" "Configurando AWS Budgets y alertas"
     show_budget_alerts
-    
+
     show_section "📈 3. GENERACIÓN DE REPORTES"
     simulate_command "./scripts/generate-cost-report.sh -f weekly -s --cost-optimization" "Generando reporte semanal con recomendaciones"
     show_recommendations
-    
+
     show_section "🤖 4. AUTOMATIZACIÓN CON GITHUB ACTIONS"
     echo -e "${YELLOW}▶ GitHub Actions Workflow activado${NC}"
     echo -e "${BLUE}  • Pull Request: Análisis automático de costes${NC}"
@@ -104,7 +103,7 @@ main() {
     echo -e "${BLUE}  • Alertas de presupuesto: Verificación cada 6 horas${NC}"
     echo -e "${GREEN}  ✓ Workflow configurado y activo${NC}"
     echo ""
-    
+
     show_section "🔄 5. MONITOREO CONTINUO"
     echo -e "${YELLOW}▶ Cron Jobs configurados${NC}"
     echo -e "${BLUE}  • Reporte diario: L-V 9:00 AM${NC}"
@@ -113,7 +112,7 @@ main() {
     echo -e "${BLUE}  • Verificación de anomalías: Cada 6 horas${NC}"
     echo -e "${GREEN}  ✓ Monitoreo 24/7 activo${NC}"
     echo ""
-    
+
     show_section "🎯 RESUMEN DEL SISTEMA"
     echo -e "${GREEN}✅ Sistema de Control de Costes Completamente Implementado${NC}"
     echo ""
@@ -149,7 +148,7 @@ echo ""
 echo -e "${GREEN}Para comenzar a usar el sistema:${NC}"
 echo ""
 echo -e "${BLUE}1. Configurar variables de entorno:${NC}"
-echo "   export INFRACOST_API_KEY='your-api-key'"
+echo "   export INFRACOST_API_KEY='your-api-key'"  # pragma: allowlist secret
 echo "   export EMAIL_RECIPIENTS='your-email@company.com'"
 echo ""
 echo -e "${BLUE}2. Ejecutar análisis inicial:${NC}"

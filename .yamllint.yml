@@ -26,8 +26,8 @@ rules:
     forbid-in-flow-mappings: true
 
   # Documentos vacíos - permitir archivos vacíos
-  document-empty:
-    level: disable
+  document-start:
+    present: false
 
   # Saltos de línea - permitir saltos múltiples para legibilidad
   empty-lines:

@@ -80,50 +80,23 @@ resource "helm_release" "external_dns" {
   namespace  = "kube-system"
   version    = "1.13.1"
 
-  set {
-    name  = "provider"
-    value = "aws"
-  }
-
-  set {
-    name  = "aws.region"
-    value = var.region
-  }
-
-  set {
-    name  = "domainFilters[0]"
-    value = var.domain_name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = "external-dns"
-  }
-
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.external_dns.arn
-  }
-
-  set {
-    name  = "policy"
-    value = "sync"
-  }
-
-  set {
-    name  = "registry"
-    value = "txt"
-  }
-
-  set {
-    name  = "txtOwnerId"
-    value = var.cluster_name
-  }
+  values = [
+    <<-EOF
+    provider: aws
+    aws:
+      region: ${var.region}
+    domainFilters:
+      - ${var.domain_name}
+    serviceAccount:
+      create: true
+      name: external-dns
+      annotations:
+        eks.amazonaws.com/role-arn: ${aws_iam_role.external_dns.arn}
+    policy: sync
+    registry: txt
+    txtOwnerId: ${var.cluster_name}
+    EOF
+  ]
 
   depends_on = [aws_iam_role_policy_attachment.external_dns]
 }

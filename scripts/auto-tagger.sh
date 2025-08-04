@@ -82,7 +82,7 @@ EXAMPLES:
 
 SUPPORTED RESOURCE TYPES:
     • AWS::RDS::DBInstance
-    • AWS::RDS::DBCluster  
+    • AWS::RDS::DBCluster
     • AWS::EKS::Cluster
     • AWS::EKS::NodeGroup
     • AWS::ElastiCache::CacheCluster
@@ -98,14 +98,14 @@ EOF
 # Verificar dependencias
 check_dependencies() {
     local deps=("aws" "jq")
-    
+
     for dep in "${deps[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             log_error "Dependencia requerida no encontrada: $dep"
             exit 1
         fi
     done
-    
+
     # Verificar credenciales AWS
     if ! aws sts get-caller-identity &> /dev/null; then
         log_error "AWS CLI no configurado o credenciales inválidas"
@@ -123,9 +123,9 @@ build_tags() {
     local department="$6"
     local component="$7"
     local criticality="$8"
-    
+
     local current_date=$(date +%Y-%m-%d)
-    
+
     # Tags obligatorios
     local tags=()
     tags+=("Environment=$environment")
@@ -133,25 +133,25 @@ build_tags() {
     tags+=("Owner=$owner")
     tags+=("CostCenter=$cost_center")
     tags+=("ManagedBy=$DEFAULT_MANAGED_BY")
-    
+
     # Tags de negocio
     tags+=("BusinessUnit=$business_unit")
     tags+=("Department=$department")
-    
+
     # Tags técnicos
     tags+=("CreatedBy=auto-tagger")
     tags+=("CreatedDate=$current_date")
     tags+=("Architecture=x86_64")
-    
+
     # Tags opcionales
     if [[ -n "$component" ]]; then
         tags+=("Component=$component")
     fi
-    
+
     if [[ -n "$criticality" ]]; then
         tags+=("Criticality=$criticality")
     fi
-    
+
     # Tags específicos por environment
     case "$environment" in
         "production")
@@ -170,12 +170,12 @@ build_tags() {
             tags+=("ScheduleShutdown=enabled")
             ;;
     esac
-    
+
     # Tags de costes
     tags+=("BillingProject=BG-2025-Q3")
     tags+=("BudgetAlerts=enabled")
     tags+=("CostOptimization=candidate")
-    
+
     printf '%s\n' "${tags[@]}"
 }
 
@@ -184,23 +184,23 @@ get_resources() {
     local resource_type="$1"
     local resource_arn="$2"
     local region="$3"
-    
+
     if [[ -n "$resource_arn" ]]; then
         # Recurso específico
         echo "[$resource_arn]"
         return
     fi
-    
+
     local aws_cmd="aws resourcegroupstaggingapi get-resources --output json"
-    
+
     if [[ -n "$resource_type" ]]; then
         aws_cmd="$aws_cmd --resource-type-filters $resource_type"
     fi
-    
+
     if [[ -n "$region" ]]; then
         aws_cmd="$aws_cmd --region $region"
     fi
-    
+
     $aws_cmd | jq -r '.ResourceTagMappingList[].ResourceARN'
 }
 
@@ -209,17 +209,17 @@ apply_tags_to_resource() {
     local resource_arn="$1"
     local tags_array=("${@:2}")
     local dry_run="$3"
-    
+
     log_info "Procesando: $(basename "$resource_arn")"
-    
+
     # Determinar el servicio AWS desde el ARN
     local service=$(echo "$resource_arn" | cut -d':' -f3)
     local region=$(echo "$resource_arn" | cut -d':' -f4)
-    
+
     # Construir comando de tagging según el servicio
     local tag_cmd=""
     local tag_format=""
-    
+
     case "$service" in
         "rds")
             tag_cmd="aws rds add-tags-to-resource"
@@ -250,7 +250,7 @@ apply_tags_to_resource() {
             return 1
             ;;
     esac
-    
+
     # Preparar tags según el formato del servicio
     local formatted_tags=""
     case "$service" in
@@ -285,7 +285,7 @@ apply_tags_to_resource() {
             done
             ;;
     esac
-    
+
     # Construir comando completo
     local full_cmd=""
     case "$service" in
@@ -296,11 +296,11 @@ apply_tags_to_resource() {
             full_cmd="$tag_cmd $tag_format $formatted_tags"
             ;;
     esac
-    
+
     if [[ -n "$region" ]]; then
         full_cmd="$full_cmd --region $region"
     fi
-    
+
     # Mostrar comando (dry run) o ejecutar
     if [[ "$dry_run" == "true" ]]; then
         log_info "[DRY RUN] $full_cmd"
@@ -330,7 +330,7 @@ main() {
     local resource_arn=""
     local force="false"
     local region=""
-    
+
     # Parsear argumentos
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -397,27 +397,27 @@ main() {
                 ;;
         esac
     done
-    
+
     # Validar parámetros obligatorios
     if [[ -z "$environment" ]]; then
         log_error "Environment es obligatorio (-e|--environment)"
         exit 1
     fi
-    
+
     if [[ -z "$owner" ]]; then
         log_error "Owner email es obligatorio (-o|--owner)"
         exit 1
     fi
-    
+
     # Validar environment
     if [[ ! "$environment" =~ ^(production|staging|development|testing)$ ]]; then
         log_error "Environment debe ser: production, staging, development, o testing"
         exit 1
     fi
-    
+
     # Verificar dependencias
     check_dependencies
-    
+
     log_info "🏷️  AWS Auto-Tagger iniciado"
     echo "================================"
     echo "Environment: $environment"
@@ -430,15 +430,15 @@ main() {
     [[ -n "$resource_arn" ]] && echo "Specific Resource: $resource_arn"
     echo "Dry Run: $dry_run"
     echo
-    
+
     # Construir tags
     local tags_array
     readarray -t tags_array < <(build_tags "$environment" "$owner" "$project" "$cost_center" "$business_unit" "$department" "$component" "$criticality")
-    
+
     log_info "Tags que se aplicarán:"
     printf '  • %s\n' "${tags_array[@]}"
     echo
-    
+
     # Confirmación si no está en modo force
     if [[ "$force" != "true" && "$dry_run" != "true" ]]; then
         read -p "¿Continuar con el tagging? (y/N): " -n 1 -r
@@ -448,29 +448,29 @@ main() {
             exit 0
         fi
     fi
-    
+
     # Obtener recursos a taggear
     log_info "Obteniendo recursos..."
     local resources
     readarray -t resources < <(get_resources "$resource_type" "$resource_arn" "$region")
-    
+
     if [[ ${#resources[@]} -eq 0 ]]; then
         log_warning "No se encontraron recursos para taggear"
         exit 0
     fi
-    
+
     log_info "Encontrados ${#resources[@]} recursos para taggear"
     echo
-    
+
     # Aplicar tags a cada recurso
     local success_count=0
     local error_count=0
-    
+
     for resource in "${resources[@]}"; do
         if [[ -z "$resource" || "$resource" == "null" ]]; then
             continue
         fi
-        
+
         if apply_tags_to_resource "$resource" "${tags_array[@]}" "$dry_run"; then
             ((success_count++))
         else
@@ -478,7 +478,7 @@ main() {
         fi
         echo
     done
-    
+
     # Resumen final
     echo
     log_info "📊 RESUMEN"
@@ -486,7 +486,7 @@ main() {
     echo "Recursos procesados: ${#resources[@]}"
     echo "Exitosos: $success_count"
     echo "Errores: $error_count"
-    
+
     if [[ "$dry_run" == "true" ]]; then
         log_info "🧪 Modo DRY RUN - No se aplicaron cambios reales"
     else

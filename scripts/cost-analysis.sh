@@ -14,7 +14,6 @@ NC='\033[0m' # No Color
 
 # Configuración
 TF_ROOT="calavia-eks-infra"
-INFRACOST_CONFIG=".infracost/config.yml"
 
 # Función para mostrar ayuda
 show_help() {
@@ -24,7 +23,7 @@ show_help() {
     echo ""
     echo "ENVIRONMENTS:"
     echo "  staging     Analizar costes del entorno de staging"
-    echo "  production  Analizar costes del entorno de producción"  
+    echo "  production  Analizar costes del entorno de producción"
     echo "  both        Analizar ambos entornos (por defecto)"
     echo ""
     echo "OPTIONS:"
@@ -42,24 +41,24 @@ show_help() {
 # Función para verificar dependencias
 check_dependencies() {
     echo -e "${BLUE}Verificando dependencias...${NC}"
-    
+
     if ! command -v infracost &> /dev/null; then
         echo -e "${RED}Error: Infracost no está instalado${NC}"
         echo "Instala Infracost desde: https://www.infracost.io/docs/#quick-start"
         exit 1
     fi
-    
+
     if ! command -v terraform &> /dev/null; then
         echo -e "${RED}Error: Terraform no está instalado${NC}"
         exit 1
     fi
-    
+
     if [ -z "$INFRACOST_API_KEY" ]; then
         echo -e "${YELLOW}Advertencia: INFRACOST_API_KEY no está configurada${NC}"
         echo "Configura tu API key: export INFRACOST_API_KEY=your-api-key"
         echo "Obtenla gratis en: https://dashboard.infracost.io"
     fi
-    
+
     echo -e "${GREEN}✓ Dependencias verificadas${NC}"
 }
 
@@ -69,36 +68,36 @@ analyze_environment() {
     local output_format=$2
     local compare_mode=$3
     local save_report=$4
-    
+
     echo -e "${BLUE}Analizando costes para entorno: ${env}${NC}"
-    
+
     local tf_path="${TF_ROOT}/environments/${env}"
     local usage_file=".infracost/usage-${env}.yml"
     local output_file=""
-    
+
     if [ "$save_report" = true ]; then
         output_file="reports/infracost-${env}-$(date +%Y%m%d-%H%M%S)"
         mkdir -p reports
     fi
-    
+
     # Verificar que existen los archivos necesarios
     if [ ! -d "$tf_path" ]; then
         echo -e "${RED}Error: No se encontró el directorio $tf_path${NC}"
         return 1
     fi
-    
+
     if [ ! -f "$usage_file" ]; then
         echo -e "${YELLOW}Advertencia: No se encontró $usage_file, usando valores por defecto${NC}"
         usage_file=""
     fi
-    
+
     # Construir comando de Infracost
     local cmd="infracost breakdown --path $tf_path"
-    
+
     if [ -n "$usage_file" ]; then
         cmd="$cmd --usage-file $usage_file"
     fi
-    
+
     if [ "$compare_mode" = true ]; then
         echo -e "${BLUE}Modo comparación activado - comparando con main...${NC}"
         cmd="infracost diff --path $tf_path"
@@ -107,7 +106,7 @@ analyze_environment() {
         fi
         cmd="$cmd --compare-to main"
     fi
-    
+
     # Ejecutar análisis
     case $output_format in
         "json")
@@ -135,7 +134,7 @@ analyze_environment() {
             $cmd
             ;;
     esac
-    
+
     echo ""
 }
 
@@ -143,25 +142,26 @@ analyze_environment() {
 generate_combined_report() {
     local output_format=$1
     local save_report=$2
-    
+
     echo -e "${BLUE}Generando reporte combinado...${NC}"
-    
+
     local staging_path="${TF_ROOT}/environments/staging"
     local production_path="${TF_ROOT}/environments/production"
     local staging_usage=".infracost/usage-staging.yml"
     local production_usage=".infracost/usage-production.yml"
-    
+
     # Generar archivos temporales
     infracost breakdown --path $staging_path --usage-file $staging_usage --format json --out-file /tmp/staging.json
     infracost breakdown --path $production_path --usage-file $production_usage --format json --out-file /tmp/production.json
-    
+
     # Combinar reportes
     local combined_cmd="infracost output --path /tmp/staging.json --path /tmp/production.json"
-    
+
     if [ "$save_report" = true ]; then
-        local output_file="reports/infracost-combined-$(date +%Y%m%d-%H%M%S)"
+        local output_file
+        output_file="reports/infracost-combined-$(date +%Y%m%d-%H%M%S)"
         mkdir -p reports
-        
+
         case $output_format in
             "json")
                 $combined_cmd --format json --out-file "${output_file}.json"
@@ -177,11 +177,11 @@ generate_combined_report() {
                 ;;
         esac
     fi
-    
+
     # Mostrar resumen en consola
     echo -e "${YELLOW}=== RESUMEN DE COSTES COMBINADO ===${NC}"
     $combined_cmd
-    
+
     # Limpiar archivos temporales
     rm -f /tmp/staging.json /tmp/production.json
 }
@@ -192,7 +192,7 @@ main() {
     local output_format="table"
     local compare_mode=false
     local save_report=false
-    
+
     # Parsear argumentos
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -223,20 +223,20 @@ main() {
                 ;;
         esac
     done
-    
+
     # Validar formato de salida
     if [[ ! "$output_format" =~ ^(table|json|html)$ ]]; then
         echo -e "${RED}Error: Formato de salida no válido: $output_format${NC}"
         echo "Formatos válidos: table, json, html"
         exit 1
     fi
-    
+
     echo -e "${GREEN}🏗️  Análisis de Costes - Board Games Infrastructure${NC}"
     echo -e "${BLUE}Entorno: $environment | Formato: $output_format | Comparar: $compare_mode | Guardar: $save_report${NC}"
     echo ""
-    
+
     check_dependencies
-    
+
     case $environment in
         "staging")
             analyze_environment "staging" "$output_format" "$compare_mode" "$save_report"
@@ -251,7 +251,7 @@ main() {
             generate_combined_report "$output_format" "$save_report"
             ;;
     esac
-    
+
     echo -e "${GREEN}✅ Análisis completado${NC}"
 }
 

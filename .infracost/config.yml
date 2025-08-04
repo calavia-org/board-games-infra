@@ -6,8 +6,8 @@ projects:
   - path: calavia-eks-infra/environments/staging
     name: board-games-staging
     usage_file: .infracost/usage-staging.yml
-    
-  # Production Environment  
+
+  # Production Environment
   - path: calavia-eks-infra/environments/production
     name: board-games-production
     usage_file: .infracost/usage-production.yml

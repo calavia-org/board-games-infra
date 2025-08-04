@@ -373,7 +373,8 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: custom
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           custom_payload: |
             {
               "text": "📊 Monthly Infrastructure Cost Report",
@@ -492,7 +493,8 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: custom
-          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           custom_payload: |
             {
               "text": "🚨 BUDGET ALERT - Infrastructure Costs",

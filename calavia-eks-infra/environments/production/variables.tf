@@ -19,37 +19,37 @@ variable "availability_zones" {
 variable "node_instance_type" {
   description = "Tipo de instancia para los nodos del clúster - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "t4g.small"  # Graviton2 ARM64 - mejor rendimiento/coste que t3.small (2 vCPUs, 2 GB RAM)
+  default     = "t4g.small" # Graviton2 ARM64 - mejor rendimiento/coste que t3.small (2 vCPUs, 2 GB RAM)
 }
 
 variable "desired_capacity" {
   description = "Número deseado de nodos en el clúster - optimizado"
   type        = number
-  default     = 2  # Reducido de 3 a 2 para ahorrar costes manteniendo HA
+  default     = 2 # Reducido de 3 a 2 para ahorrar costes manteniendo HA
 }
 
 variable "max_size" {
   description = "Número máximo de nodos en el clúster - controlado"
   type        = number
-  default     = 4  # Reducido de 5 a 4
+  default     = 4 # Reducido de 5 a 4
 }
 
 variable "min_size" {
   description = "Número mínimo de nodos en el clúster - mínimo para HA"
   type        = number
-  default     = 2  # Mantenido en 2 para alta disponibilidad
+  default     = 2 # Mantenido en 2 para alta disponibilidad
 }
 
 variable "redis_instance_type" {
   description = "Tipo de instancia para Redis - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "cache.t4g.micro"  # Graviton2 ARM64 - mejor eficiencia energética y coste
+  default     = "cache.t4g.micro" # Graviton2 ARM64 - mejor eficiencia energética y coste
 }
 
 variable "postgres_instance_type" {
   description = "Tipo de instancia para PostgreSQL - Graviton2 ARM64 optimizado para producción"
   type        = string
-  default     = "db.t4g.small"  # Graviton2 ARM64 - mejor rendimiento/coste para producción
+  default     = "db.t4g.small" # Graviton2 ARM64 - mejor rendimiento/coste para producción
 }
 
 variable "db_username" {
@@ -107,9 +107,9 @@ variable "subnet_count" {
 variable "subnet_cidrs" {
   description = "CIDR blocks para las subnets"
   type        = list(string)
-  default     = [
+  default = [
     "10.0.1.0/24",
-    "10.0.2.0/24", 
+    "10.0.2.0/24",
     "10.0.3.0/24"
   ]
 }
@@ -169,43 +169,43 @@ variable "infrastructure_version" {
 variable "enable_spot_instances" {
   description = "Habilitar instancias spot para ahorrar costes"
   type        = bool
-  default     = true  # Habilitado para ahorrar hasta 70% en compute
+  default     = true # Habilitado para ahorrar hasta 70% en compute
 }
 
 variable "spot_instance_percentage" {
   description = "Porcentaje de instancias spot en el node group"
   type        = number
-  default     = 50  # 50% spot, 50% on-demand para balance coste/disponibilidad
+  default     = 50 # 50% spot, 50% on-demand para balance coste/disponibilidad
 }
 
 variable "backup_retention_period" {
   description = "Período de retención de backups en días"
   type        = number
-  default     = 7  # Reducido de 30 a 7 días para ahorrar costes
+  default     = 7 # Reducido de 30 a 7 días para ahorrar costes
 }
 
 variable "storage_size" {
   description = "Tamaño de almacenamiento RDS en GB - optimizado"
   type        = number
-  default     = 20  # Empezar con el mínimo y escalar según necesidad
+  default     = 20 # Empezar con el mínimo y escalar según necesidad
 }
 
 variable "storage_type" {
   description = "Tipo de almacenamiento RDS"
   type        = string
-  default     = "gp3"  # gp3 es más eficiente para volúmenes grandes
+  default     = "gp3" # gp3 es más eficiente para volúmenes grandes
 }
 
 variable "allocated_storage_max" {
   description = "Máximo storage auto-scaling para RDS"
   type        = number
-  default     = 100  # Limitado a 100GB para controlar costes
+  default     = 100 # Limitado a 100GB para controlar costes
 }
 
 variable "enable_performance_insights" {
   description = "Habilitar Performance Insights (tiene coste adicional)"
   type        = bool
-  default     = false  # Deshabilitado para ahorrar ~$2.5/mes por DB
+  default     = false # Deshabilitado para ahorrar ~$2.5/mes por DB
 }
 
 # Variables adicionales requeridas por main.tf
@@ -218,26 +218,26 @@ variable "db_name" {
 variable "enable_multi_az" {
   description = "Habilitar Multi-AZ para RDS"
   type        = bool
-  default     = false  # Deshabilitado para ahorrar costes (habilitarlo duplica el coste)
+  default     = false # Deshabilitado para ahorrar costes (habilitarlo duplica el coste)
 }
 
 variable "redis_node_type" {
   description = "Tipo de instancia para Redis - Graviton2 ARM64"
   type        = string
-  default     = "cache.t4g.micro"  # Graviton2 ARM64 - mayor eficiencia
+  default     = "cache.t4g.micro" # Graviton2 ARM64 - mayor eficiencia
 }
 
 # Variables para node groups
 variable "on_demand_instance_type" {
   description = "Tipo de instancia para nodos on-demand - Graviton2 ARM64"
   type        = string
-  default     = "t4g.small"  # Graviton2 ARM64 - mejor eficiencia energética
+  default     = "t4g.small" # Graviton2 ARM64 - mejor eficiencia energética
 }
 
 variable "on_demand_desired_size" {
   description = "Número deseado de nodos on-demand"
   type        = number
-  default     = 1  # Mínimo para producción con coste controlado
+  default     = 1 # Mínimo para producción con coste controlado
 }
 
 variable "on_demand_max_size" {
@@ -255,7 +255,7 @@ variable "on_demand_min_size" {
 variable "spot_instance_types" {
   description = "Tipos de instancia para nodos spot - Graviton2 ARM64"
   type        = list(string)
-  default     = ["t4g.small", "t4g.medium"]  # Graviton2 ARM64 - hasta 40% mejor rendimiento/coste
+  default     = ["t4g.small", "t4g.medium"] # Graviton2 ARM64 - hasta 40% mejor rendimiento/coste
 }
 
 variable "spot_desired_size" {

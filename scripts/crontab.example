@@ -29,7 +29,7 @@ if [ $(cat /tmp/daily-cost-check.json | jq -r '.totalMonthlyCost | tonumber') -g
 fi
 
 # ============================================================================
-# REPORTES SEMANALES  
+# REPORTES SEMANALES
 # ============================================================================
 
 # Reporte semanal completo - Lunes a las 8:00 AM

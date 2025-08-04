@@ -124,7 +124,7 @@ cd board-games-infra
 # Configurar variables de entorno
 export AWS_REGION=us-west-2
 export TF_VAR_owner_email="tu-email@empresa.com"
-export INFRACOST_API_KEY="tu-infracost-api-key"
+export INFRACOST_API_KEY="tu-infracost-api-key"  # pragma: allowlist secret
 
 # Verificar configuración
 aws sts get-caller-identity
@@ -777,7 +777,7 @@ Tags actualizados:
 
 - **Issues**: [GitHub Issues](https://github.com/calavia-org/board-games-infra/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/calavia-org/board-games-infra/discussions)
-- **Email**: devops@calavia.org
+- **Email**: <devops@calavia.org>
 - **Slack**: #board-games-infra
 
 ### 📚 **Referencias Adicionales**

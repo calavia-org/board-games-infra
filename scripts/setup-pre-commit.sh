@@ -122,7 +122,7 @@ else
     print_warning "TFSec ya está instalado"
 fi
 
-# shellcheck
+# ShellCheck installation
 if ! command_exists shellcheck; then
     print_status "Instalando shellcheck..."
     if command_exists apt-get; then

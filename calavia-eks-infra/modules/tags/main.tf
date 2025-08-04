@@ -66,7 +66,7 @@ variable "billing_project" {
 variable "infrastructure_version" {
   description = "Version of the infrastructure code"
   type        = string
-  default     = "2.0.0"  # Updated for EKS 1.31 + Graviton migration
+  default     = "2.0.0" # Updated for EKS 1.31 + Graviton migration
 }
 
 variable "additional_tags" {
@@ -121,7 +121,7 @@ variable "expiry_date" {
 locals {
   # Get current timestamp for created date
   current_date = formatdate("YYYY-MM-DD", timestamp())
-  
+
   # Mandatory tags (always required)
   mandatory_tags = {
     Environment = var.environment
@@ -141,11 +141,11 @@ locals {
   # Technical tags
   technical_tags = merge(
     {
-      CreatedBy     = "terraform"
-      CreatedDate   = local.current_date
-      Version       = var.infrastructure_version
-      Architecture  = "arm64"  # Updated to ARM64 for Graviton instances
-      Service       = var.service  # Service or application using this resource
+      CreatedBy    = "terraform"
+      CreatedDate  = local.current_date
+      Version      = var.infrastructure_version
+      Architecture = "arm64"     # Updated to ARM64 for Graviton instances
+      Service      = var.service # Service or application using this resource
     },
     var.component != "" ? { Component = var.component } : {},
     var.purpose != "" ? { Purpose = var.purpose } : {},
@@ -159,23 +159,23 @@ locals {
 
   # Cost management tags
   cost_tags = {
-    BillingProject    = var.billing_project
-    BudgetAlerts      = "enabled"
-    CostOptimization  = "candidate"
+    BillingProject   = var.billing_project
+    BudgetAlerts     = "enabled"
+    CostOptimization = "candidate"
   }
 
   # Environment-specific tags
   environment_tags = var.environment == "production" ? {
-    Backup          = "required"
-    Monitoring      = "enhanced"
+    Backup           = "required"
+    Monitoring       = "enhanced"
     ReservedInstance = "candidate"
-  } : var.environment == "staging" ? {
-    Backup          = "weekly"
-    Monitoring      = "standard"
+    } : var.environment == "staging" ? {
+    Backup           = "weekly"
+    Monitoring       = "standard"
     ScheduleShutdown = "enabled"
-  } : {
-    Backup          = "optional"
-    Monitoring      = "basic"
+    } : {
+    Backup           = "optional"
+    Monitoring       = "basic"
     ScheduleShutdown = "enabled"
   }
 
@@ -209,7 +209,7 @@ output "cost_tags" {
 
 output "monitoring_tags" {
   description = "Tags for monitoring and alerting"
-  value       = merge(local.mandatory_tags, {
+  value = merge(local.mandatory_tags, {
     Criticality = var.criticality
     Component   = var.component
     Service     = var.service

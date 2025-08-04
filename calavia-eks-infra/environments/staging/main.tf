@@ -9,7 +9,7 @@ module "tags" {
   business_unit          = var.business_unit
   department             = var.department
   criticality            = "medium"
-  service                = "board-games-platform"  # Main service identifier
+  service                = "board-games-platform" # Main service identifier
   infrastructure_version = var.infrastructure_version
 
   additional_tags = {
@@ -104,7 +104,7 @@ resource "aws_db_instance" "calavia_postgres" {
   tags = merge(module.tags.tags, {
     Name            = "calavia-postgres-staging"
     Component       = "database"
-    Service         = "user-data-service-staging"  # Staging version of user data service
+    Service         = "user-data-service-staging" # Staging version of user data service
     Purpose         = "staging-game-database"
     Engine          = "postgresql"
     EngineVersion   = "14.9"
@@ -129,7 +129,7 @@ resource "aws_elasticache_cluster" "calavia_redis" {
   tags = merge(module.tags.tags, {
     Name          = "calavia-redis-staging"
     Component     = "cache"
-    Service       = "session-cache-service-staging"  # Staging version of session cache
+    Service       = "session-cache-service-staging" # Staging version of session cache
     Purpose       = "staging-session-cache"
     Engine        = "redis"
     EngineVersion = "7.0"
@@ -163,12 +163,12 @@ resource "aws_security_group" "db_sg" {
   }
 
   tags = merge(module.tags.tags, {
-    Name              = "calavia-db-sg-staging"
-    Component         = "database"
-    Purpose           = "postgres-security-group"
-    ResourceType      = "security-group"
-    Protocol          = "tcp"
-    Port              = "5432"
+    Name         = "calavia-db-sg-staging"
+    Component    = "database"
+    Purpose      = "postgres-security-group"
+    ResourceType = "security-group"
+    Protocol     = "tcp"
+    Port         = "5432"
   })
 }
 
@@ -191,13 +191,13 @@ resource "aws_security_group" "redis_sg" {
   }
 
   tags = merge(module.tags.tags, {
-    Name              = "calavia-redis-sg-staging"
-    Component         = "cache"
-    Purpose           = "redis-security-group"
-    ResourceType      = "security-group"
-    Protocol          = "tcp"
-    Port              = "6379"
-    CostOptimized     = "true"
+    Name          = "calavia-redis-sg-staging"
+    Component     = "cache"
+    Purpose       = "redis-security-group"
+    ResourceType  = "security-group"
+    Protocol      = "tcp"
+    Port          = "6379"
+    CostOptimized = "true"
   })
 }
 
@@ -219,12 +219,12 @@ resource "aws_security_group" "eks_sg" {
   }
 
   tags = merge(module.tags.tags, {
-    Name              = "calavia-eks-sg-staging"
-    Component         = "compute"
-    Purpose           = "eks-cluster-security-group"
-    ResourceType      = "security-group"
-    Protocol          = "tcp"
-    Port              = "443"
+    Name         = "calavia-eks-sg-staging"
+    Component    = "compute"
+    Purpose      = "eks-cluster-security-group"
+    ResourceType = "security-group"
+    Protocol     = "tcp"
+    Port         = "443"
   })
 }
 

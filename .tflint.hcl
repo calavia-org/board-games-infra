@@ -17,13 +17,13 @@ plugin "terraform" {
 config {
   # Disable default rules that might be too strict
   disabled_by_default = false
-  
+
   # Call module inspection (expensive but thorough)
   call_module_type = "all"
-  
+
   # Force check mode to avoid making changes
   force = false
-  
+
   # Disable color output for CI/CD environments
   format = "compact"
 }

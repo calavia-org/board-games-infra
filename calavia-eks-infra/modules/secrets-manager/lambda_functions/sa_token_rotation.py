@@ -18,14 +18,14 @@ def lambda_handler(event, context):
     """
     service = boto3.client('secretsmanager', region_name='${region}')
     eks = boto3.client('eks', region_name='${region}')
-    
+
     # Extract parameters from event
     secret_arn = event['SecretId']
     token = event['ClientRequestToken']
     step = event['Step']
-    
+
     logger.info(f"Starting Service Account token rotation for secret: {secret_arn}, step: {step}")
-    
+
     try:
         if step == 'createSecret':
             create_secret(service, secret_arn, token)
@@ -38,10 +38,10 @@ def lambda_handler(event, context):
         else:
             logger.error(f"Invalid step parameter: {step}")
             raise ValueError(f"Invalid step parameter: {step}")
-            
+
         logger.info(f"Successfully completed step: {step}")
         return {'statusCode': 200}
-        
+
     except Exception as e:
         logger.error(f"Error in step {step}: {str(e)}")
         raise e
@@ -53,12 +53,12 @@ def create_secret(service, secret_arn, token):
     try:
         # Get current secret
         current_secret = get_secret_dict(service, secret_arn, "AWSCURRENT")
-        
+
         # Create new secret version (token will be updated in setSecret step)
         new_secret = current_secret.copy()
         new_secret['rotation_timestamp'] = int(time.time())
         new_secret['rotation_token'] = token
-        
+
         # Put the new secret
         service.put_secret_value(
             SecretId=secret_arn,
@@ -66,9 +66,9 @@ def create_secret(service, secret_arn, token):
             SecretString=json.dumps(new_secret),
             VersionStage="AWSPENDING"
         )
-        
+
         logger.info("Successfully created new secret version")
-        
+
     except ClientError as e:
         if e.response['Error']['Code'] == 'ResourceExistsException':
             logger.info("createSecret: Secret version already exists")
@@ -83,23 +83,23 @@ def set_secret(service, eks, secret_arn, token):
         # Get current secret to extract service account info
         current_secret = get_secret_dict(service, secret_arn, "AWSCURRENT")
         pending_secret = get_secret_dict(service, secret_arn, "AWSPENDING", token)
-        
+
         # Extract service account name from secret name
         sa_name = extract_service_account_name(secret_arn)
         namespace = current_secret.get('namespace', get_namespace_for_service(sa_name))
-        
+
         # Configure Kubernetes client
         k8s_client = configure_k8s_client(eks, os.environ['EKS_CLUSTER_NAME'])
-        
+
         # Create new service account token
         new_token = create_service_account_token(k8s_client, sa_name, namespace)
-        
+
         # Update pending secret with new token
         pending_secret['token'] = new_token
         pending_secret['namespace'] = namespace
         pending_secret['service_account'] = sa_name
         pending_secret['cluster_name'] = os.environ['EKS_CLUSTER_NAME']
-        
+
         # Save updated secret
         service.put_secret_value(
             SecretId=secret_arn,
@@ -107,9 +107,9 @@ def set_secret(service, eks, secret_arn, token):
             SecretString=json.dumps(pending_secret),
             VersionStage="AWSPENDING"
         )
-        
+
         logger.info(f"Successfully created new token for service account: {sa_name}")
-        
+
     except Exception as e:
         logger.error(f"Error setting secret: {str(e)}")
         raise e
@@ -121,17 +121,17 @@ def test_secret(service, eks, secret_arn, token):
     try:
         # Get pending secret
         pending_secret = get_secret_dict(service, secret_arn, "AWSPENDING", token)
-        
+
         # Configure Kubernetes client with new token
         k8s_client = configure_k8s_client_with_token(
-            eks, 
+            eks,
             os.environ['EKS_CLUSTER_NAME'],
             pending_secret['token']
         )
-        
+
         # Test the token by making a simple API call
         v1 = client.CoreV1Api(k8s_client)
-        
+
         # Try to list pods in the service account's namespace
         namespace = pending_secret.get('namespace', 'default')
         try:
@@ -143,7 +143,7 @@ def test_secret(service, eks, secret_arn, token):
                 logger.info("Token authenticated but has limited permissions (expected)")
             else:
                 raise e
-            
+
     except Exception as e:
         logger.error(f"Error testing secret: {str(e)}")
         raise e
@@ -160,9 +160,9 @@ def finish_secret(service, secret_arn, token):
             ClientRequestToken=token,
             RemoveFromVersionId=get_secret_version_id(service, secret_arn, "AWSCURRENT")
         )
-        
+
         logger.info("Successfully finished secret rotation")
-        
+
     except Exception as e:
         logger.error(f"Error finishing secret rotation: {str(e)}")
         raise e
@@ -175,10 +175,10 @@ def get_secret_dict(service, secret_arn, stage, token=None):
         kwargs = {'SecretId': secret_arn, 'VersionStage': stage}
         if token:
             kwargs['VersionId'] = token
-            
+
         response = service.get_secret_value(**kwargs)
         return json.loads(response['SecretString'])
-        
+
     except Exception as e:
         logger.error(f"Error getting secret: {str(e)}")
         raise e
@@ -193,7 +193,7 @@ def get_secret_version_id(service, secret_arn, stage):
             if stage in version_info:
                 return version_id
         return None
-        
+
     except Exception as e:
         logger.error(f"Error getting secret version ID: {str(e)}")
         raise e
@@ -205,7 +205,7 @@ def extract_service_account_name(secret_arn):
     try:
         # Extract from secret name pattern: cluster-service-sa-token
         secret_name = secret_arn.split(':')[-1]
-        
+
         if 'prometheus' in secret_name:
             return 'prometheus'
         elif 'external-dns' in secret_name:
@@ -218,7 +218,7 @@ def extract_service_account_name(secret_arn):
             # Fallback: extract from secret name
             parts = secret_name.split('-')
             return '-'.join(parts[1:-2])  # Remove cluster prefix and sa-token suffix
-            
+
     except Exception as e:
         logger.error(f"Error extracting service account name: {str(e)}")
         raise e
@@ -233,7 +233,7 @@ def get_namespace_for_service(service_name):
         'external-dns': 'kube-system',
         'cert-manager': 'cert-manager'
     }
-    
+
     return namespace_map.get(service_name, 'default')
 
 def configure_k8s_client(eks, cluster_name):
@@ -245,19 +245,19 @@ def configure_k8s_client(eks, cluster_name):
         cluster_info = eks.describe_cluster(name=cluster_name)
         cluster_endpoint = cluster_info['cluster']['endpoint']
         cluster_ca = cluster_info['cluster']['certificateAuthority']['data']
-        
+
         # Get token using AWS CLI equivalent
         sts = boto3.client('sts')
         token = get_bearer_token(cluster_name, sts)
-        
+
         # Configure client
         configuration = client.Configuration()
         configuration.host = cluster_endpoint
         configuration.ssl_ca_cert_data = base64.b64decode(cluster_ca)
         configuration.api_key = {"authorization": "Bearer " + token}
-        
+
         return client.ApiClient(configuration)
-        
+
     except Exception as e:
         logger.error(f"Error configuring Kubernetes client: {str(e)}")
         raise e
@@ -271,15 +271,15 @@ def configure_k8s_client_with_token(eks, cluster_name, sa_token):
         cluster_info = eks.describe_cluster(name=cluster_name)
         cluster_endpoint = cluster_info['cluster']['endpoint']
         cluster_ca = cluster_info['cluster']['certificateAuthority']['data']
-        
+
         # Configure client with SA token
         configuration = client.Configuration()
         configuration.host = cluster_endpoint
         configuration.ssl_ca_cert_data = base64.b64decode(cluster_ca)
         configuration.api_key = {"authorization": "Bearer " + sa_token}
-        
+
         return client.ApiClient(configuration)
-        
+
     except Exception as e:
         logger.error(f"Error configuring Kubernetes client with token: {str(e)}")
         raise e
@@ -314,7 +314,7 @@ def create_service_account_token(k8s_client, sa_name, namespace):
     """
     try:
         v1 = client.CoreV1Api(k8s_client)
-        
+
         # Create token request
         token_request = client.V1TokenRequest(
             spec=client.V1TokenRequestSpec(
@@ -322,16 +322,16 @@ def create_service_account_token(k8s_client, sa_name, namespace):
                 expiration_seconds=7776000  # 90 days
             )
         )
-        
+
         # Create the token
         response = v1.create_namespaced_service_account_token(
             name=sa_name,
             namespace=namespace,
             body=token_request
         )
-        
+
         return response.status.token
-        
+
     except Exception as e:
         logger.error(f"Error creating service account token: {str(e)}")
         raise e

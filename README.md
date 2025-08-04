@@ -285,7 +285,7 @@ reports/                          # Reportes generados
 
 ```bash
 # Infracost API Key (obtener gratis en dashboard.infracost.io)
-export INFRACOST_API_KEY="your-api-key"
+export INFRACOST_API_KEY="your-api-key"  # pragma: allowlist secret
 
 # Notificaciones por email
 export EMAIL_RECIPIENTS="devops@calavia.org,finance@calavia.org"

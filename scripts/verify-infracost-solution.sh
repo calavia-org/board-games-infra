@@ -79,12 +79,12 @@ echo
 echo "4. 🔧 Verificando Terraform..."
 if command -v terraform &> /dev/null; then
     echo "   ✅ Terraform disponible: $(terraform version | head -n1)"
-    
+
     # Test de validación en staging
-    cd calavia-eks-infra/environments/staging
+    cd calavia-eks-infra/environments/staging || exit
     if terraform init -backend=false &>/dev/null; then
         echo "   ✅ terraform init funciona"
-        
+
         if terraform validate &>/dev/null; then
             echo "   ✅ terraform validate funciona"
         else
@@ -93,7 +93,7 @@ if command -v terraform &> /dev/null; then
     else
         echo "   ⚠️  terraform init con warnings (normal sin AWS credentials)"
     fi
-    cd - &>/dev/null
+    cd - &>/dev/null || exit
 else
     echo "   ⚠️  Terraform no disponible (normal en entornos locales)"
 fi
@@ -104,7 +104,7 @@ echo
 echo "5. 💰 Verificando Infracost..."
 if command -v infracost &> /dev/null; then
     echo "   ✅ Infracost disponible: $(infracost --version 2>/dev/null | head -n1)"
-    
+
     if [ -n "$INFRACOST_API_KEY" ]; then
         echo "   ✅ INFRACOST_API_KEY configurado"
     else
@@ -133,7 +133,7 @@ echo "3. Crea una PR para ver el análisis automático"
 echo "4. ¡Disfruta del control automático de costes!"
 echo
 echo "📊 COSTES ESTIMADOS ACTUALES:"
-echo "   • Staging:    ~$101/mes  (configuración mínima)"
+echo "   • Staging:    ~\$101/mes  (configuración mínima)"
 echo "   • Production: ~$1,006/mes (configuración robusta)"
 echo "   • Total:      ~$1,107/mes"
 echo

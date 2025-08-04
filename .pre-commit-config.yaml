@@ -64,11 +64,10 @@ repos:
           - --args=--only=terraform_required_version
           - --args=--only=terraform_required_providers
           - --args=--only=terraform_standard_module_structure
-      - id: terraform_tfsec
-        description: Análisis de seguridad para Terraform
+      - id: terraform_trivy
+        description: Análisis de seguridad para Terraform con Trivy
         args:
-          - --args=--minimum-severity=MEDIUM
-          - --args=--format=compact
+          - --args=--severity=MEDIUM,HIGH,CRITICAL
 
   # YAML linting and formatting
   - repo: https://github.com/adrienverge/yamllint

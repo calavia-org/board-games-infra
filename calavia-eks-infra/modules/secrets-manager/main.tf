@@ -58,9 +58,9 @@ resource "aws_secretsmanager_secret" "postgres_master" {
   }
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-postgres-master"
-    Service     = "RDS"
-    SecretType  = "database-credentials"
+    Name       = "${var.cluster_name}-postgres-master"
+    Service    = "RDS"
+    SecretType = "database-credentials" # pragma: allowlist secret
   })
 }
 
@@ -68,7 +68,7 @@ resource "aws_secretsmanager_secret_version" "postgres_master" {
   secret_id = aws_secretsmanager_secret.postgres_master.id
   secret_string = jsonencode({
     username = var.postgres_username
-    password = var.postgres_password
+    password = var.postgres_password # pragma: allowlist secret
     engine   = "postgres"
     host     = var.postgres_endpoint
     port     = var.postgres_port
@@ -92,21 +92,21 @@ resource "aws_secretsmanager_secret" "postgres_app_user" {
   }
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-postgres-app"
-    Service     = "RDS"
-    SecretType  = "database-credentials"
+    Name       = "${var.cluster_name}-postgres-app"
+    Service    = "RDS"
+    SecretType = "database-credentials" # pragma: allowlist secret
   })
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_app_user" {
   secret_id = aws_secretsmanager_secret.postgres_app_user.id
   secret_string = jsonencode({
-    username = "${var.cluster_name}_app_user"
-    password = random_password.postgres_app_password.result
-    engine   = "postgres"
-    host     = var.postgres_endpoint
-    port     = var.postgres_port
-    dbname   = var.postgres_database
+    username   = "${var.cluster_name}_app_user"
+    password   = random_password.postgres_app_password.result # pragma: allowlist secret
+    engine     = "postgres"
+    host       = var.postgres_endpoint
+    port       = var.postgres_port
+    dbname     = var.postgres_database
     privileges = ["CONNECT", "CREATE", "TEMPORARY"]
   })
 
@@ -132,9 +132,9 @@ resource "aws_secretsmanager_secret" "redis_auth" {
   }
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-redis-auth"
-    Service     = "ElastiCache"
-    SecretType  = "auth-token"
+    Name       = "${var.cluster_name}-redis-auth"
+    Service    = "ElastiCache"
+    SecretType = "auth-token" # pragma: allowlist secret
   })
 }
 
@@ -163,9 +163,9 @@ resource "aws_secretsmanager_secret" "grafana_admin" {
   }
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-grafana-admin"
-    Service     = "Grafana"
-    SecretType  = "admin-credentials"
+    Name       = "${var.cluster_name}-grafana-admin"
+    Service    = "Grafana"
+    SecretType = "admin-credentials" # pragma: allowlist secret
   })
 }
 
@@ -173,7 +173,7 @@ resource "aws_secretsmanager_secret_version" "grafana_admin" {
   secret_id = aws_secretsmanager_secret.grafana_admin.id
   secret_string = jsonencode({
     username = "admin"
-    password = var.grafana_admin_password
+    password = var.grafana_admin_password # pragma: allowlist secret
     url      = var.grafana_url
   })
 
@@ -190,9 +190,9 @@ resource "aws_secretsmanager_secret" "prometheus_sa_token" {
   recovery_window_in_days = 7
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-prometheus-sa"
-    Service     = "Prometheus"
-    SecretType  = "service-account-token"
+    Name       = "${var.cluster_name}-prometheus-sa"
+    Service    = "Prometheus"
+    SecretType = "service-account-token" # pragma: allowlist secret
   })
 }
 
@@ -203,9 +203,9 @@ resource "aws_secretsmanager_secret" "external_dns_sa_token" {
   recovery_window_in_days = 7
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-external-dns-sa"
-    Service     = "ExternalDNS"
-    SecretType  = "service-account-token"
+    Name       = "${var.cluster_name}-external-dns-sa"
+    Service    = "ExternalDNS"
+    SecretType = "service-account-token" # pragma: allowlist secret
   })
 }
 
@@ -216,9 +216,9 @@ resource "aws_secretsmanager_secret" "cert_manager_sa_token" {
   recovery_window_in_days = 7
 
   tags = merge(var.tags, {
-    Name        = "${var.cluster_name}-cert-manager-sa"
-    Service     = "CertManager"
-    SecretType  = "service-account-token"
+    Name       = "${var.cluster_name}-cert-manager-sa"
+    Service    = "CertManager"
+    SecretType = "service-account-token" # pragma: allowlist secret
   })
 }
 
@@ -317,16 +317,16 @@ resource "aws_iam_role_policy" "secrets_rotation_lambda_policy" {
 resource "aws_lambda_function" "postgres_rotation" {
   filename         = data.archive_file.postgres_rotation_zip.output_path
   function_name    = "${var.cluster_name}-postgres-rotation"
-  role            = aws_iam_role.secrets_rotation_lambda_role.arn
-  handler         = "lambda_function.lambda_handler"
+  role             = aws_iam_role.secrets_rotation_lambda_role.arn
+  handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.postgres_rotation_zip.output_base64sha256
-  runtime         = "python3.9"
-  timeout         = 300
+  runtime          = "python3.9"
+  timeout          = 300
 
   environment {
     variables = {
-      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com"
-      RDS_ENDPOINT            = var.postgres_endpoint
+      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com" # pragma: allowlist secret
+      RDS_ENDPOINT             = var.postgres_endpoint
     }
   }
 
@@ -342,16 +342,16 @@ resource "aws_lambda_function" "postgres_rotation" {
 resource "aws_lambda_function" "redis_rotation" {
   filename         = data.archive_file.redis_rotation_zip.output_path
   function_name    = "${var.cluster_name}-redis-rotation"
-  role            = aws_iam_role.secrets_rotation_lambda_role.arn
-  handler         = "lambda_function.lambda_handler"
+  role             = aws_iam_role.secrets_rotation_lambda_role.arn
+  handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.redis_rotation_zip.output_base64sha256
-  runtime         = "python3.9"
-  timeout         = 300
+  runtime          = "python3.9"
+  timeout          = 300
 
   environment {
     variables = {
-      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com"
-      ELASTICACHE_ENDPOINT    = var.redis_endpoint
+      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com" # pragma: allowlist secret
+      ELASTICACHE_ENDPOINT     = var.redis_endpoint
     }
   }
 
@@ -367,17 +367,17 @@ resource "aws_lambda_function" "redis_rotation" {
 resource "aws_lambda_function" "sa_token_rotation" {
   filename         = data.archive_file.sa_rotation_zip.output_path
   function_name    = "${var.cluster_name}-sa-token-rotation"
-  role            = aws_iam_role.secrets_rotation_lambda_role.arn
-  handler         = "lambda_function.lambda_handler"
+  role             = aws_iam_role.secrets_rotation_lambda_role.arn
+  handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.sa_rotation_zip.output_base64sha256
-  runtime         = "python3.9"
-  timeout         = 300
+  runtime          = "python3.9"
+  timeout          = 300
 
   environment {
     variables = {
-      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com"
-      EKS_CLUSTER_NAME        = var.cluster_name
-      EKS_CLUSTER_ENDPOINT    = var.eks_cluster_endpoint
+      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${var.region}.amazonaws.com" # pragma: allowlist secret
+      EKS_CLUSTER_NAME         = var.cluster_name
+      EKS_CLUSTER_ENDPOINT     = var.eks_cluster_endpoint
     }
   }
 

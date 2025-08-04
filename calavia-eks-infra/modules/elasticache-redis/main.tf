@@ -45,33 +45,33 @@ resource "aws_elasticache_parameter_group" "redis" {
 
 # ElastiCache Redis Replication Group (for better features)
 resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id         = "${var.cluster_name}-redis"
-  description                  = "Redis replication group for ${var.cluster_name}"
-  
+  replication_group_id = "${var.cluster_name}-redis"
+  description          = "Redis replication group for ${var.cluster_name}"
+
   # Engine settings
   engine               = "redis"
   engine_version       = var.redis_version
   node_type            = var.node_type
   port                 = var.port
   parameter_group_name = aws_elasticache_parameter_group.redis.name
-  
+
   # Cluster settings
   num_cache_clusters = var.num_cache_nodes
-  
+
   # Network settings
-  subnet_group_name   = aws_elasticache_subnet_group.main.name
-  security_group_ids  = var.security_group_ids
-  
+  subnet_group_name  = aws_elasticache_subnet_group.main.name
+  security_group_ids = var.security_group_ids
+
   # Backup settings
   snapshot_retention_limit = var.backup_retention_limit
-  snapshot_window         = var.backup_window
-  maintenance_window      = var.maintenance_window
-  
+  snapshot_window          = var.backup_window
+  maintenance_window       = var.maintenance_window
+
   # Encryption settings
   at_rest_encryption_enabled = var.enable_encryption_at_rest
   transit_encryption_enabled = var.enable_encryption_in_transit
   kms_key_id                 = var.enable_encryption_at_rest ? aws_kms_key.redis.arn : null
-  
+
   # Auth token for encryption in transit
   auth_token = var.enable_encryption_in_transit ? random_password.redis_auth_token.result : null
 
@@ -197,11 +197,11 @@ resource "aws_secretsmanager_secret_rotation" "redis_credentials" {
 resource "aws_lambda_function" "redis_token_rotation" {
   filename         = "redis_token_rotation.zip"
   function_name    = "${var.cluster_name}-redis-token-rotation"
-  role            = aws_iam_role.lambda_redis_rotation.arn
-  handler         = "lambda_function.lambda_handler"
+  role             = aws_iam_role.lambda_redis_rotation.arn
+  handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.redis_token_rotation.output_base64sha256
-  runtime         = "python3.9"
-  timeout         = 60
+  runtime          = "python3.9"
+  timeout          = 60
 
   vpc_config {
     subnet_ids         = var.subnet_ids
@@ -210,7 +210,7 @@ resource "aws_lambda_function" "redis_token_rotation" {
 
   environment {
     variables = {
-      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com"
+      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com" # pragma: allowlist secret
     }
   }
 

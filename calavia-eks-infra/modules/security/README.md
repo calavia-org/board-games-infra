@@ -48,3 +48,115 @@ The module will output the following:
 ## License
 
 This module is licensed under the MIT License. See the LICENSE file for more information.
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_security_group.ALB](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.eks_nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.RDS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.Redis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.vpc_endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.cluster_ingress_nodes_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_cluster_coredns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_cluster_kubelet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.rds_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.redis_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_allowed_cidrs"></a> [allowed\_cidrs](#input\_allowed\_cidrs) | List of CIDR blocks allowed to access the cluster | `list(string)` | `[]` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_grafana_admin_password"></a> [Grafana\_admin\_password](#input\_grafana\_admin\_password) | Admin password for Grafana | `string` | n/a | yes |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet IDs | `list(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to security resources | `map(string)` | `{}` | no |
+| <a name="input_vpc_cidr"></a> [VPC\_cidr](#input\_vpc\_cidr) | CIDR block of the VPC | `string` | n/a | yes |
+| <a name="input_vpc_id"></a> [VPC\_id](#input\_vpc\_id) | ID of the VPC | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_alb_sg_id"></a> [ALB\_sg\_id](#output\_alb\_sg\_id) | ID of the ALB security group |
+| <a name="output_eks_cluster_sg_id"></a> [EKS\_cluster\_sg\_id](#output\_eks\_cluster\_sg\_id) | ID of the EKS cluster security group |
+| <a name="output_eks_nodes_sg_id"></a> [EKS\_nodes\_sg\_id](#output\_eks\_nodes\_sg\_id) | ID of the EKS nodes security group |
+| <a name="output_rds_sg_id"></a> [RDS\_sg\_id](#output\_rds\_sg\_id) | ID of the RDS security group |
+| <a name="output_redis_sg_id"></a> [Redis\_sg\_id](#output\_redis\_sg\_id) | ID of the Redis security group |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_security_group.ALB](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.eks_nodes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.RDS](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.Redis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group.vpc_endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_security_group_rule.cluster_ingress_nodes_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_cluster_coredns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.nodes_ingress_cluster_kubelet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.rds_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+| [aws_security_group_rule.redis_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_allowed_cidrs"></a> [allowed\_cidrs](#input\_allowed\_cidrs) | List of CIDR blocks allowed to access the cluster | `list(string)` | `[]` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_grafana_admin_password"></a> [Grafana\_admin\_password](#input\_grafana\_admin\_password) | Admin password for Grafana | `string` | n/a | yes |
+| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet IDs | `list(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to security resources | `map(string)` | `{}` | no |
+| <a name="input_vpc_cidr"></a> [VPC\_cidr](#input\_vpc\_cidr) | CIDR block of the VPC | `string` | n/a | yes |
+| <a name="input_vpc_id"></a> [VPC\_id](#input\_vpc\_id) | ID of the VPC | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_alb_sg_id"></a> [ALB\_sg\_id](#output\_alb\_sg\_id) | ID of the ALB security group |
+| <a name="output_eks_cluster_sg_id"></a> [EKS\_cluster\_sg\_id](#output\_eks\_cluster\_sg\_id) | ID of the EKS cluster security group |
+| <a name="output_eks_nodes_sg_id"></a> [EKS\_nodes\_sg\_id](#output\_eks\_nodes\_sg\_id) | ID of the EKS nodes security group |
+| <a name="output_rds_sg_id"></a> [RDS\_sg\_id](#output\_rds\_sg\_id) | ID of the RDS security group |
+| <a name="output_redis_sg_id"></a> [Redis\_sg\_id](#output\_redis\_sg\_id) | ID of the Redis security group |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->

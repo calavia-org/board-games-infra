@@ -68,7 +68,7 @@ resource "aws_db_instance" "postgres" {
   max_allocated_storage = var.max_allocated_storage
   storage_type          = "gp3"
   storage_encrypted     = var.enable_encryption
-  kms_key_id           = var.enable_encryption ? aws_kms_key.rds.arn : null
+  kms_key_id            = var.enable_encryption ? aws_kms_key.rds.arn : null
 
   # Database settings
   db_name  = var.db_name
@@ -82,18 +82,18 @@ resource "aws_db_instance" "postgres" {
 
   # Backup settings
   backup_retention_period = var.backup_retention_period
-  backup_window          = var.backup_window
-  maintenance_window     = var.maintenance_window
-  
+  backup_window           = var.backup_window
+  maintenance_window      = var.maintenance_window
+
   # Snapshot settings
   skip_final_snapshot       = false
   final_snapshot_identifier = "${var.cluster_name}-postgres-final-snapshot"
   copy_tags_to_snapshot     = true
 
   # Performance and monitoring
-  performance_insights_enabled = var.enable_performance_insights
-  monitoring_interval         = 60
-  monitoring_role_arn         = aws_iam_role.rds_monitoring.arn
+  performance_insights_enabled    = var.enable_performance_insights
+  monitoring_interval             = 60
+  monitoring_role_arn             = aws_iam_role.rds_monitoring.arn
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
   # Parameter group
@@ -245,11 +245,11 @@ resource "aws_secretsmanager_secret_rotation" "db_credentials" {
 resource "aws_lambda_function" "password_rotation" {
   filename         = "password_rotation.zip"
   function_name    = "${var.cluster_name}-rds-password-rotation"
-  role            = aws_iam_role.lambda_rotation.arn
-  handler         = "lambda_function.lambda_handler"
+  role             = aws_iam_role.lambda_rotation.arn
+  handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.password_rotation.output_base64sha256
-  runtime         = "python3.9"
-  timeout         = 60
+  runtime          = "python3.9"
+  timeout          = 60
 
   vpc_config {
     subnet_ids         = var.subnet_ids
@@ -258,7 +258,7 @@ resource "aws_lambda_function" "password_rotation" {
 
   environment {
     variables = {
-      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com"
+      SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com" # pragma: allowlist secret
     }
   }
 

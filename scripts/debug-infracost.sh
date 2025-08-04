@@ -121,7 +121,7 @@ if infracost breakdown \
     --format json \
     --out-file "/tmp/infracost-test.json" > /tmp/infracost.log 2>&1; then
     echo -e "${GREEN}✓ infracost breakdown exitoso${NC}"
-    
+
     # Mostrar resumen
     if [ -f "/tmp/infracost-test.json" ]; then
         echo "Coste mensual estimado:"
@@ -145,7 +145,7 @@ echo "4. Para GitHub Actions, asegúrate de que INFRACOST_API_KEY esté en los s
 
 echo -e "\n${BLUE}Archivos de log creados:${NC}"
 echo "- /tmp/tf-init.log"
-echo "- /tmp/tf-validate.log" 
+echo "- /tmp/tf-validate.log"
 echo "- /tmp/infracost.log"
 echo "- /tmp/infracost-test.json"
 

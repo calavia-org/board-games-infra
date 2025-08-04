@@ -122,11 +122,11 @@ output "lambda_security_group_id" {
 output "rotation_schedules" {
   description = "Information about configured rotation schedules"
   value = {
-    postgres_master_days    = var.postgres_rotation_days
-    postgres_app_days      = var.postgres_rotation_days
-    redis_days             = var.redis_rotation_days
-    grafana_days           = var.grafana_rotation_days
-    service_account_days   = var.sa_token_rotation_days
+    postgres_master_days = var.postgres_rotation_days
+    postgres_app_days    = var.postgres_rotation_days
+    redis_days           = var.redis_rotation_days
+    grafana_days         = var.grafana_rotation_days
+    service_account_days = var.sa_token_rotation_days
   }
 }
 
@@ -134,13 +134,13 @@ output "rotation_schedules" {
 output "secret_names" {
   description = "Map of secret names for external reference"
   value = {
-    postgres_master    = aws_secretsmanager_secret.postgres_master.name
-    postgres_app      = aws_secretsmanager_secret.postgres_app_user.name
-    redis_auth        = aws_secretsmanager_secret.redis_auth.name
-    grafana_admin     = aws_secretsmanager_secret.grafana_admin.name
-    prometheus_sa     = aws_secretsmanager_secret.prometheus_sa_token.name
-    external_dns_sa   = aws_secretsmanager_secret.external_dns_sa_token.name
-    cert_manager_sa   = aws_secretsmanager_secret.cert_manager_sa_token.name
+    postgres_master = aws_secretsmanager_secret.postgres_master.name
+    postgres_app    = aws_secretsmanager_secret.postgres_app_user.name
+    redis_auth      = aws_secretsmanager_secret.redis_auth.name
+    grafana_admin   = aws_secretsmanager_secret.grafana_admin.name
+    prometheus_sa   = aws_secretsmanager_secret.prometheus_sa_token.name
+    external_dns_sa = aws_secretsmanager_secret.external_dns_sa_token.name
+    cert_manager_sa = aws_secretsmanager_secret.cert_manager_sa_token.name
   }
 }
 
@@ -148,12 +148,12 @@ output "secret_names" {
 output "secret_arns" {
   description = "Map of secret ARNs for IAM policy references"
   value = {
-    postgres_master    = aws_secretsmanager_secret.postgres_master.arn
-    postgres_app      = aws_secretsmanager_secret.postgres_app_user.arn
-    redis_auth        = aws_secretsmanager_secret.redis_auth.arn
-    grafana_admin     = aws_secretsmanager_secret.grafana_admin.arn
-    prometheus_sa     = aws_secretsmanager_secret.prometheus_sa_token.arn
-    external_dns_sa   = aws_secretsmanager_secret.external_dns_sa_token.arn
-    cert_manager_sa   = aws_secretsmanager_secret.cert_manager_sa_token.arn
+    postgres_master = aws_secretsmanager_secret.postgres_master.arn
+    postgres_app    = aws_secretsmanager_secret.postgres_app_user.arn
+    redis_auth      = aws_secretsmanager_secret.redis_auth.arn
+    grafana_admin   = aws_secretsmanager_secret.grafana_admin.arn
+    prometheus_sa   = aws_secretsmanager_secret.prometheus_sa_token.arn
+    external_dns_sa = aws_secretsmanager_secret.external_dns_sa_token.arn
+    cert_manager_sa = aws_secretsmanager_secret.cert_manager_sa_token.arn
   }
 }

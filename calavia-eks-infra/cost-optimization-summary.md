@@ -1,11 +1,13 @@
 # 💰 Resumen de Optimización de Costes AWS - Instancias Más Pequeñas
 
 ## 🎯 Objetivo Alcanzado
+
 Hemos configurado las máquinas **más pequeñas posibles** del catálogo de AWS para el cluster y las bases de datos, maximizando el ahorro de costes manteniendo la funcionalidad.
 
 ## 📊 Configuración de Instancias Optimizadas
 
 ### 🟡 Entorno STAGING (Ahorro Máximo)
+
 ```hcl
 # EKS Worker Nodes - Instancia más pequeña disponible
 node_instance_type = "t3.nano"          # 2 vCPUs, 0.5GB RAM
@@ -22,6 +24,7 @@ allocated_storage      = 20              # Almacenamiento mínimo
 ```
 
 ### 🟢 Entorno PRODUCTION (Equilibrio Coste-Rendimiento)
+
 ```hcl
 # EKS Worker Nodes - Optimizado con Spot Instances
 node_instance_type        = "t3.small"  # 2 vCPUs, 2GB RAM
@@ -36,6 +39,7 @@ postgres_instance_type = "db.t3.small"  # 2 vCPUs, 2GB RAM
 ## 💸 Características de Ahorro Implementadas
 
 ### 🔧 Optimizaciones de Red (Staging)
+
 ```hcl
 # Deshabilitamos NAT Gateway (ahorro ~$45/mes)
 enable_nat_gateway = false
@@ -45,6 +49,7 @@ availability_zones = ["us-west-2a", "us-west-2b"]
 ```
 
 ### 🗄️ Optimizaciones de Base de Datos
+
 ```hcl
 # Deshabilitamos Multi-AZ en staging (ahorro ~50% coste RDS)
 enable_multi_az = false
@@ -60,6 +65,7 @@ storage_type = "gp3"  # Más barato que gp2
 ```
 
 ### ⚡ Optimizaciones de Cache (Staging)
+
 ```hcl
 # Sin encriptación para ahorrar CPU
 at_rest_encryption_enabled = false
@@ -73,6 +79,7 @@ num_cache_nodes = 1
 ## 📈 Estimación de Ahorros Mensuales
 
 ### 💚 Staging Environment
+
 | Recurso | Configuración Anterior | Nueva Configuración | Ahorro Estimado |
 |---------|----------------------|-------------------|-----------------|
 | EKS Nodes | t3.small (3 nodos) | t3.nano (1 nodo) | ~$45/mes |
@@ -82,6 +89,7 @@ num_cache_nodes = 1
 | **TOTAL STAGING** | | | **~$123/mes** |
 
 ### 💛 Production Environment
+
 | Optimización | Ahorro Estimado |
 |-------------|-----------------|
 | 50% Spot Instances | ~70% en compute = ~$50/mes |
@@ -93,8 +101,9 @@ num_cache_nodes = 1
 ## 🏷️ Sistema de Tagging Integrado
 
 Todos los recursos incluyen tags completas para:
+
 - ✅ Control de costes granular
-- ✅ Identificación de optimizaciones 
+- ✅ Identificación de optimizaciones
 - ✅ Seguimiento de instancias optimizadas
 - ✅ Categorización por tipo de coste
 
@@ -117,11 +126,13 @@ tags = merge(module.tags.tags, {
 ## ⚠️ Consideraciones Importantes
 
 ### Staging (t3.nano)
+
 - ✅ Perfecto para desarrollo y pruebas ligeras
 - ⚠️ Recursos muy limitados (0.5GB RAM)
 - 🔄 Burstable performance - ideal para cargas intermitentes
 
 ### Production (t3.small + Spot)
+
 - ✅ Balance óptimo coste-rendimiento
 - ✅ Spot instances para cargas no críticas
 - ✅ Mantenemos alta disponibilidad
