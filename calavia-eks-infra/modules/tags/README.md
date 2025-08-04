@@ -1034,7 +1034,7 @@ No resources.
 | <a name="output_project"></a> [project](#output\_project) | Nombre del proyecto |
 | <a name="output_tags"></a> [tags](#output\_tags) | Map completo de tags para aplicar a recursos |
 <!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
 No requirements.
@@ -1085,4 +1085,56 @@ No resources.
 | <a name="output_environment"></a> [environment](#output\_environment) | Entorno actual |
 | <a name="output_project"></a> [project](#output\_project) | Nombre del proyecto |
 | <a name="output_tags"></a> [tags](#output\_tags) | Map completo de tags para aplicar a recursos |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Additional tags to merge with the standard tags | `map(string)` | `{}` | no |
+| <a name="input_application"></a> [application](#input\_application) | Nombre de la aplicación | `string` | `"board-games"` | no |
+| <a name="input_billing_project"></a> [billing\_project](#input\_billing\_project) | Billing project identifier | `string` | `"BG-2025-Q3"` | no |
+| <a name="input_business_unit"></a> [business\_unit](#input\_business\_unit) | Business unit name | `string` | `"Gaming-Platform"` | no |
+| <a name="input_component"></a> [component](#input\_component) | Component or service type | `string` | `""` | no |
+| <a name="input_cost_center"></a> [cost\_center](#input\_cost\_center) | Cost center code for billing purposes | `string` | `"CC-001-GAMING"` | no |
+| <a name="input_criticality"></a> [criticality](#input\_criticality) | Resource criticality level | `string` | `"medium"` | no |
+| <a name="input_department"></a> [department](#input\_department) | Department responsible for the resource | `string` | `"Engineering"` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (production, staging, development, testing) | `string` | n/a | yes |
+| <a name="input_expiry_date"></a> [expiry\_date](#input\_expiry\_date) | Resource expiry date in YYYY-MM-DD format (for temporary resources) | `string` | `""` | no |
+| <a name="input_infrastructure_version"></a> [infrastructure\_version](#input\_infrastructure\_version) | Version of the infrastructure code | `string` | `"2.0.0"` | no |
+| <a name="input_maintenance_window"></a> [maintenance\_window](#input\_maintenance\_window) | Maintenance window in format WEEKDAY-HH:MM | `string` | `"Sunday-03:00"` | no |
+| <a name="input_owner"></a> [owner](#input\_owner) | Equipo responsable del recurso | `string` | `"calavia-org"` | no |
+| <a name="input_owner_email"></a> [owner\_email](#input\_owner\_email) | Email of the team/person responsible for the resource | `string` | n/a | yes |
+| <a name="input_project"></a> [project](#input\_project) | Nombre del proyecto | `string` | `"board-games-infra"` | no |
+| <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the project | `string` | `"board-games"` | no |
+| <a name="input_purpose"></a> [purpose](#input\_purpose) | Purpose or description of the resource | `string` | `""` | no |
+| <a name="input_service"></a> [service](#input\_service) | Service or application name that uses this resource | `string` | `"board-games-platform"` | no |
+| <a name="input_version"></a> [version](#input\_version) | Versión de la aplicación | `string` | `"v2.0.0"` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_application"></a> [application](#output\_application) | Nombre de la aplicación |
+| <a name="output_billing_tag"></a> [billing\_tag](#output\_billing\_tag) | Tag de facturación |
+| <a name="output_cost_center"></a> [cost\_center](#output\_cost\_center) | Centro de costes para facturación |
+| <a name="output_environment"></a> [environment](#output\_environment) | Entorno actual |
+| <a name="output_project"></a> [project](#output\_project) | Nombre del proyecto |
+| <a name="output_tags"></a> [tags](#output\_tags) | Map completo de tags para aplicar a recursos |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
