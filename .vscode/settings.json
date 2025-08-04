@@ -1,0 +1,109 @@
+{
+  // Configuración específica para Board Games Infrastructure
+  // Configuración general del editor
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  "editor.trimAutoWhitespace": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  // Configuración de Terraform
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+      "source.formatDocument": "explicit"
+    },
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[terraform-vars]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  // Configuración de YAML
+  "[yaml]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  // Configuración de JSON
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  // Configuración de Markdown
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    }
+  },
+  // Configuración de Shell
+  "[shellscript]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
+  // Configuración específica de archivos
+  "files.associations": {
+    "*.tf": "terraform",
+    "*.tfvars": "terraform-vars",
+    "*.hcl": "terraform",
+    "*.tpl": "terraform",
+    ".tflint.hcl": "terraform",
+    ".pre-commit-config.yaml": "yaml",
+    ".yamllint.yml": "yaml",
+    ".markdownlint.yml": "yaml"
+  },
+  // Configuración de Terraform específica
+  "terraform.experimentalFeatures": {
+    "validateOnSave": true,
+    "prefillRequiredFields": true
+  },
+  "terraform.codelens.referenceCount": true,
+  // Configuración de YAML
+  "yaml.format.enable": true,
+  "yaml.validate": true,
+  "yaml.hover": true,
+  "yaml.completion": true,
+  // Configuración de Git
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  // Configuración de explorador de archivos
+  "files.exclude": {
+    "**/.terraform": true,
+    "**/.terraform.lock.hcl": false,
+    "**/terraform.tfstate": true,
+    "**/terraform.tfstate.backup": true,
+    "**/.infracost": false,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "search.exclude": {
+    "**/.terraform": true,
+    "**/node_modules": true,
+    "**/terraform.tfstate": true,
+    "**/terraform.tfstate.backup": true
+  },
+  // Configuración de terminal
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  // Configuración específica de AWS
+  "aws.telemetry": false,
+  "aws.profile": "default",
+  "aws.region": "us-west-2"
+}

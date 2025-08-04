@@ -9,6 +9,7 @@ module "tags" {
   business_unit          = var.business_unit
   department             = var.department
   criticality            = "critical"
+  service                = "board-games-platform"  # Main service identifier
   infrastructure_version = var.infrastructure_version
 
   additional_tags = {
@@ -57,6 +58,7 @@ resource "aws_eks_cluster" "calavia_eks" {
   tags = merge(module.tags.tags, {
     Name      = var.cluster_name
     Component = "kubernetes"
+    Service   = "container-orchestration-service"  # Main orchestration service
     Purpose   = "container-orchestration"
   })
 }
@@ -114,9 +116,10 @@ resource "aws_db_instance" "calavia_postgres" {
   performance_insights_enabled = false # Deshabilitado para ahorrar costes
 
   tags = merge(module.tags.tags, {
-    Name      = "calavia-postgres-production"
-    Component = "database"
-    Purpose   = "application-data-store"
+    Name           = "calavia-postgres-production"
+    Component      = "database"
+    Service        = "user-data-service"  # Specific service using this database
+    Purpose        = "application-data-store"
     BackupSchedule = "daily"
   })
 }
@@ -158,6 +161,7 @@ resource "aws_elasticache_cluster" "calavia_redis" {
   tags = merge(module.tags.tags, {
     Name      = "calavia-redis-production"
     Component = "cache"
+    Service   = "session-cache-service"  # Specific service using this cache
     Purpose   = "application-cache"
   })
 }

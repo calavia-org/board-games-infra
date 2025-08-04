@@ -1,0 +1,132 @@
+# Pre-commit hooks configuration for Board Games Infrastructure
+# Instalar: pip install pre-commit && pre-commit install
+# Ejecutar manualmente: pre-commit run --all-files
+
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        description: Elimina espacios en blanco al final de líneas
+      - id: end-of-file-fixer
+        description: Asegura que los archivos terminen con nueva línea
+      - id: check-yaml
+        description: Verifica sintaxis YAML
+        args: ['--multi']
+      - id: check-json
+        description: Verifica sintaxis JSON
+      - id: check-merge-conflict
+        description: Detecta marcadores de conflictos de merge
+      - id: check-case-conflict
+        description: Verifica conflictos de nombres de archivos
+      - id: check-added-large-files
+        description: Previene archivos grandes (>500KB)
+        args: ['--maxkb=500']
+      - id: detect-private-key
+        description: Detecta claves privadas accidentales
+      - id: mixed-line-ending
+        description: Normaliza terminaciones de línea
+        args: ['--fix=lf']
+
+  # Terraform hooks
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.88.4
+    hooks:
+      - id: terraform_fmt
+        description: Formatea archivos Terraform
+        args:
+          - --args=-recursive
+          - --args=-diff
+      - id: terraform_validate
+        description: Valida sintaxis de Terraform
+        args:
+          - --args=-json
+          - --hook-config=--retry-once-with-cleanup=true
+      - id: terraform_docs
+        description: Genera documentación de módulos Terraform
+        args:
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
+      - id: terraform_tflint
+        description: Linter avanzado para Terraform
+        args:
+          - --args=--only=terraform_deprecated_interpolation
+          - --args=--only=terraform_deprecated_index
+          - --args=--only=terraform_unused_declarations
+          - --args=--only=terraform_comment_syntax
+          - --args=--only=terraform_documented_outputs
+          - --args=--only=terraform_documented_variables
+          - --args=--only=terraform_typed_variables
+          - --args=--only=terraform_module_pinned_source
+          - --args=--only=terraform_naming_convention
+          - --args=--only=terraform_required_version
+          - --args=--only=terraform_required_providers
+          - --args=--only=terraform_standard_module_structure
+      - id: terraform_tfsec
+        description: Análisis de seguridad para Terraform
+        args:
+          - --args=--minimum-severity=MEDIUM
+          - --args=--format=compact
+
+  # YAML linting and formatting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        description: Linter para archivos YAML
+        args: [-c=.yamllint.yml]
+
+  # Markdown linting and formatting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        description: Linter para archivos Markdown
+        args: ['--fix', '--config', '.markdownlint.yml']
+
+  # GitHub Actions workflow validation
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.26
+    hooks:
+      - id: actionlint
+        description: Linter para GitHub Actions workflows
+
+  # Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        description: Detecta secretos en el código
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+  # Shell script linting
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
+        description: Linter para scripts de shell
+        args: [--severity=warning]
+
+  # Docker linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        description: Linter para Dockerfiles
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+# Configuración global
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

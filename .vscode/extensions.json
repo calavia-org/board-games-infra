@@ -1,0 +1,34 @@
+{
+  "recommendations": [
+    // Terraform
+    "hashicorp.terraform",
+    "hashicorp.hcl",
+    // YAML/JSON
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    // Markdown
+    "DavidAnson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    // Git & Pre-commit
+    "eamodio.gitlens",
+    "elagil.pre-commit-helper",
+    // Docker
+    "ms-azuretools.vscode-docker",
+    // Shell scripting
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    // AWS
+    "amazonwebservices.aws-toolkit-vscode",
+    // Kubernetes
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    // General productivity
+    "ms-vscode.vscode-typescript-next",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-python.python",
+    // Security
+    "ms-vscode.vscode-github-issue-notebooks",
+    "github.copilot",
+    "github.copilot-chat"
+  ]
+}

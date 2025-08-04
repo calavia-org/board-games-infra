@@ -81,6 +81,16 @@ variable "component" {
   default     = ""
 }
 
+variable "service" {
+  description = "Service or application name that uses this resource"
+  type        = string
+  default     = "board-games-platform"
+  validation {
+    condition     = length(var.service) > 0
+    error_message = "Service name cannot be empty."
+  }
+}
+
 variable "purpose" {
   description = "Purpose or description of the resource"
   type        = string
@@ -135,6 +145,7 @@ locals {
       CreatedDate   = local.current_date
       Version       = var.infrastructure_version
       Architecture  = "arm64"  # Updated to ARM64 for Graviton instances
+      Service       = var.service  # Service or application using this resource
     },
     var.component != "" ? { Component = var.component } : {},
     var.purpose != "" ? { Purpose = var.purpose } : {},
@@ -201,6 +212,7 @@ output "monitoring_tags" {
   value       = merge(local.mandatory_tags, {
     Criticality = var.criticality
     Component   = var.component
+    Service     = var.service
     Environment = var.environment
   })
 }

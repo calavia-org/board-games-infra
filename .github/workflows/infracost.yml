@@ -10,7 +10,7 @@ on:
       - main
       - setup
     paths:
-      - 'calavia-eks-infra/**' 
+      - 'calavia-eks-infra/**'
       - '.infracost/**'
   workflow_dispatch:
 
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    
+
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
@@ -52,7 +52,7 @@ jobs:
           echo "Key files:"
           ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
           ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
-          
+
           # Check if infrastructure exists in base branch
           if [ -d "${TF_ROOT}/environments/staging" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -70,7 +70,7 @@ jobs:
           ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
           ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
           ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
-          
+
           echo "Changing to staging directory..."
           cd ${TF_ROOT}/environments/staging
           echo "Running terraform init..."
@@ -111,7 +111,7 @@ jobs:
           ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
           ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
           ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
-          
+
           echo "Changing to staging directory..."
           cd ${TF_ROOT}/environments/staging
           echo "Running terraform init..."
@@ -169,7 +169,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    
+
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
@@ -196,7 +196,7 @@ jobs:
           find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
           echo "Detailed directory listing:"
           ls -la
-          
+
           # Check if infrastructure exists in base branch
           if [ -d "${TF_ROOT}/environments/production" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -214,7 +214,7 @@ jobs:
           ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
           ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
           ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
-          
+
           echo "Changing to production directory..."
           cd ${TF_ROOT}/environments/production
           echo "Running terraform init..."
@@ -254,7 +254,7 @@ jobs:
           ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
           ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
           ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
-          
+
           echo "Changing to production directory..."
           cd ${TF_ROOT}/environments/production
           echo "Running terraform init..."
@@ -311,7 +311,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [infracost-staging, infracost-production]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
-    
+
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
@@ -341,7 +341,7 @@ jobs:
           ls -la /tmp/staging/ || echo "Staging directory not found"
           echo "Production files:"
           ls -la /tmp/production/ || echo "Production directory not found"
-          
+
           # Check if infracost files exist with correct names
           if [ -f "/tmp/staging/staging-infracost.json" ]; then
             echo "✅ Staging staging-infracost.json found"
@@ -350,22 +350,22 @@ jobs:
             echo "❌ Staging staging-infracost.json NOT found"
             exit 1
           fi
-          
+
           if [ -f "/tmp/production/production-infracost.json" ]; then
-            echo "✅ Production production-infracost.json found"  
+            echo "✅ Production production-infracost.json found"
             echo "Production file size: $(wc -c < /tmp/production/production-infracost.json) bytes"
           else
             echo "❌ Production production-infracost.json NOT found"
             exit 1
           fi
-          
+
           # Use files directly without copying - pass multiple --path arguments
           echo "Combining reports directly from downloaded artifacts..."
           infracost output --path /tmp/staging/staging-infracost.json \
                           --path /tmp/production/production-infracost.json \
                           --format=slack-message \
                           --out-file=/tmp/slack-message.json
-          
+
           echo "Combined report generated successfully"
 
       - name: Send Slack notification
@@ -398,7 +398,7 @@ jobs:
                 {
                   "type": "section",
                   "text": {
-                    "type": "mrkdwn", 
+                    "type": "mrkdwn",
                     "text": "📈 *Cost breakdown has been updated.*\n\nView detailed breakdown in the GitHub Actions logs or Infracost dashboard."
                   }
                 },
@@ -423,7 +423,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [infracost-staging, infracost-production]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
-    
+
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
@@ -453,7 +453,7 @@ jobs:
           ls -la /tmp/staging/ || echo "Staging directory not found"
           echo "Production directory contents:"
           ls -la /tmp/production/ || echo "Production directory not found"
-          
+
           # Check if files exist before processing with correct names
           if [ -f "/tmp/staging/staging-infracost.json" ]; then
             echo "✅ Staging artifact found"
@@ -461,27 +461,27 @@ jobs:
             echo "❌ Staging artifact missing"
             exit 1
           fi
-          
+
           if [ -f "/tmp/production/production-infracost.json" ]; then
             echo "✅ Production artifact found"
           else
             echo "❌ Production artifact missing"
             exit 1
           fi
-          
+
           # Extract costs from downloaded reports with correct file names
           STAGING_COST=$(cat /tmp/staging/staging-infracost.json | jq -r '.totalMonthlyCost // "0"')
           PRODUCTION_COST=$(cat /tmp/production/production-infracost.json | jq -r '.totalMonthlyCost // "0"')
-          
+
           echo "Staging monthly cost: \$${STAGING_COST}"
           echo "Production monthly cost: \$${PRODUCTION_COST}"
-          
+
           # Alertas de presupuesto
           if (( $(echo "$STAGING_COST > 500" | bc -l) )); then
             echo "⚠️ STAGING BUDGET ALERT: Monthly cost (\$${STAGING_COST}) exceeds \$500 threshold"
             echo "staging_budget_exceeded=true" >> $GITHUB_ENV
           fi
-          
+
           if (( $(echo "$PRODUCTION_COST > 1500" | bc -l) )); then
             echo "⚠️ PRODUCTION BUDGET ALERT: Monthly cost (\$${PRODUCTION_COST}) exceeds \$1500 threshold"
             echo "production_budget_exceeded=true" >> $GITHUB_ENV
@@ -519,7 +519,7 @@ jobs:
                       "text": "*Staging Threshold:* $500/month"
                     },
                     {
-                      "type": "mrkdwn", 
+                      "type": "mrkdwn",
                       "text": "*Production Threshold:* $1500/month"
                     }
                   ]

@@ -1,0 +1,82 @@
+# Markdown Linting Configuration for Board Games Infrastructure
+# Configuración para markdownlint hook en pre-commit
+
+# Reglas por defecto
+default: true
+
+# Configuración específica de reglas
+MD001: false  # Permitir headers que no sigan secuencia estricta
+MD003:        # Estilo de headers - usar ATX style (###)
+  style: "atx"
+MD004:        # Estilo de listas - usar guiones consistentes
+  style: "dash"
+MD007:        # Indentación de listas - 2 espacios
+  indent: 2
+MD009: false  # Permitir espacios al final - manejado por trailing-whitespace
+MD010: false  # Permitir tabs - manejado por mixed-line-ending
+MD013:        # Longitud de línea - más permisivo para URLs y comandos
+  line_length: 120
+  heading_line_length: 80
+  code_block_line_length: 150
+  tables: false
+  headers: false
+  strict: false
+  stern: false
+MD024: false  # Permitir headers duplicados - común en README complejos
+MD025: false  # Permitir múltiples H1 - común en documentación modular
+MD026:        # Puntuación en headers - permitir algunos signos
+  punctuation: ".,;:!?"
+MD029:        # Estilo de listas ordenadas - usar números secuenciales
+  style: "ordered"
+MD033:        # HTML inline - permitir ciertos tags útiles
+  allowed_elements: ["br", "sub", "sup", "img", "details", "summary", "kbd"]
+MD034: false  # Permitir URLs sin brackets - común en documentación técnica
+MD036: false  # Permitir énfasis en lugar de headers - útil para destacar
+MD040: false  # Permitir bloques de código sin especificar lenguaje
+MD041: false  # Permitir que el primer header no sea H1
+MD044:        # Nombres propios - definir términos técnicos comunes
+  names:
+    - "Terraform"
+    - "AWS"
+    - "EKS"
+    - "Kubernetes"
+    - "PostgreSQL"
+    - "Redis"
+    - "ElastiCache"
+    - "RDS"
+    - "VPC"
+    - "IAM"
+    - "RBAC"
+    - "DNS"
+    - "SSL"
+    - "TLS"
+    - "HTTPS"
+    - "CloudWatch"
+    - "Prometheus"
+    - "Grafana"
+    - "Graviton"
+    - "ARM64"
+    - "x86"
+    - "GitHub"
+    - "CI/CD"
+    - "YAML"
+    - "JSON"
+    - "API"
+    - "FQDN"
+    - "Let's Encrypt"
+    - "Route53"
+    - "ALB"
+    - "NLB"
+    - "Ingress"
+    - "NGINX"
+    - "Calavia"
+  code_blocks: false
+MD045: false  # Permitir imágenes sin alt text - no siempre necesario
+MD046:        # Estilo de code blocks - usar fenced (```)
+  style: "fenced"
+MD048:        # Estilo de code fence - usar backticks consistentes
+  style: "backtick"
+MD049:        # Estilo de énfasis - usar asteriscos
+  style: "asterisk"
+MD050:        # Estilo de strong - usar asteriscos dobles
+  style: "asterisk"

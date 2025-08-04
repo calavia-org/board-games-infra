@@ -9,6 +9,7 @@ module "tags" {
   business_unit          = var.business_unit
   department             = var.department
   criticality            = "medium"
+  service                = "board-games-platform"  # Main service identifier
   infrastructure_version = var.infrastructure_version
 
   additional_tags = {
@@ -103,6 +104,7 @@ resource "aws_db_instance" "calavia_postgres" {
   tags = merge(module.tags.tags, {
     Name            = "calavia-postgres-staging"
     Component       = "database"
+    Service         = "user-data-service-staging"  # Staging version of user data service
     Purpose         = "staging-game-database"
     Engine          = "postgresql"
     EngineVersion   = "14.9"
@@ -127,6 +129,7 @@ resource "aws_elasticache_cluster" "calavia_redis" {
   tags = merge(module.tags.tags, {
     Name          = "calavia-redis-staging"
     Component     = "cache"
+    Service       = "session-cache-service-staging"  # Staging version of session cache
     Purpose       = "staging-session-cache"
     Engine        = "redis"
     EngineVersion = "7.0"

@@ -1,0 +1,67 @@
+# YAML Linting Configuration for Board Games Infrastructure
+# Configuración para yamllint hook en pre-commit
+
+extends: default
+
+rules:
+  # Longitud de línea - permitir líneas más largas para URLs y comandos
+  line-length:
+    max: 120
+    level: warning
+
+  # Indentación - usar 2 espacios consistentemente
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Comentarios - permitir comentarios sin espacios después de #
+  comments:
+    min-spaces-from-content: 1
+    require-starting-space: false
+
+  # Llaves vacías - permitir en algunos casos como outputs vacíos
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: true
+
+  # Documentos vacíos - permitir archivos vacíos
+  document-empty:
+    level: disable
+
+  # Saltos de línea - permitir saltos múltiples para legibilidad
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+
+  # Truthy values - permitir valores como 'on', 'off' en GitHub Actions
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+    check-keys: false
+
+  # Brackets - ser más permisivo con espacios
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Braces - ser más permisivo con espacios
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+
+  # Floating values - permitir valores flotantes sin punto decimal
+  float-values:
+    require-numeral-before-decimal: false
+    forbid-scientific-notation: false
+    forbid-nan: true
+    forbid-inf: true
+
+# Ignorar ciertos archivos que pueden tener formatos específicos
+ignore: |
+  .github/workflows/*.yml
+  */Chart.yaml
+  */values.yaml
+  .infracost/usage-*.yml
