@@ -359,9 +359,10 @@ jobs:
             exit 1
           fi
           
-          # Use files directly without copying - specify the exact paths
+          # Use files directly without copying - pass multiple --path arguments
           echo "Combining reports directly from downloaded artifacts..."
-          infracost output --path="/tmp/staging/staging-infracost.json,/tmp/production/production-infracost.json" \
+          infracost output --path /tmp/staging/staging-infracost.json \
+                          --path /tmp/production/production-infracost.json \
                           --format=slack-message \
                           --out-file=/tmp/slack-message.json
           
