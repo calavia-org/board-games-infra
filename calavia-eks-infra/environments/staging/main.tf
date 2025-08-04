@@ -31,6 +31,72 @@ resource "aws_vpc" "calavia_vpc" {
   })
 }
 
+# VPC Flow Logs
+resource "aws_flow_log" "vpc_flow_logs" {
+  iam_role_arn    = aws_iam_role.flow_logs_role.arn
+  log_destination = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.calavia_vpc.id
+
+  tags = merge(module.tags.tags, {
+    Name      = "calavia-vpc-flow-logs-staging"
+    Component = "monitoring"
+    Purpose   = "vpc-flow-logs"
+  })
+}
+
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc/flowlogs/staging"
+  retention_in_days = 3 # Shorter retention for staging
+
+  tags = merge(module.tags.tags, {
+    Name      = "calavia-vpc-flow-logs-group-staging"
+    Component = "monitoring"
+    Purpose   = "vpc-flow-logs"
+  })
+}
+
+resource "aws_iam_role" "flow_logs_role" {
+  name = "flow-logs-role-staging"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = module.tags.tags
+}
+
+resource "aws_iam_role_policy" "flow_logs_policy" {
+  name = "flow-logs-policy-staging"
+  role = aws_iam_role.flow_logs_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_subnet" "calavia_subnet" {
   count             = var.subnet_count
   vpc_id            = aws_vpc.calavia_vpc.id
@@ -42,14 +108,75 @@ resource "aws_subnet" "calavia_subnet" {
   }
 }
 
+# KMS key for EKS encryption
+resource "aws_kms_key" "eks_encryption" {
+  description             = "KMS key for EKS cluster encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = merge(module.tags.tags, {
+    Name      = "${var.cluster_name}-eks-encryption-key"
+    Component = "security"
+    Purpose   = "eks-encryption"
+  })
+}
+
+resource "aws_kms_alias" "eks_encryption" {
+  name          = "alias/${var.cluster_name}-eks-encryption"
+  target_key_id = aws_kms_key.eks_encryption.key_id
+}
+
+# KMS key for RDS encryption
+resource "aws_kms_key" "rds_encryption" {
+  description             = "KMS key for RDS encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = merge(module.tags.tags, {
+    Name      = "${var.cluster_name}-rds-encryption-key"
+    Component = "security"
+    Purpose   = "rds-encryption"
+  })
+}
+
+resource "aws_kms_alias" "rds_encryption" {
+  name          = "alias/${var.cluster_name}-rds-encryption"
+  target_key_id = aws_kms_key.rds_encryption.key_id
+}
+
 resource "aws_eks_cluster" "calavia_eks" {
   name     = var.cluster_name
   role_arn = aws_iam_role.eks_role.arn
+
+  # VPC configuration with restricted public access for staging
   vpc_config {
-    subnet_ids = aws_subnet.calavia_subnet[*].id
+    subnet_ids              = aws_subnet.calavia_subnet[*].id
+    endpoint_private_access = true
+    endpoint_public_access  = false           # Disable public access for security
+    public_access_cidrs     = ["10.0.0.0/16"] # Restrict to VPC CIDR only
   }
 
-  depends_on = [aws_iam_role_policy_attachment.eks_policy]
+  # Enable control plane logging
+  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
+  # Enable encryption for secrets
+  encryption_config {
+    provider {
+      key_arn = aws_kms_key.eks_encryption.arn
+    }
+    resources = ["secrets"]
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_policy,
+    aws_kms_key.eks_encryption
+  ]
+
+  tags = merge(module.tags.tags, {
+    Name      = var.cluster_name
+    Component = "kubernetes"
+    Purpose   = "staging-container-orchestration"
+  })
 }
 
 resource "aws_iam_role" "eks_role" {
@@ -89,14 +216,20 @@ resource "aws_db_instance" "calavia_postgres" {
   password = var.db_password
 
   # Configuraciones de coste optimizado para staging
-  multi_az                = var.enable_multi_az         # false para staging
-  backup_retention_period = var.backup_retention_period # 1 día
+  multi_az                = var.enable_multi_az # false para staging
+  backup_retention_period = 7                   # 7 días mínimo recomendado
   backup_window           = "03:00-04:00"
   maintenance_window      = "sun:04:00-sun:05:00"
 
   # Configuraciones de seguridad
   vpc_security_group_ids = [aws_security_group.db_sg.id]
   skip_final_snapshot    = true # Para staging no necesitamos snapshot final
+
+  # Security enhancements
+  storage_encrypted                   = true
+  kms_key_id                          = aws_kms_key.rds_encryption.arn
+  iam_database_authentication_enabled = true
+  deletion_protection                 = true # Enable protection even for staging
 
   # Performance Insights deshabilitado para ahorrar costes
   performance_insights_enabled = false
@@ -125,6 +258,10 @@ resource "aws_elasticache_cluster" "calavia_redis" {
   port                 = 6379
   subnet_group_name    = aws_elasticache_subnet_group.redis_subnet_group.name
   security_group_ids   = [aws_security_group.redis_sg.id]
+
+  # Backup and snapshot settings
+  snapshot_retention_limit = 5
+  snapshot_window          = "03:00-05:00"
 
   tags = merge(module.tags.tags, {
     Name          = "calavia-redis-staging"
@@ -187,7 +324,7 @@ resource "aws_security_group" "redis_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   tags = merge(module.tags.tags, {
@@ -215,7 +352,7 @@ resource "aws_security_group" "eks_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   tags = merge(module.tags.tags, {
@@ -226,20 +363,4 @@ resource "aws_security_group" "eks_sg" {
     Protocol     = "tcp"
     Port         = "443"
   })
-}
-
-output "cluster_endpoint" {
-  value = aws_eks_cluster.calavia_eks.endpoint
-}
-
-output "cluster_name" {
-  value = aws_eks_cluster.calavia_eks.name
-}
-
-output "db_instance_endpoint" {
-  value = aws_db_instance.calavia_postgres.endpoint
-}
-
-output "redis_endpoint" {
-  value = aws_elasticache_cluster.calavia_redis.configuration_endpoint
 }

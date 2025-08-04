@@ -190,7 +190,8 @@ generate_compliance_report() {
     # Crear directorio de reportes
     mkdir -p "$REPORTS_DIR"
 
-    local temp_file=$(mktemp)
+    local temp_file
+    temp_file=$(mktemp)
     local results_file="$REPORTS_DIR/compliance-results-$TIMESTAMP.json"
 
     # Array para almacenar resultados
@@ -212,7 +213,8 @@ generate_compliance_report() {
         log_info "Procesando: $resource_type"
 
         # Obtener recursos de este tipo
-        local resources_json=$(get_resources_with_tags "$resource_type")
+        local resources_json
+        resources_json=$(get_resources_with_tags "$resource_type")
 
         # Procesar cada recurso
         while IFS= read -r resource_line; do
@@ -220,19 +222,23 @@ generate_compliance_report() {
                 continue
             fi
 
-            local resource_arn=$(echo "$resource_line" | jq -r '.ResourceARN')
-            local resource_tags=$(echo "$resource_line" | jq '.Tags')
+            local resource_arn
+            resource_arn=$(echo "$resource_line" | jq -r '.ResourceARN')
+            local resource_tags
+            resource_tags=$(echo "$resource_line" | jq '.Tags')
 
             # Filtrar por environment si se especifica
             if [[ -n "$environment_filter" ]]; then
-                local env_tag=$(echo "$resource_tags" | jq -r --arg env "$environment_filter" '.[] | select(.Key == "Environment") | .Value')
+                local env_tag
+                env_tag=$(echo "$resource_tags" | jq -r --arg env "$environment_filter" '.[] | select(.Key == "Environment") | .Value')
                 if [[ "$env_tag" != "$environment_filter" ]]; then
                     continue
                 fi
             fi
 
             # Verificar compliance
-            local compliance_result=$(check_resource_compliance "$resource_arn" "$resource_tags")
+            local compliance_result
+            compliance_result=$(check_resource_compliance "$resource_arn" "$resource_tags")
 
             # Agregar tipo de recurso al resultado
             compliance_result=$(echo "$compliance_result" | jq --arg type "$resource_type" '. + {resourceType: $type}')
@@ -258,7 +264,8 @@ generate_compliance_report() {
     fi
 
     # Crear reporte final
-    local report_data=$(jq -n \
+    local report_data
+    report_data=$(jq -n \
         --argjson total "$total_resources" \
         --argjson compliant "$compliant_resources" \
         --argjson non_compliant "$non_compliant_resources" \
@@ -511,7 +518,8 @@ send_email_report() {
         return 1
     fi
 
-    local subject="Tag Compliance Report - $(date +%Y-%m-%d)"
+    local subject
+    subject="Tag Compliance Report - $(date +%Y-%m-%d)"
 
     case "$format" in
         "html")
@@ -547,7 +555,7 @@ main() {
     local output_file=""
     local email=""
     local region=""
-    local save_details=false
+    # local save_details=false  # Variable no utilizada actualmente
     local fix_mode_enabled=false
     local environment_filter=""
     local resource_type_filter=""
@@ -572,7 +580,7 @@ main() {
                 shift 2
                 ;;
             --save-details)
-                save_details=true
+                # save_details=true  # Variable no utilizada actualmente
                 shift
                 ;;
             --fix-mode)

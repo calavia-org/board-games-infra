@@ -1,0 +1,146 @@
+# Devcontainer para Board Games Infrastructure
+# Imagen base con herramientas de desarrollo preinstaladas
+
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+
+# Metadatos
+LABEL maintainer="Calavia Gaming Infrastructure Team"
+LABEL description="Devcontainer optimizado para Board Games Infrastructure con pre-commit hooks"
+
+# Variables de entorno
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TERRAFORM_VERSION=1.8.5
+ENV KUBECTL_VERSION=v1.31.0
+ENV TFLINT_VERSION=v0.47.0
+ENV TRIVY_VERSION=0.44.0
+ENV INFRACOST_VERSION=0.10.29
+
+# Actualizar sistema e instalar dependencias base
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    unzip \
+    jq \
+    git \
+    build-essential \
+    python3 \
+    python3-pip \
+    python3-venv \
+    shellcheck \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    software-properties-common \
+    apt-transport-https \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Node.js (para algunas herramientas)
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear usuario vscode si no existe
+RUN if ! id -u vscode > /dev/null 2>&1; then \
+        groupadd --gid 1000 vscode \
+        && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \
+        && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/vscode; \
+    fi
+
+# Cambiar a usuario vscode para instalaciones
+USER vscode
+WORKDIR /home/vscode
+
+# Instalar AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf aws awscliv2.zip
+
+# Instalar Terraform
+RUN curl -o terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    && unzip terraform.zip \
+    && mv terraform /usr/local/bin/ \
+    && rm terraform.zip
+
+# Instalar kubectl
+RUN curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+    && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+    && rm kubectl
+
+# Instalar TFLint
+RUN curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash \
+    && mv /home/vscode/bin/tflint /usr/local/bin/
+
+# Instalar Trivy
+RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list' \
+    && curl -qsSL https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends trivy \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Infracost
+RUN curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh \
+    && mv infracost /usr/local/bin/
+
+# Instalar Python tools y pre-commit
+RUN pip install --no-cache-dir \
+    pre-commit==3.5.0 \
+    yamllint==1.35.1 \
+    ansible-lint==6.22.2 \
+    && echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc
+
+# Instalar herramientas adicionales con npm
+RUN npm install -g \
+    markdownlint-cli@0.39.0 \
+    @commitlint/cli@18.4.3 \
+    @commitlint/config-conventional@18.4.3
+
+# Configurar Git globalmente (valores por defecto)
+RUN git config --global init.defaultBranch main \
+    && git config --global pull.rebase false \
+    && git config --global core.autocrlf input
+
+# Crear directorios necesarios
+RUN mkdir -p ~/.aws ~/.kube ~/.terraform.d
+
+# Configurar aliases útiles
+RUN echo 'alias tf="terraform"' >> ~/.bashrc \
+    && echo 'alias k="kubectl"' >> ~/.bashrc \
+    && echo 'alias pc="pre-commit"' >> ~/.bashrc \
+    && echo 'alias pcr="pre-commit run"' >> ~/.bashrc \
+    && echo 'alias pcra="pre-commit run --all-files"' >> ~/.bashrc \
+    && echo 'alias ll="ls -alF"' >> ~/.bashrc \
+    && echo 'alias la="ls -A"' >> ~/.bashrc \
+    && echo 'alias l="ls -CF"' >> ~/.bashrc
+
+# Función para cambiar contextos de kubectl
+RUN echo "kctx() {" >> ~/.bashrc \
+    && echo "    if [[ \$1 == \"staging\" ]]; then" >> ~/.bashrc \
+    && echo "        aws eks update-kubeconfig --region us-west-2 --name board-games-staging" >> ~/.bashrc \
+    && echo "    elif [[ \$1 == \"production\" ]]; then" >> ~/.bashrc \
+    && echo "        aws eks update-kubeconfig --region us-west-2 --name board-games-production" >> ~/.bashrc \
+    && echo "    else" >> ~/.bashrc \
+    && echo "        echo \"Uso: kctx [staging|production]\"" >> ~/.bashrc \
+    && echo "    fi" >> ~/.bashrc \
+    && echo "}" >> ~/.bashrc
+
+# Configurar prompt mejorado
+RUN echo 'export PS1="\u@\h:\w\$ "' >> ~/.bashrc
+
+# Verificar instalaciones
+RUN echo "Verificando instalaciones..." \
+    && aws --version \
+    && terraform version \
+    && kubectl version --client \
+    && tflint --version \
+    && trivy --version \
+    && infracost --version \
+    && pre-commit --version \
+    && echo "✅ Todas las herramientas instaladas correctamente"
+
+# Volver al directorio de trabajo por defecto
+WORKDIR /workspace
+
+# Punto de entrada por defecto
+CMD ["/bin/bash"]

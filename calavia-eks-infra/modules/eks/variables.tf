@@ -3,20 +3,20 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "vpc_id" {
-  description = "ID of the VPC"
-  type        = string
-}
+# variable "vpc_id" {
+#   description = "ID of the VPC"
+#   type        = string
+# }
 
 variable "subnet_ids" {
   description = "List of subnet IDs for the EKS cluster"
   type        = list(string)
 }
 
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-}
+# variable "availability_zones" {
+#   description = "List of availability zones"
+#   type        = list(string)
+# }
 
 variable "desired_capacity" {
   description = "Desired number of nodes"
@@ -70,4 +70,14 @@ variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
   default     = {}
+}
+
+variable "vpc_id" {
+  description = "ID of the VPC"
+  type        = string
+}
+
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
 }

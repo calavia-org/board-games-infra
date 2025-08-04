@@ -151,8 +151,104 @@ variable "log_retention_days" {
 }
 
 # Notification Configuration
+# variable "enable_rotation_notifications" {
+#   description = "Enable SNS notifications for rotation events"
+#   type        = bool
+#   default     = true
+# }
+
+# variable "notification_email" {
+#   description = "Email address for rotation notifications"
+#   type        = string
+#   default     = ""
+# }
+
+# variable "slack_webhook_url" {
+#   description = "Slack webhook URL for rotation notifications"
+#   type        = string
+#   default     = ""
+#   sensitive   = true
+# }
+
+# Environment Configuration
+# variable "environment" {
+#   description = "Environment (staging, production)"
+#   type        = string
+#   validation {
+#     condition     = contains(["staging", "production"], var.environment)
+#     error_message = "Environment must be either 'staging' or 'production'."
+#   }
+# }
+
+# Custom Rotation Schedules
+# variable "custom_rotation_schedules" {
+#   description = "Custom rotation schedules for different services"
+#   type = object({
+#     database_credentials   = optional(number, 30)
+#     cache_credentials      = optional(number, 30)
+#     admin_credentials      = optional(number, 90)
+#     service_account_tokens = optional(number, 90)
+#     api_keys               = optional(number, 60)
+#   })
+#   default = {
+#     database_credentials   = 30
+#     cache_credentials      = 30
+#     admin_credentials      = 90
+#     service_account_tokens = 90
+#     api_keys               = 60
+#   }
+# }
+
+# Security Configuration
+# variable "enable_secret_replication" {
+#   description = "Enable cross-region secret replication"
+#   type        = bool
+#   default     = true
+# }
+
+# variable "require_approval_for_rotation" {
+#   description = "Require manual approval for critical secret rotations"
+#   type        = bool
+#   default     = false
+# }
+
+# variable "allowed_rotation_window" {
+#   description = "Time window when rotations are allowed (24h format)"
+#   type = object({
+#     start_hour = number
+#     end_hour   = number
+#   })
+#   default = {
+#     start_hour = 2 # 2 AM
+#     end_hour   = 4 # 4 AM
+#   }
+#   validation {
+#     condition = (
+#       var.allowed_rotation_window.start_hour >= 0 &&
+#       var.allowed_rotation_window.start_hour <= 23 &&
+#       var.allowed_rotation_window.end_hour >= 0 &&
+#       var.allowed_rotation_window.end_hour <= 23
+#     )
+#     error_message = "Rotation window hours must be between 0 and 23."
+#   }
+# }
+
+# Tags
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+# Environment Configuration
+variable "environment" {
+  description = "Environment name (production, staging, development)"
+  type        = string
+}
+
+# Notification Configuration
 variable "enable_rotation_notifications" {
-  description = "Enable SNS notifications for rotation events"
+  description = "Enable notifications for secret rotations"
   type        = bool
   default     = true
 }
@@ -164,78 +260,8 @@ variable "notification_email" {
 }
 
 variable "slack_webhook_url" {
-  description = "Slack webhook URL for rotation notifications"
+  description = "Slack webhook URL for notifications"
   type        = string
   default     = ""
   sensitive   = true
-}
-
-# Environment Configuration
-variable "environment" {
-  description = "Environment (staging, production)"
-  type        = string
-  validation {
-    condition     = contains(["staging", "production"], var.environment)
-    error_message = "Environment must be either 'staging' or 'production'."
-  }
-}
-
-# Custom Rotation Schedules
-variable "custom_rotation_schedules" {
-  description = "Custom rotation schedules for different services"
-  type = object({
-    database_credentials   = optional(number, 30)
-    cache_credentials      = optional(number, 30)
-    admin_credentials      = optional(number, 90)
-    service_account_tokens = optional(number, 90)
-    api_keys               = optional(number, 60)
-  })
-  default = {
-    database_credentials   = 30
-    cache_credentials      = 30
-    admin_credentials      = 90
-    service_account_tokens = 90
-    api_keys               = 60
-  }
-}
-
-# Security Configuration
-variable "enable_secret_replication" {
-  description = "Enable cross-region secret replication"
-  type        = bool
-  default     = true
-}
-
-variable "require_approval_for_rotation" {
-  description = "Require manual approval for critical secret rotations"
-  type        = bool
-  default     = false
-}
-
-variable "allowed_rotation_window" {
-  description = "Time window when rotations are allowed (24h format)"
-  type = object({
-    start_hour = number
-    end_hour   = number
-  })
-  default = {
-    start_hour = 2 # 2 AM
-    end_hour   = 4 # 4 AM
-  }
-  validation {
-    condition = (
-      var.allowed_rotation_window.start_hour >= 0 &&
-      var.allowed_rotation_window.start_hour <= 23 &&
-      var.allowed_rotation_window.end_hour >= 0 &&
-      var.allowed_rotation_window.end_hour <= 23
-    )
-    error_message = "Rotation window hours must be between 0 and 23."
-  }
-}
-
-# Tags
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default     = {}
 }

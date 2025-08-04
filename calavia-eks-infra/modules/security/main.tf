@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 # Security Groups para la infraestructura de juegos de mesa
 # Incluye security groups para EKS, RDS, ElastiCache, ALB y componentes de monitoreo
 
@@ -25,13 +36,22 @@ resource "aws_security_group" "alb" {
     description = "HTTPS from internet"
   }
 
-  # Permite todo el tráfico saliente
+  # Permite todo el tráfico saliente a VPC
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All outbound traffic to VPC"
+  }
+
+  # Permite HTTPS outbound para ALB health checks
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    description = "HTTPS outbound for health checks"
   }
 
   tags = merge(var.tags, {
@@ -71,8 +91,8 @@ resource "aws_security_group" "eks_cluster" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All outbound traffic to VPC"
   }
 
   tags = merge(var.tags, {
@@ -100,8 +120,8 @@ resource "aws_security_group" "eks_nodes" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "VPC outbound traffic"
   }
 
   tags = merge(var.tags, {
@@ -179,8 +199,8 @@ resource "aws_security_group" "rds" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All outbound traffic within VPC"
   }
 
   tags = merge(var.tags, {
@@ -217,8 +237,8 @@ resource "aws_security_group" "redis" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All outbound traffic within VPC"
   }
 
   tags = merge(var.tags, {
@@ -273,8 +293,8 @@ resource "aws_security_group" "monitoring" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "VPC outbound traffic"
   }
 
   tags = merge(var.tags, {
@@ -302,8 +322,8 @@ resource "aws_security_group" "vpc_endpoints" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "All outbound traffic"
+    cidr_blocks = [var.vpc_cidr]
+    description = "All outbound traffic within VPC"
   }
 
   tags = merge(var.tags, {

@@ -1,7 +1,27 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
+  }
+}
+
 # KMS Key for ElastiCache encryption
 resource "aws_kms_key" "redis" {
   description             = "KMS key for ElastiCache Redis encryption"
   deletion_window_in_days = 7
+  enable_key_rotation     = true
 
   tags = merge(var.tags, {
     Name = "${var.cluster_name}-redis-key"
@@ -288,6 +308,7 @@ resource "aws_lambda_permission" "secrets_manager_redis" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.redis_token_rotation.function_name
   principal     = "secretsmanager.amazonaws.com"
+  source_arn    = aws_secretsmanager_secret.redis_credentials.arn
 }
 
 # Data source for current region

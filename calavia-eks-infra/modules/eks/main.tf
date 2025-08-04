@@ -1,11 +1,26 @@
-# Data source para obtener la AMI más reciente de EKS
-data "aws_eks_cluster_auth" "cluster" {
-  name = aws_eks_cluster.this.name
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+  }
 }
 
-data "aws_ssm_parameter" "eks_ami_release_version" {
-  name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.this.version}/amazon-linux-2/recommended/release_version"
-}
+# Data source para obtener la AMI más reciente de EKS
+# data "aws_eks_cluster_auth" "cluster" {
+#   name = aws_eks_cluster.this.name
+# }
+
+# data "aws_ssm_parameter" "eks_ami_release_version" {
+#   name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.this.version}/amazon-linux-2/recommended/release_version"
+# }
 
 # IAM Role para el EKS Cluster
 resource "aws_iam_role" "eks_cluster_role" {
@@ -28,12 +43,12 @@ resource "aws_iam_role" "eks_cluster_role" {
 }
 
 # Policy attachments para el cluster role
-resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "eks_cluster_amazon_eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSVPCResourceController" {
+resource "aws_iam_role_policy_attachment" "eks_cluster_amazon_eks_vpc_resource_controller" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.eks_cluster_role.name
 }
@@ -59,22 +74,22 @@ resource "aws_iam_role" "eks_node_group_role" {
 }
 
 # Policy attachments para el node group role
-resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEKSWorkerNodePolicy" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_amazon_eks_worker_node_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.eks_node_group_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEKS_CNI_Policy" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_amazon_eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.eks_node_group_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEC2ContainerRegistryReadOnly" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_amazon_ec2_container_registry_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_node_group_role.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonSSMManagedInstanceCore" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_amazon_ssm_managed_instance_core" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.eks_node_group_role.name
 }
@@ -103,8 +118,8 @@ resource "aws_eks_cluster" "this" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.eks_cluster_AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.eks_cluster_amazon_eks_cluster_policy,
+    aws_iam_role_policy_attachment.eks_cluster_amazon_eks_vpc_resource_controller,
     aws_cloudwatch_log_group.cluster
   ]
 
@@ -123,6 +138,7 @@ resource "aws_cloudwatch_log_group" "cluster" {
 resource "aws_kms_key" "eks" {
   description             = "EKS Secret Encryption Key for ${var.cluster_name}"
   deletion_window_in_days = 7
+  enable_key_rotation     = true
 
   tags = merge(var.tags, {
     Name = "${var.cluster_name}-eks-key"
@@ -146,6 +162,13 @@ resource "aws_launch_template" "eks_nodes" {
     endpoint     = aws_eks_cluster.this.endpoint
     ca_data      = aws_eks_cluster.this.certificate_authority[0].data
   }))
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+    instance_metadata_tags      = "enabled"
+  }
 
   tag_specifications {
     resource_type = "instance"
@@ -187,9 +210,9 @@ resource "aws_eks_node_group" "on_demand" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_eks_cni_policy,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_ec2_container_registry_read_only,
   ]
 
   tags = var.tags
@@ -223,9 +246,9 @@ resource "aws_eks_node_group" "spot" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.eks_node_group_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_eks_worker_node_policy,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_eks_cni_policy,
+    aws_iam_role_policy_attachment.eks_node_group_amazon_ec2_container_registry_read_only,
   ]
 
   tags = var.tags

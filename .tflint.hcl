@@ -1,5 +1,5 @@
 # TFLint Configuration for Board Games Infrastructure
-# Configuración para terraform_tflint hook en pre-commit
+# Configuración robusta para terraform_tflint hook en pre-commit
 
 # Plugin configuration
 plugin "aws" {
@@ -28,7 +28,7 @@ config {
   format = "compact"
 }
 
-# Rule configuration
+# Rule configuration - Terraform core rules
 rule "terraform_deprecated_interpolation" {
   enabled = true
 }
@@ -79,56 +79,6 @@ rule "terraform_standard_module_structure" {
   enabled = true
 }
 
-# AWS-specific rules
-rule "aws_instance_invalid_type" {
-  enabled = true
-}
-
-rule "aws_instance_previous_type" {
-  enabled = true
-}
-
-rule "aws_db_instance_invalid_type" {
-  enabled = true
-}
-
-rule "aws_elasticache_cluster_invalid_type" {
-  enabled = true
-}
-
-rule "aws_eks_cluster_invalid_version" {
-  enabled = true
-}
-
-rule "aws_iam_policy_invalid_policy" {
-  enabled = true
-}
-
-rule "aws_iam_role_invalid_policy" {
-  enabled = true
-}
-
-rule "aws_security_group_invalid_protocol" {
-  enabled = true
-}
-
-rule "aws_route_invalid_route_table" {
-  enabled = true
-}
-
-rule "aws_alb_invalid_subnet" {
-  enabled = true
-}
-
-rule "aws_alb_invalid_security_group" {
-  enabled = true
-}
-
-# Disable some rules that might be too restrictive for our use case
-rule "aws_instance_invalid_ami" {
-  enabled = false  # AMIs change frequently, especially for ARM64
-}
-
-rule "aws_launch_configuration_invalid_image_id" {
-  enabled = false  # Same as above for launch configurations
-}
+# AWS plugin rules are enabled by default when the plugin is loaded
+# We let the plugin use its default rules rather than specifying individual ones
+# This avoids issues with non-existent rule names in different plugin versions

@@ -8,8 +8,8 @@
 set -euo pipefail
 
 # Configuración
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # Variable no utilizada
+# PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"  # Variable no utilizada
 
 # Colores para output
 RED='\033[0;31m'
@@ -124,7 +124,8 @@ build_tags() {
     local component="$7"
     local criticality="$8"
 
-    local current_date=$(date +%Y-%m-%d)
+    local current_date
+    current_date=$(date +%Y-%m-%d)
 
     # Tags obligatorios
     local tags=()
@@ -213,8 +214,10 @@ apply_tags_to_resource() {
     log_info "Procesando: $(basename "$resource_arn")"
 
     # Determinar el servicio AWS desde el ARN
-    local service=$(echo "$resource_arn" | cut -d':' -f3)
-    local region=$(echo "$resource_arn" | cut -d':' -f4)
+    local service
+    service=$(echo "$resource_arn" | cut -d':' -f3)
+    local region
+    region=$(echo "$resource_arn" | cut -d':' -f4)
 
     # Construir comando de tagging según el servicio
     local tag_cmd=""
@@ -231,13 +234,15 @@ apply_tags_to_resource() {
             ;;
         "elasticache")
             # ElastiCache usa nombres de recurso, no ARNs completos
-            local resource_name=$(echo "$resource_arn" | rev | cut -d':' -f1 | rev)
+            local resource_name
+            resource_name=$(echo "$resource_arn" | rev | cut -d':' -f1 | rev)
             tag_cmd="aws elasticache add-tags-to-resource"
             tag_format="--resource-name $resource_name --tags"
             ;;
         "ec2")
             # EC2 usa resource IDs
-            local resource_id=$(echo "$resource_arn" | rev | cut -d'/' -f1 | rev)
+            local resource_id
+            resource_id=$(echo "$resource_arn" | rev | cut -d'/' -f1 | rev)
             tag_cmd="aws ec2 create-tags"
             tag_format="--resources $resource_id --tags"
             ;;
@@ -275,8 +280,10 @@ apply_tags_to_resource() {
         "elasticloadbalancing")
             # Formato especial para ELB
             for tag in "${tags_array[@]}"; do
-                local key=$(echo "$tag" | cut -d'=' -f1)
-                local value=$(echo "$tag" | cut -d'=' -f2-)
+                local key
+                key=$(echo "$tag" | cut -d'=' -f1)
+                local value
+                value=$(echo "$tag" | cut -d'=' -f2-)
                 if [[ -n "$formatted_tags" ]]; then
                     formatted_tags="$formatted_tags Key=$key,Value=$value"
                 else

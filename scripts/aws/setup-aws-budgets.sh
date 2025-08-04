@@ -15,7 +15,7 @@ NC='\033[0m'
 # Configuración
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null || echo "")
 EMAIL_ALERT=${EMAIL_ALERT:-"devops@calavia.org"}
-SLACK_WEBHOOK=${SLACK_WEBHOOK_URL:-""}
+# SLACK_WEBHOOK=${SLACK_WEBHOOK_URL:-""}  # Variable no utilizada
 
 show_help() {
     echo "Configuración de AWS Budgets para Board Games Infrastructure"
@@ -56,7 +56,8 @@ list_budgets() {
 delete_budgets() {
     echo -e "${YELLOW}Eliminando budgets existentes...${NC}"
 
-    local budgets=$(aws budgets describe-budgets --account-id $ACCOUNT_ID --query 'Budgets[?BudgetName | starts_with(@, `board-games`)].BudgetName' --output text)
+    local budgets
+    budgets=$(aws budgets describe-budgets --account-id $ACCOUNT_ID --query 'Budgets[?BudgetName | starts_with(@, `board-games`)].BudgetName' --output text)
 
     if [ -z "$budgets" ]; then
         echo -e "${YELLOW}No se encontraron budgets para eliminar${NC}"
@@ -233,7 +234,8 @@ create_cost_anomaly_detector() {
     echo -e "${BLUE}Configurando detector de anomalías de costes...${NC}"
 
     # Crear detector de anomalías para la aplicación completa
-    local detector_arn=$(aws ce create-anomaly-detector \
+    local detector_arn
+    detector_arn=$(aws ce create-anomaly-detector \
         --anomaly-detector '{"MonitorType":"DIMENSIONAL","DimensionKey":"SERVICE","MatchOptions":["EQUALS"],"Values":["AmazonEKS","AmazonRDS","AmazonElastiCache"]}' \
         --query AnomalyDetectorArn --output text)
 

@@ -1,3 +1,22 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.0"
+    }
+  }
+}
+
 # Random password rotation
 resource "random_password" "master_password" {
   length  = 16
@@ -8,6 +27,7 @@ resource "random_password" "master_password" {
 resource "aws_kms_key" "rds" {
   description             = "KMS key for RDS encryption"
   deletion_window_in_days = 7
+  enable_key_rotation     = true
 
   tags = merge(var.tags, {
     Name = "${var.cluster_name}-rds-key"
@@ -336,6 +356,7 @@ resource "aws_lambda_permission" "secrets_manager" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.password_rotation.function_name
   principal     = "secretsmanager.amazonaws.com"
+  source_arn    = aws_secretsmanager_secret.db_credentials.arn
 }
 
 # Data source for current region

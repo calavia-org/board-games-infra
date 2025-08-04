@@ -91,11 +91,14 @@ analyze_cost_trends() {
         *) days_back=7 ;;
     esac
 
-    local start_date=$(date -d "$days_back days ago" +%Y-%m-%d)
-    local end_date=$(date +%Y-%m-%d)
+    local start_date
+    start_date=$(date -d "$days_back days ago" +%Y-%m-%d)
+    local end_date
+    end_date=$(date +%Y-%m-%d)
 
     # Obtener datos de costes reales de AWS
-    local cost_data=$(get_aws_costs $start_date $end_date "DAILY" "SERVICE")
+    local cost_data
+    cost_data=$(get_aws_costs $start_date $end_date "DAILY" "SERVICE")
 
     # Generar análisis de tendencias
     cat > "$output_dir/trend-analysis.json" << EOF
@@ -117,13 +120,15 @@ generate_optimization_recommendations() {
     echo -e "${BLUE}Generando recomendaciones de optimización...${NC}"
 
     # Obtener recomendaciones de AWS Cost Explorer
-    local recommendations=$(aws ce get-rightsizing-recommendation \
+    local recommendations
+    recommendations=$(aws ce get-rightsizing-recommendation \
         --service EC2-Instance \
         --query 'RightsizingRecommendations[*].[CurrentInstance.InstanceName,RightsizingType,TargetInstances[0].EstimatedMonthlySavings.Value]' \
         --output json 2>/dev/null || echo "[]")
 
     # Obtener recomendaciones de Trusted Advisor (si está disponible)
-    local trusted_advisor=$(aws support describe-trusted-advisor-checks \
+    local trusted_advisor
+    trusted_advisor=$(aws support describe-trusted-advisor-checks \
         --language en \
         --query 'checks[?category==`cost_optimizing`].[name,id]' \
         --output json 2>/dev/null || echo "[]")
@@ -164,7 +169,8 @@ generate_html_report() {
     echo -e "${BLUE}Generando reporte HTML...${NC}"
 
     local report_title="Board Games Infrastructure - Cost Report ($frequency)"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S UTC')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S UTC')
 
     cat > "$output_file" << EOF
 <!DOCTYPE html>
@@ -360,7 +366,8 @@ main() {
 
     setup_directories
 
-    local timestamp=$(date +%Y%m%d-%H%M%S)
+    local timestamp
+    timestamp=$(date +%Y%m%d-%H%M%S)
     local output_dir="$REPORTS_DIR/$frequency"
     local report_file="$output_dir/cost-report-$timestamp.$output_format"
 

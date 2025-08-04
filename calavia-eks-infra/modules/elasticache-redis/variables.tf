@@ -42,11 +42,11 @@ variable "port" {
   default     = 6379
 }
 
-variable "parameter_group_name" {
-  description = "Parameter group name"
-  type        = string
-  default     = "default.redis7"
-}
+# variable "parameter_group_name" {
+#   description = "Parameter group name"
+#   type        = string
+#   default     = "default.redis7"
+# }
 
 variable "backup_retention_limit" {
   description = "Number of days to retain backups"

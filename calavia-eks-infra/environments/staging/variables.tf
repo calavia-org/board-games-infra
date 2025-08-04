@@ -28,11 +28,11 @@ variable "subnet_cidrs" {
 # OPTIMIZACIÓN DE COSTES STAGING
 # ===================================
 
-variable "enable_nat_gateway" {
-  description = "Habilitar NAT Gateway - deshabilitado en staging para ahorrar costes"
-  type        = bool
-  default     = false # Deshabilitado para ahorrar ~$45/mes por NAT Gateway
-}
+# variable "enable_nat_gateway" {
+#   description = "Habilitar NAT Gateway - deshabilitado en staging para ahorrar costes"
+#   type        = bool
+#   default     = false # Deshabilitado para ahorrar ~$45/mes por NAT Gateway
+# }
 
 variable "enable_multi_az" {
   description = "Habilitar Multi-AZ para RDS - deshabilitado en staging"
@@ -76,29 +76,29 @@ variable "availability_zones" {
   default     = ["us-west-2a", "us-west-2b"] # Reducido de 3 a 2 AZs
 }
 
-variable "node_instance_type" {
-  description = "Tipo de instancia para los nodos del clúster - usando Graviton2 ARM64 para staging"
-  type        = string
-  default     = "t4g.nano" # Graviton2 ARM64 - 2 vCPUs, 0.5 GB RAM (más eficiente y económico)
-}
+# variable "node_instance_type" {
+#   description = "Tipo de instancia para los nodos del clúster - usando Graviton2 ARM64 para staging"
+#   type        = string
+#   default     = "t4g.nano" # Graviton2 ARM64 - 2 vCPUs, 0.5 GB RAM (más eficiente y económico)
+# }
 
-variable "desired_capacity" {
-  description = "Número deseado de nodos en el clúster - mínimo para staging"
-  type        = number
-  default     = 1 # Reducido a 1 para minimizar costes
-}
+# variable "desired_capacity" {
+#   description = "Número deseado de nodos en el clúster - mínimo para staging"
+#   type        = number
+#   default     = 1 # Reducido a 1 para minimizar costes
+# }
 
-variable "max_size" {
-  description = "Número máximo de nodos en el clúster - limitado para staging"
-  type        = number
-  default     = 2 # Reducido para evitar escalado excesivo
-}
+# variable "max_size" {
+#   description = "Número máximo de nodos en el clúster - limitado para staging"
+#   type        = number
+#   default     = 2 # Reducido para evitar escalado excesivo
+# }
 
-variable "min_size" {
-  description = "Número mínimo de nodos en el clúster - mínimo absoluto"
-  type        = number
-  default     = 1 # Mínimo de 1 nodo
-}
+# variable "min_size" {
+#   description = "Número mínimo de nodos en el clúster - mínimo absoluto"
+#   type        = number
+#   default     = 1 # Mínimo de 1 nodo
+# }
 
 variable "redis_instance_type" {
   description = "Tipo de instancia para Redis - Graviton2 ARM64 para mejor eficiencia"
@@ -124,23 +124,23 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "monitoring_retention_days" {
-  description = "Días de retención para las métricas de monitoreo"
-  type        = number
-  default     = 1
-}
+# variable "monitoring_retention_days" {
+#   description = "Días de retención para las métricas de monitoreo"
+#   type        = number
+#   default     = 1
+# }
 
-variable "external_dns_zone" {
-  description = "Zona de Route 53 para gestionar DNS"
-  type        = string
-  default     = "calavia.example.com"
-}
+# variable "external_dns_zone" {
+#   description = "Zona de Route 53 para gestionar DNS"
+#   type        = string
+#   default     = "calavia.example.com"
+# }
 
-variable "letsencrypt_email" {
-  description = "Email para el registro de Let's Encrypt"
-  type        = string
-  default     = "admin@example.com"
-}
+# variable "letsencrypt_email" {
+#   description = "Email para el registro de Let's Encrypt"
+#   type        = string
+#   default     = "admin@example.com"
+# }
 
 # ===================================
 # VARIABLES DE TAGGING

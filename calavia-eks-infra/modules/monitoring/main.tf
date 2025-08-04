@@ -1,7 +1,26 @@
 # Data source for current AWS account ID
 data "aws_caller_identity" "current" {}
 
-# Create monitoring namespace
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+  }
+}
+
+# Crear namespace para monitoring
 resource "kubernetes_namespace" "monitoring" {
   metadata {
     name = var.monitoring_namespace
@@ -113,9 +132,26 @@ resource "aws_grafana_workspace" "main" {
 
 # SNS Topic for alerts
 resource "aws_sns_topic" "alerts" {
-  name = "${var.cluster_name}-monitoring-alerts"
+  name              = "${var.cluster_name}-monitoring-alerts"
+  kms_master_key_id = aws_kms_key.sns_encryption.id
 
   tags = var.tags
+}
+
+# KMS key for SNS encryption
+resource "aws_kms_key" "sns_encryption" {
+  description             = "KMS key for SNS topic encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = merge(var.tags, {
+    Name = "${var.cluster_name}-sns-encryption-key"
+  })
+}
+
+resource "aws_kms_alias" "sns_encryption" {
+  name          = "alias/${var.cluster_name}-sns-encryption"
+  target_key_id = aws_kms_key.sns_encryption.key_id
 }
 
 # SNS Topic Subscription for email alerts

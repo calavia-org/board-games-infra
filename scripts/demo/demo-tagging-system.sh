@@ -8,8 +8,8 @@
 set -euo pipefail
 
 # Configuración
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # Variable no utilizada
+# PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"  # Variable no utilizada
 
 # Colores para output
 RED='\033[0;31m'

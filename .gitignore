@@ -54,6 +54,14 @@ reports/tag-compliance/
 # Pre-commit
 .pre-commit.log
 
+# TFLint
+.tflint.d/
+.tflint-cache/
+.tflint-test.hcl
+.tflint-backup.hcl
+.tflint-simple.hcl
+*.tflint-*
+
 # IDEs and editors
 .vscode/launch.json
 .vscode/tasks.json
@@ -131,6 +139,16 @@ secrets.yml
 # Backup files
 *.bak
 *.backup
+*-backup.*
+*-test.*
+*-temp.*
+*-tmp.*
+
+# Documentation temporales
+*-SUMMARY.md
+*-CONSOLIDATION.md
+TFLINT-*.md
+CONSOLIDATION-*.md
 
 # Cache directories
 .cache/
@@ -138,6 +156,11 @@ secrets.yml
 .tox/
 .coverage
 .nyc_output
+
+# Terraform cache específico
+.terraform-validate-cache/
+.terraform-modules-cache/
+**/.terraform.lock.hcl.backup
 
 # Local development
 local/

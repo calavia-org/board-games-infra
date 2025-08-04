@@ -1,3 +1,14 @@
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 # VPC principal
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -169,4 +180,67 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_elasticache_subnet_group" "main" {
   name       = "${var.cluster_name}-cache-subnet-group"
   subnet_ids = aws_subnet.database[*].id
+}
+
+# IAM role for VPC Flow Logs
+resource "aws_iam_role" "vpc_flow_logs" {
+  name = "${var.cluster_name}-vpc-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# IAM policy for VPC Flow Logs to write to CloudWatch
+resource "aws_iam_role_policy" "vpc_flow_logs" {
+  name = "${var.cluster_name}-vpc-flow-logs-policy"
+  role = aws_iam_role.vpc_flow_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# CloudWatch Log Group for VPC Flow Logs
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc/flowlogs"
+  retention_in_days = 7
+
+  tags = var.tags
+}
+
+# VPC Flow Logs
+resource "aws_flow_log" "vpc" {
+  iam_role_arn    = aws_iam_role.vpc_flow_logs.arn
+  log_destination = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.main.id
+
+  tags = merge(var.tags, {
+    Name = "${var.tags.Name}-vpc-flow-logs"
+  })
 }
