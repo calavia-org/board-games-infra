@@ -348,6 +348,7 @@ jobs:
             echo "Staging file size: $(wc -c < /tmp/staging/staging-infracost.json) bytes"
           else
             echo "❌ Staging staging-infracost.json NOT found"
+            exit 1
           fi
           
           if [ -f "/tmp/production/production-infracost.json" ]; then
@@ -355,20 +356,16 @@ jobs:
             echo "Production file size: $(wc -c < /tmp/production/production-infracost.json) bytes"
           else
             echo "❌ Production production-infracost.json NOT found"
+            exit 1
           fi
           
-          # Copy files with standard names for combination
-          cp /tmp/staging/staging-infracost.json /tmp/staging-costs.json
-          cp /tmp/production/production-infracost.json /tmp/production-costs.json
-          
-          # Verify copied files
-          echo "Copied files:"
-          ls -la /tmp/staging-costs.json /tmp/production-costs.json
-          
-          # Combine reports
-          infracost output --path="/tmp/staging-costs.json,/tmp/production-costs.json" \
+          # Use files directly without copying - specify the exact paths
+          echo "Combining reports directly from downloaded artifacts..."
+          infracost output --path="/tmp/staging/staging-infracost.json,/tmp/production/production-infracost.json" \
                           --format=slack-message \
                           --out-file=/tmp/slack-message.json
+          
+          echo "Combined report generated successfully"
 
       - name: Send Slack notification
         if: env.SLACK_WEBHOOK_URL != ''
