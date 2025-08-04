@@ -1650,3 +1650,210 @@ No modules.
 | <a name="output_prometheus_role_arn"></a> [Prometheus\_role\_arn](#output\_prometheus\_role\_arn) | ARN of the IAM role for Prometheus |
 | <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic for alerts |
 <!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [AWS](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
+| <a name="requirement_kubernetes"></a> [Kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.0.2 |
+| <a name="provider_kubernetes"></a> [Kubernetes](#provider\_kubernetes) | 2.38.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_log_group.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_grafana_workspace.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace) | resource |
+| [aws_iam_policy.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.Prometheus](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_kms_alias.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_sns_topic.alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic_subscription.email_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [helm_release.kube_prometheus_stack](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_namespace.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_alertmanager_storage_size"></a> [alertmanager\_storage\_size](#input\_alertmanager\_storage\_size) | Storage size for AlertManager in GB | `string` | `"10Gi"` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_cluster_oidc_issuer_url"></a> [cluster\_oidc\_issuer\_url](#input\_cluster\_oidc\_issuer\_url) | OIDC issuer URL for the EKS cluster | `string` | n/a | yes |
+| <a name="input_email_notifications"></a> [email\_notifications](#input\_email\_notifications) | Email address for alert notifications | `string` | `"admin@example.com"` | no |
+| <a name="input_enable_aws_managed_grafana"></a> [enable\_AWS\_managed\_Grafana](#input\_enable\_aws\_managed\_grafana) | Enable AWS Managed Grafana | `bool` | `true` | no |
+| <a name="input_grafana_admin_password"></a> [Grafana\_admin\_password](#input\_grafana\_admin\_password) | Admin password for Grafana | `string` | n/a | yes |
+| <a name="input_grafana_storage_size"></a> [Grafana\_storage\_size](#input\_grafana\_storage\_size) | Storage size for Grafana in GB | `string` | `"10Gi"` | no |
+| <a name="input_monitoring_namespace"></a> [monitoring\_namespace](#input\_monitoring\_namespace) | Kubernetes namespace for monitoring resources | `string` | `"monitoring"` | no |
+| <a name="input_prometheus_storage_size"></a> [Prometheus\_storage\_size](#input\_prometheus\_storage\_size) | Storage size for Prometheus in GB | `string` | `"50Gi"` | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_retention_days"></a> [retention\_days](#input\_retention\_days) | Number of days to retain monitoring data | `number` | `3` | no |
+| <a name="input_slack_webhook_url"></a> [slack\_webhook\_url](#input\_slack\_webhook\_url) | Slack webhook URL for alerts | `string` | `""` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cloudwatch_log_group_name"></a> [CloudWatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of the CloudWatch log group for EKS cluster |
+| <a name="output_grafana_workspace_id"></a> [Grafana\_workspace\_id](#output\_grafana\_workspace\_id) | ID of the AWS Managed Grafana workspace |
+| <a name="output_grafana_workspace_url"></a> [Grafana\_workspace\_url](#output\_grafana\_workspace\_url) | URL of the AWS Managed Grafana workspace |
+| <a name="output_helm_release_status"></a> [helm\_release\_status](#output\_helm\_release\_status) | Status of the kube-Prometheus-stack Helm release |
+| <a name="output_monitoring_namespace"></a> [monitoring\_namespace](#output\_monitoring\_namespace) | Kubernetes namespace for monitoring |
+| <a name="output_prometheus_role_arn"></a> [Prometheus\_role\_arn](#output\_prometheus\_role\_arn) | ARN of the IAM role for Prometheus |
+| <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic for alerts |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [AWS](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
+| <a name="requirement_kubernetes"></a> [Kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.0.2 |
+| <a name="provider_kubernetes"></a> [Kubernetes](#provider\_kubernetes) | 2.38.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_log_group.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_grafana_workspace.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace) | resource |
+| [aws_iam_policy.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.Prometheus](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_kms_alias.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_sns_topic.alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic_subscription.email_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [helm_release.kube_prometheus_stack](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_namespace.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_alertmanager_storage_size"></a> [alertmanager\_storage\_size](#input\_alertmanager\_storage\_size) | Storage size for AlertManager in GB | `string` | `"10Gi"` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_cluster_oidc_issuer_url"></a> [cluster\_oidc\_issuer\_url](#input\_cluster\_oidc\_issuer\_url) | OIDC issuer URL for the EKS cluster | `string` | n/a | yes |
+| <a name="input_email_notifications"></a> [email\_notifications](#input\_email\_notifications) | Email address for alert notifications | `string` | `"admin@example.com"` | no |
+| <a name="input_enable_aws_managed_grafana"></a> [enable\_AWS\_managed\_Grafana](#input\_enable\_aws\_managed\_grafana) | Enable AWS Managed Grafana | `bool` | `true` | no |
+| <a name="input_grafana_admin_password"></a> [Grafana\_admin\_password](#input\_grafana\_admin\_password) | Admin password for Grafana | `string` | n/a | yes |
+| <a name="input_grafana_storage_size"></a> [Grafana\_storage\_size](#input\_grafana\_storage\_size) | Storage size for Grafana in GB | `string` | `"10Gi"` | no |
+| <a name="input_monitoring_namespace"></a> [monitoring\_namespace](#input\_monitoring\_namespace) | Kubernetes namespace for monitoring resources | `string` | `"monitoring"` | no |
+| <a name="input_prometheus_storage_size"></a> [Prometheus\_storage\_size](#input\_prometheus\_storage\_size) | Storage size for Prometheus in GB | `string` | `"50Gi"` | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_retention_days"></a> [retention\_days](#input\_retention\_days) | Number of days to retain monitoring data | `number` | `3` | no |
+| <a name="input_slack_webhook_url"></a> [slack\_webhook\_url](#input\_slack\_webhook\_url) | Slack webhook URL for alerts | `string` | `""` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cloudwatch_log_group_name"></a> [CloudWatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of the CloudWatch log group for EKS cluster |
+| <a name="output_grafana_workspace_id"></a> [Grafana\_workspace\_id](#output\_grafana\_workspace\_id) | ID of the AWS Managed Grafana workspace |
+| <a name="output_grafana_workspace_url"></a> [Grafana\_workspace\_url](#output\_grafana\_workspace\_url) | URL of the AWS Managed Grafana workspace |
+| <a name="output_helm_release_status"></a> [helm\_release\_status](#output\_helm\_release\_status) | Status of the kube-Prometheus-stack Helm release |
+| <a name="output_monitoring_namespace"></a> [monitoring\_namespace](#output\_monitoring\_namespace) | Kubernetes namespace for monitoring |
+| <a name="output_prometheus_role_arn"></a> [Prometheus\_role\_arn](#output\_prometheus\_role\_arn) | ARN of the IAM role for Prometheus |
+| <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic for alerts |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [Terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [AWS](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
+| <a name="requirement_kubernetes"></a> [Kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [AWS](#provider\_aws) | 6.7.0 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | 3.0.2 |
+| <a name="provider_kubernetes"></a> [Kubernetes](#provider\_kubernetes) | 2.38.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_log_group.eks_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_grafana_workspace.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/grafana_workspace) | resource |
+| [aws_iam_policy.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.Prometheus](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.prometheus_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_kms_alias.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.sns_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_sns_topic.alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
+| [aws_sns_topic_subscription.email_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [helm_release.kube_prometheus_stack](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_namespace.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_alertmanager_storage_size"></a> [alertmanager\_storage\_size](#input\_alertmanager\_storage\_size) | Storage size for AlertManager in GB | `string` | `"10Gi"` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the EKS cluster | `string` | n/a | yes |
+| <a name="input_cluster_oidc_issuer_url"></a> [cluster\_oidc\_issuer\_url](#input\_cluster\_oidc\_issuer\_url) | OIDC issuer URL for the EKS cluster | `string` | n/a | yes |
+| <a name="input_email_notifications"></a> [email\_notifications](#input\_email\_notifications) | Email address for alert notifications | `string` | `"admin@example.com"` | no |
+| <a name="input_enable_aws_managed_grafana"></a> [enable\_AWS\_managed\_Grafana](#input\_enable\_aws\_managed\_grafana) | Enable AWS Managed Grafana | `bool` | `true` | no |
+| <a name="input_grafana_admin_password"></a> [Grafana\_admin\_password](#input\_grafana\_admin\_password) | Admin password for Grafana | `string` | n/a | yes |
+| <a name="input_grafana_storage_size"></a> [Grafana\_storage\_size](#input\_grafana\_storage\_size) | Storage size for Grafana in GB | `string` | `"10Gi"` | no |
+| <a name="input_monitoring_namespace"></a> [monitoring\_namespace](#input\_monitoring\_namespace) | Kubernetes namespace for monitoring resources | `string` | `"monitoring"` | no |
+| <a name="input_prometheus_storage_size"></a> [Prometheus\_storage\_size](#input\_prometheus\_storage\_size) | Storage size for Prometheus in GB | `string` | `"50Gi"` | no |
+| <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
+| <a name="input_retention_days"></a> [retention\_days](#input\_retention\_days) | Number of days to retain monitoring data | `number` | `3` | no |
+| <a name="input_slack_webhook_url"></a> [slack\_webhook\_url](#input\_slack\_webhook\_url) | Slack webhook URL for alerts | `string` | `""` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_cloudwatch_log_group_name"></a> [CloudWatch\_log\_group\_name](#output\_cloudwatch\_log\_group\_name) | Name of the CloudWatch log group for EKS cluster |
+| <a name="output_grafana_workspace_id"></a> [Grafana\_workspace\_id](#output\_grafana\_workspace\_id) | ID of the AWS Managed Grafana workspace |
+| <a name="output_grafana_workspace_url"></a> [Grafana\_workspace\_url](#output\_grafana\_workspace\_url) | URL of the AWS Managed Grafana workspace |
+| <a name="output_helm_release_status"></a> [helm\_release\_status](#output\_helm\_release\_status) | Status of the kube-Prometheus-stack Helm release |
+| <a name="output_monitoring_namespace"></a> [monitoring\_namespace](#output\_monitoring\_namespace) | Kubernetes namespace for monitoring |
+| <a name="output_prometheus_role_arn"></a> [Prometheus\_role\_arn](#output\_prometheus\_role\_arn) | ARN of the IAM role for Prometheus |
+| <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic for alerts |
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
