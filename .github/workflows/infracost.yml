@@ -130,34 +130,34 @@ jobs:
                           --format=json \
                           --usage-file=.infracost/usage-staging.yml \
                           --compare-to=/tmp/infracost-base.json \
-                          --out-file=/tmp/infracost.json
+                          --out-file=/tmp/staging-infracost.json
           else
             echo "No base branch infrastructure found, generating breakdown..."
             infracost breakdown --path=${TF_ROOT}/environments/staging \
                               --format=json \
                               --usage-file=.infracost/usage-staging.yml \
-                              --out-file=/tmp/infracost.json
+                              --out-file=/tmp/staging-infracost.json
           fi
-
-      - name: Post Infracost comment
-        if: github.event_name == 'pull_request'
-        run: |
-          infracost comment github --path=/tmp/infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --pull-request=${{github.event.pull_request.number}} \
-                                   --behavior=update
 
       - name: Upload staging cost report
         uses: actions/upload-artifact@v4
         with:
           name: staging-infracost-report
-          path: /tmp/infracost.json
+          path: /tmp/staging-infracost.json
+
+      - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost comment github --path=/tmp/staging-infracost.json \
+                                   --repo=$GITHUB_REPOSITORY \
+                                   --github-token=${{github.token}} \
+                                   --pull-request=${{github.event.pull_request.number}} \
+                                   --behavior=update
 
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
-          infracost comment github --path=/tmp/infracost.json \
+          infracost comment github --path=/tmp/staging-infracost.json \
                                    --repo=$GITHUB_REPOSITORY \
                                    --github-token=${{github.token}} \
                                    --commit=${{github.sha}} \
@@ -273,34 +273,34 @@ jobs:
                           --format=json \
                           --usage-file=.infracost/usage-production.yml \
                           --compare-to=/tmp/infracost-base.json \
-                          --out-file=/tmp/infracost.json
+                          --out-file=/tmp/production-infracost.json
           else
             echo "No base branch infrastructure found, generating breakdown..."
             infracost breakdown --path=${TF_ROOT}/environments/production \
                               --format=json \
                               --usage-file=.infracost/usage-production.yml \
-                              --out-file=/tmp/infracost.json
+                              --out-file=/tmp/production-infracost.json
           fi
-
-      - name: Post Infracost comment
-        if: github.event_name == 'pull_request'
-        run: |
-          infracost comment github --path=/tmp/infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --pull-request=${{github.event.pull_request.number}} \
-                                   --behavior=update
 
       - name: Upload production cost report
         uses: actions/upload-artifact@v4
         with:
           name: production-infracost-report
-          path: /tmp/infracost.json
+          path: /tmp/production-infracost.json
+
+      - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost comment github --path=/tmp/production-infracost.json \
+                                   --repo=$GITHUB_REPOSITORY \
+                                   --github-token=${{github.token}} \
+                                   --pull-request=${{github.event.pull_request.number}} \
+                                   --behavior=update
 
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
-          infracost comment github --path=/tmp/infracost.json \
+          infracost comment github --path=/tmp/production-infracost.json \
                                    --repo=$GITHUB_REPOSITORY \
                                    --github-token=${{github.token}} \
                                    --commit=${{github.sha}} \
@@ -336,14 +336,34 @@ jobs:
       - name: Generate combined cost report
         run: |
           # List downloaded files for debugging
+          echo "=== DEBUGGING ARTIFACT DOWNLOADS ==="
           echo "Staging files:"
-          ls -la /tmp/staging/
+          ls -la /tmp/staging/ || echo "Staging directory not found"
           echo "Production files:"
-          ls -la /tmp/production/
+          ls -la /tmp/production/ || echo "Production directory not found"
           
-          # Copy files with proper names
-          cp /tmp/staging/infracost.json /tmp/staging-costs.json
-          cp /tmp/production/infracost.json /tmp/production-costs.json
+          # Check if infracost files exist with correct names
+          if [ -f "/tmp/staging/staging-infracost.json" ]; then
+            echo "✅ Staging staging-infracost.json found"
+            echo "Staging file size: $(wc -c < /tmp/staging/staging-infracost.json) bytes"
+          else
+            echo "❌ Staging staging-infracost.json NOT found"
+          fi
+          
+          if [ -f "/tmp/production/production-infracost.json" ]; then
+            echo "✅ Production production-infracost.json found"  
+            echo "Production file size: $(wc -c < /tmp/production/production-infracost.json) bytes"
+          else
+            echo "❌ Production production-infracost.json NOT found"
+          fi
+          
+          # Copy files with standard names for combination
+          cp /tmp/staging/staging-infracost.json /tmp/staging-costs.json
+          cp /tmp/production/production-infracost.json /tmp/production-costs.json
+          
+          # Verify copied files
+          echo "Copied files:"
+          ls -la /tmp/staging-costs.json /tmp/production-costs.json
           
           # Combine reports
           infracost output --path="/tmp/staging-costs.json,/tmp/production-costs.json" \
@@ -402,7 +422,8 @@ jobs:
 
   budget-alerts:
     name: Budget Monitoring
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
+    needs: [infracost-staging, infracost-production]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
     
     steps:
@@ -428,9 +449,31 @@ jobs:
 
       - name: Check budget thresholds
         run: |
-          # Extract costs from downloaded reports
-          STAGING_COST=$(cat /tmp/staging/infracost.json | jq -r '.totalMonthlyCost // "0"')
-          PRODUCTION_COST=$(cat /tmp/production/infracost.json | jq -r '.totalMonthlyCost // "0"')
+          # Debug artifact downloads
+          echo "=== DEBUGGING BUDGET ALERTS ARTIFACTS ==="
+          echo "Staging directory contents:"
+          ls -la /tmp/staging/ || echo "Staging directory not found"
+          echo "Production directory contents:"
+          ls -la /tmp/production/ || echo "Production directory not found"
+          
+          # Check if files exist before processing with correct names
+          if [ -f "/tmp/staging/staging-infracost.json" ]; then
+            echo "✅ Staging artifact found"
+          else
+            echo "❌ Staging artifact missing"
+            exit 1
+          fi
+          
+          if [ -f "/tmp/production/production-infracost.json" ]; then
+            echo "✅ Production artifact found"
+          else
+            echo "❌ Production artifact missing"
+            exit 1
+          fi
+          
+          # Extract costs from downloaded reports with correct file names
+          STAGING_COST=$(cat /tmp/staging/staging-infracost.json | jq -r '.totalMonthlyCost // "0"')
+          PRODUCTION_COST=$(cat /tmp/production/production-infracost.json | jq -r '.totalMonthlyCost // "0"')
           
           echo "Staging monthly cost: \$${STAGING_COST}"
           echo "Production monthly cost: \$${PRODUCTION_COST}"
