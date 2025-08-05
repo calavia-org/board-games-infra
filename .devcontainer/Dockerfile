@@ -47,30 +47,45 @@ RUN if ! id -u vscode > /dev/null 2>&1; then \
         && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/vscode; \
     fi
 
-# Cambiar a usuario vscode para instalaciones
-USER vscode
-WORKDIR /home/vscode
-
+# Todas las instalaciones como root (ya somos root por defecto)
 # Instalar AWS CLI v2
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then AWS_ARCH="x86_64"; \
+    elif [ "$ARCH" = "arm64" ]; then AWS_ARCH="aarch64"; \
+    else AWS_ARCH="x86_64"; fi && \
+    curl -L "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
     && ./aws/install \
     && rm -rf aws awscliv2.zip
 
 # Instalar Terraform
-RUN curl -o terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then TF_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then TF_ARCH="arm64"; \
+    else TF_ARCH="amd64"; fi && \
+    curl -L -o terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TF_ARCH}.zip" \
     && unzip terraform.zip \
     && mv terraform /usr/local/bin/ \
     && rm terraform.zip
 
 # Instalar kubectl
-RUN curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then KUBECTL_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then KUBECTL_ARCH="arm64"; \
+    else KUBECTL_ARCH="amd64"; fi && \
+    curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${KUBECTL_ARCH}/kubectl" \
     && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
     && rm kubectl
 
 # Instalar TFLint
-RUN curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash \
-    && mv /home/vscode/bin/tflint /usr/local/bin/
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then TFLINT_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then TFLINT_ARCH="arm64"; \
+    else TFLINT_ARCH="amd64"; fi && \
+    curl -L -o tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_${TFLINT_ARCH}.zip" \
+    && unzip tflint.zip \
+    && mv tflint /usr/local/bin/ \
+    && rm tflint.zip
 
 # Instalar Trivy
 RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list' \
@@ -80,8 +95,25 @@ RUN sh -c 'echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecur
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar Infracost
-RUN curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh \
-    && mv infracost /usr/local/bin/
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then INFRACOST_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then INFRACOST_ARCH="arm64"; \
+    else INFRACOST_ARCH="amd64"; fi && \
+    curl -L -o infracost.tar.gz "https://github.com/infracost/infracost/releases/download/v${INFRACOST_VERSION}/infracost-linux-${INFRACOST_ARCH}.tar.gz" \
+    && tar -xzf infracost.tar.gz \
+    && chmod +x infracost-linux-${INFRACOST_ARCH} \
+    && mv infracost-linux-${INFRACOST_ARCH} /usr/local/bin/infracost \
+    && rm infracost.tar.gz
+
+# Instalar herramientas NPM globalmente
+RUN npm install -g \
+    markdownlint-cli@0.39.0 \
+    @commitlint/cli@18.4.3 \
+    @commitlint/config-conventional@18.4.3
+
+# Cambiar a usuario vscode para configuraciones de usuario
+USER vscode
+WORKDIR /home/vscode
 
 # Instalar Python tools y pre-commit
 RUN pip install --no-cache-dir \
@@ -89,12 +121,6 @@ RUN pip install --no-cache-dir \
     yamllint==1.35.1 \
     ansible-lint==6.22.2 \
     && echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc
-
-# Instalar herramientas adicionales con npm
-RUN npm install -g \
-    markdownlint-cli@0.39.0 \
-    @commitlint/cli@18.4.3 \
-    @commitlint/config-conventional@18.4.3
 
 # Configurar Git globalmente (valores por defecto)
 RUN git config --global init.defaultBranch main \
