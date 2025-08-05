@@ -51,9 +51,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 # Crear usuario vscode si no existe y configurar permisos de Docker
 RUN if ! id -u vscode > /dev/null 2>&1; then \
-        groupadd --gid 1000 vscode \
-        && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \
-        && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/vscode; \
+    groupadd --gid 1000 vscode \
+    && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \
+    && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/vscode; \
     fi \
     && usermod -aG docker vscode
 

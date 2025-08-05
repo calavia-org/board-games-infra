@@ -13,7 +13,7 @@ repos:
         description: Asegura que los archivos terminen con nueva línea
       - id: check-yaml
         description: Verifica sintaxis YAML
-        args: ['--multi']
+        args: ["--multi"]
       - id: check-json
         description: Verifica sintaxis JSON
       - id: check-merge-conflict
@@ -22,12 +22,12 @@ repos:
         description: Verifica conflictos de nombres de archivos
       - id: check-added-large-files
         description: Previene archivos grandes (>500KB)
-        args: ['--maxkb=500']
+        args: ["--maxkb=500"]
       - id: detect-private-key
         description: Detecta claves privadas accidentales
       - id: mixed-line-ending
         description: Normaliza terminaciones de línea
-        args: ['--fix=lf']
+        args: ["--fix=lf"]
 
   # Terraform hooks optimizados
   - repo: https://github.com/antonbabenko/pre-commit-terraform
@@ -63,7 +63,7 @@ repos:
     hooks:
       - id: markdownlint
         description: Linter para archivos Markdown
-        args: ['--fix', '--config', '.markdownlint.yml']
+        args: ["--fix", "--config", ".markdownlint.yml"]
 
   # Validación de workflows de GitHub Actions
   - repo: https://github.com/rhysd/actionlint
@@ -78,7 +78,7 @@ repos:
     hooks:
       - id: detect-secrets
         description: Detecta secretos en el código
-        args: ['--baseline', '.secrets.baseline']
+        args: ["--baseline", ".secrets.baseline"]
         exclude: package.lock.json
 
   # Linting de scripts de shell
@@ -95,7 +95,7 @@ repos:
     hooks:
       - id: hadolint-docker
         description: Linter para Dockerfiles
-        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+        args: ["--ignore", "DL3008", "--ignore", "DL3009"]
 
   # Hooks personalizados optimizados para Terraform
   # Estos hooks reemplazan los originales con mejoras de rendimiento y configuración
@@ -141,9 +141,9 @@ ci:
     for more information, see https://pre-commit.ci
 
   # Configuración de automatización
-  autofix_prs: true                    # Aplica fixes automáticamente en PRs
-  autoupdate_branch: ''                # Branch para actualizaciones automáticas
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly          # Frecuencia de actualizaciones
-  skip: []                            # Hooks a omitir (ninguno)
-  submodules: false                   # No procesar submódulos
+  autofix_prs: true # Aplica fixes automáticamente en PRs
+  autoupdate_branch: "" # Branch para actualizaciones automáticas
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: weekly # Frecuencia de actualizaciones
+  skip: [] # Hooks a omitir (ninguno)
+  submodules: false # No procesar submódulos
