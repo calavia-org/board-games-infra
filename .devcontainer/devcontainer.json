@@ -3,17 +3,6 @@
   "dockerFile": "Dockerfile",
   "context": "..",
   "features": {
-    "ghcr.io/devcontainers/features/aws-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.6.6"
-    },
-    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      "version": "latest",
-      "helm": "latest",
-      "minikube": "none"
-    },
     "ghcr.io/devcontainers/features/github-cli:1": {
       "installDirectlyFromGitHubRelease": true,
       "version": "latest"
@@ -48,7 +37,11 @@
         "redhat.vscode-yaml",
         "davidanson.vscode-markdownlint",
         "yzhang.markdown-all-in-one",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-containers",
+        "ms-python.python",
+        "Redis.redis-for-vscode",
+        "hashicorp.hcl"
       ],
       "settings": {
         "terraform.languageServer.enable": true,

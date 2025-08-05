@@ -10,6 +10,7 @@ LABEL description="Devcontainer optimizado para Board Games Infrastructure con p
 # Variables de entorno
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERRAFORM_VERSION=1.8.5
+ENV TERRAFORM_DOCS_VERSION=v0.17.0
 ENV KUBECTL_VERSION=v1.31.0
 ENV TFLINT_VERSION=v0.47.0
 ENV TRIVY_VERSION=0.44.0
@@ -34,18 +35,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-transport-https \
     && rm -rf /var/lib/apt/lists/*
 
+# Instalar Docker
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -f docker
+
 # Instalar Node.js (para algunas herramientas)
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear usuario vscode si no existe
+# Crear usuario vscode si no existe y configurar permisos de Docker
 RUN if ! id -u vscode > /dev/null 2>&1; then \
         groupadd --gid 1000 vscode \
         && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \
         && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/vscode; \
-    fi
+    fi \
+    && usermod -aG docker vscode
 
 # Todas las instalaciones como root (ya somos root por defecto)
 # Instalar AWS CLI v2
@@ -67,6 +77,17 @@ RUN ARCH=$(dpkg --print-architecture) && \
     && unzip terraform.zip \
     && mv terraform /usr/local/bin/ \
     && rm terraform.zip
+
+# Instalar terraform-docs
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then TFDOCS_ARCH="amd64"; \
+    elif [ "$ARCH" = "arm64" ]; then TFDOCS_ARCH="arm64"; \
+    else TFDOCS_ARCH="amd64"; fi && \
+    curl -L -o terraform-docs.tar.gz "https://github.com/terraform-docs/terraform-docs/releases/download/${TERRAFORM_DOCS_VERSION}/terraform-docs-${TERRAFORM_DOCS_VERSION}-linux-${TFDOCS_ARCH}.tar.gz" \
+    && tar -xzf terraform-docs.tar.gz \
+    && chmod +x terraform-docs \
+    && mv terraform-docs /usr/local/bin/ \
+    && rm terraform-docs.tar.gz
 
 # Instalar kubectl
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -132,6 +153,7 @@ RUN mkdir -p ~/.aws ~/.kube ~/.terraform.d
 
 # Configurar aliases útiles
 RUN echo 'alias tf="terraform"' >> ~/.bashrc \
+    && echo 'alias tfdocs="terraform-docs"' >> ~/.bashrc \
     && echo 'alias k="kubectl"' >> ~/.bashrc \
     && echo 'alias pc="pre-commit"' >> ~/.bashrc \
     && echo 'alias pcr="pre-commit run"' >> ~/.bashrc \
@@ -154,19 +176,59 @@ RUN echo "kctx() {" >> ~/.bashrc \
 # Configurar prompt mejorado
 RUN echo 'export PS1="\u@\h:\w\$ "' >> ~/.bashrc
 
-# Verificar instalaciones
-RUN echo "Verificando instalaciones..." \
+# Agregar configuración de Docker al bashrc para verificación automática
+RUN echo '' >> ~/.bashrc \
+    && echo '# Verificar permisos de Docker al iniciar sesión' >> ~/.bashrc \
+    && echo 'if [ -S /var/run/docker.sock ] && ! docker info >/dev/null 2>&1; then' >> ~/.bashrc \
+    && echo '    echo "⚠️  Configurando permisos de Docker..."' >> ~/.bashrc \
+    && echo '    sudo chown root:docker /var/run/docker.sock 2>/dev/null || true' >> ~/.bashrc \
+    && echo '    sudo chmod 664 /var/run/docker.sock 2>/dev/null || true' >> ~/.bashrc \
+    && echo 'fi' >> ~/.bashrc
+
+# Cambiar a root para crear el script de Docker setup
+USER root
+
+# Crear script de entrada para configurar permisos de Docker
+RUN echo '#!/bin/bash' > /usr/local/bin/docker-setup.sh \
+    && echo 'set -e' >> /usr/local/bin/docker-setup.sh \
+    && echo '' >> /usr/local/bin/docker-setup.sh \
+    && echo '# Configurar permisos de Docker socket si existe' >> /usr/local/bin/docker-setup.sh \
+    && echo 'if [ -S /var/run/docker.sock ]; then' >> /usr/local/bin/docker-setup.sh \
+    && echo '    echo "Configurando permisos de Docker socket..."' >> /usr/local/bin/docker-setup.sh \
+    && echo '    chown root:docker /var/run/docker.sock' >> /usr/local/bin/docker-setup.sh \
+    && echo '    chmod 664 /var/run/docker.sock' >> /usr/local/bin/docker-setup.sh \
+    && echo '    echo "✅ Permisos de Docker configurados correctamente"' >> /usr/local/bin/docker-setup.sh \
+    && echo 'else' >> /usr/local/bin/docker-setup.sh \
+    && echo '    echo "⚠️  Docker socket no encontrado en /var/run/docker.sock"' >> /usr/local/bin/docker-setup.sh \
+    && echo 'fi' >> /usr/local/bin/docker-setup.sh \
+    && echo '' >> /usr/local/bin/docker-setup.sh \
+    && echo '# Ejecutar comando pasado como argumento' >> /usr/local/bin/docker-setup.sh \
+    && echo 'exec "$@"' >> /usr/local/bin/docker-setup.sh \
+    && chmod +x /usr/local/bin/docker-setup.sh
+
+# Volver a usuario vscode
+USER vscode
+
+# Verificar instalaciones (asegura ~/.local/bin en PATH para pre-commit)
+RUN export PATH="$HOME/.local/bin:$PATH" \
+    && echo "Verificando instalaciones..." \
     && aws --version \
     && terraform version \
+    && terraform-docs --version \
     && kubectl version --client \
     && tflint --version \
     && trivy --version \
     && infracost --version \
+    && docker --version \
+    && docker compose version \
     && pre-commit --version \
     && echo "✅ Todas las herramientas instaladas correctamente"
 
 # Volver al directorio de trabajo por defecto
 WORKDIR /workspace
+
+# Configurar punto de entrada con setup de Docker
+ENTRYPOINT ["/usr/local/bin/docker-setup.sh"]
 
 # Punto de entrada por defecto
 CMD ["/bin/bash"]

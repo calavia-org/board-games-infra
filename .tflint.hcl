@@ -18,9 +18,6 @@ config {
   # Disable default rules that might be too strict
   disabled_by_default = false
 
-  # Call module inspection (expensive but thorough)
-  call_module_type = "all"
-
   # Force check mode to avoid making changes
   force = false
 
@@ -59,12 +56,12 @@ rule "terraform_typed_variables" {
 
 rule "terraform_module_pinned_source" {
   enabled = true
-  style = "semver"
+  style   = "semver"
 }
 
 rule "terraform_naming_convention" {
   enabled = true
-  format = "snake_case"
+  format  = "snake_case"
 }
 
 rule "terraform_required_version" {

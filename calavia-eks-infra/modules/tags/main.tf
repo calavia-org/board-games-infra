@@ -2,46 +2,6 @@
 # Módulo Tags - Sistema de etiquetado estándar para Board Games Infrastructure
 # ===============================================================================
 
-# Variables de entrada para configurar el etiquetado
-variable "environment" {
-  description = "Entorno de despliegue (staging, production)"
-  type        = string
-  validation {
-    condition     = contains(["staging", "production"], var.environment)
-    error_message = "Environment must be 'staging' or 'production'."
-  }
-}
-
-variable "application" {
-  description = "Nombre de la aplicación"
-  type        = string
-  default     = "board-games"
-}
-
-variable "version" {
-  description = "Versión de la aplicación"
-  type        = string
-  default     = "v2.0.0"
-}
-
-variable "owner" {
-  description = "Equipo responsable del recurso"
-  type        = string
-  default     = "calavia-org"
-}
-
-variable "project" {
-  description = "Nombre del proyecto"
-  type        = string
-  default     = "board-games-infra"
-}
-
-variable "additional_tags" {
-  description = "Tags adicionales específicos del recurso"
-  type        = map(string)
-  default     = {}
-}
-
 # ===============================================================================
 # Configuración de tags estándar
 # ===============================================================================
@@ -49,23 +9,27 @@ variable "additional_tags" {
 locals {
   # Tags base que se aplican a todos los recursos
   base_tags = {
-    Project     = var.project
-    Application = var.application
+    Project     = var.project_name
+    Service     = var.service
     Environment = var.environment
-    Owner       = var.owner
-    Version     = var.version
+    Owner       = var.owner_email
+    Version     = var.infrastructure_version
     ManagedBy   = "terraform"
     CreatedAt   = formatdate("YYYY-MM-DD", timestamp())
 
     # Tags para control de costes
-    CostCenter = var.environment == "production" ? "prod-gaming" : "dev-gaming"
-    BillingTag = "${var.application}-${var.environment}"
+    CostCenter     = var.cost_center
+    BillingProject = var.billing_project
+    BusinessUnit   = var.business_unit
+    Department     = var.department
 
     # Tags para governance
-    Backup     = var.environment == "production" ? "required" : "optional"
-    Monitoring = "enabled"
-    Security   = "standard"
-    Compliance = "gaming-workload"
+    Criticality       = var.criticality
+    Backup            = var.environment == "production" ? "required" : "optional"
+    Monitoring        = "enabled"
+    Security          = "standard"
+    Compliance        = "gaming-workload"
+    MaintenanceWindow = var.maintenance_window
   }
 
   # Combinar tags base con tags adicionales
@@ -86,14 +50,14 @@ output "environment" {
   value       = var.environment
 }
 
-output "application" {
-  description = "Nombre de la aplicación"
-  value       = var.application
+output "service" {
+  description = "Nombre del servicio"
+  value       = var.service
 }
 
-output "project" {
+output "project_name" {
   description = "Nombre del proyecto"
-  value       = var.project
+  value       = var.project_name
 }
 
 output "cost_center" {
@@ -101,7 +65,7 @@ output "cost_center" {
   value       = local.base_tags.CostCenter
 }
 
-output "billing_tag" {
-  description = "Tag de facturación"
-  value       = local.base_tags.BillingTag
+output "billing_project" {
+  description = "Proyecto de facturación"
+  value       = local.base_tags.BillingProject
 }

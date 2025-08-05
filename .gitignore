@@ -158,7 +158,7 @@ CONSOLIDATION-*.md
 .nyc_output
 
 # Terraform cache específico
-.terraform-validate-cache/
+.terraform-validate-cache
 .terraform-modules-cache/
 **/.terraform.lock.hcl.backup
 

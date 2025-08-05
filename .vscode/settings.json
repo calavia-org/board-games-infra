@@ -59,7 +59,7 @@
     ".markdownlint.yml": "yaml"
   },
   "terraform.experimentalFeatures": {
-    "validateOnSave": true,
+    "validateOnSave": false,
     "prefillRequiredFields": true
   },
   "terraform.codelens.referenceCount": true,

@@ -47,6 +47,7 @@ repos:
           - --hook-config=--path-to-file=README.md
           - --hook-config=--add-to-existing-file=true
           - --hook-config=--create-file-if-not-exist=true
+          - --hook-config=--template=<!-- BEGIN_TF_DOCS -->\n{{ .Content }}\n<!-- END_TF_DOCS -->
 
   # Linting y formateo de archivos YAML
   - repo: https://github.com/adrienverge/yamllint

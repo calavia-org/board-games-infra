@@ -3,15 +3,15 @@ name: Infracost Cost Analysis
 on:
   pull_request:
     paths:
-      - 'calavia-eks-infra/**'
-      - '.infracost/**'
+      - "calavia-eks-infra/**"
+      - ".infracost/**"
   push:
     branches:
       - main
       - setup
     paths:
-      - 'calavia-eks-infra/**'
-      - '.infracost/**'
+      - "calavia-eks-infra/**"
+      - ".infracost/**"
   workflow_dispatch:
 
 env:
@@ -39,7 +39,7 @@ jobs:
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
-          ref: '${{ github.event.pull_request.base.ref }}'
+          ref: "${{ github.event.pull_request.base.ref }}"
 
       - name: Verify base branch structure
         id: check_base
@@ -55,10 +55,10 @@ jobs:
 
           # Check if infrastructure exists in base branch
           if [ -d "${TF_ROOT}/environments/staging" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "✅ Infrastructure directory exists in base branch"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ Infrastructure directory does not exist in base branch (first PR or empty main)"
           fi
 
@@ -67,25 +67,25 @@ jobs:
         run: |
           echo "Checking directory structure..."
           ls -la
-          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
-          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
-          ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
+          ls -la "${TF_ROOT}/" || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}/environments/" || echo "environments directory not found"
+          ls -la "${TF_ROOT}/environments/staging/" || echo "staging directory not found"
 
           echo "Changing to staging directory..."
-          cd ${TF_ROOT}/environments/staging
+          cd "${TF_ROOT}/environments/staging"
           echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (base)
         if: steps.check_base.outputs.exists == 'true'
         run: |
-          cd ${TF_ROOT}/environments/staging
+          cd "${TF_ROOT}"/environments/staging
           terraform validate
 
       - name: Generate Infracost cost baseline
         if: steps.check_base.outputs.exists == 'true'
         run: |
-          infracost breakdown --path=${TF_ROOT}/environments/staging \
+          infracost breakdown --path="${TF_ROOT}"/environments/staging \
                             --format=json \
                             --usage-file=.infracost/usage-staging.yml \
                             --out-file=/tmp/infracost-base.json
@@ -108,32 +108,32 @@ jobs:
         run: |
           echo "Checking directory structure after PR checkout..."
           ls -la
-          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
-          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
-          ls -la ${TF_ROOT}/environments/staging/ || echo "staging directory not found"
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/staging/ || echo "staging directory not found"
 
           echo "Changing to staging directory..."
-          cd ${TF_ROOT}/environments/staging
+          cd "${TF_ROOT}"/environments/staging
           echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (PR)
         run: |
-          cd ${TF_ROOT}/environments/staging
+          cd "${TF_ROOT}"/environments/staging
           terraform validate
 
       - name: Generate Infracost diff
         run: |
           if [ "${{ steps.check_base.outputs.exists }}" = "true" ]; then
             echo "Generating diff against base branch..."
-            infracost diff --path=${TF_ROOT}/environments/staging \
+            infracost diff --path="${TF_ROOT}"/environments/staging \
                           --format=json \
                           --usage-file=.infracost/usage-staging.yml \
                           --compare-to=/tmp/infracost-base.json \
                           --out-file=/tmp/staging-infracost.json
           else
             echo "No base branch infrastructure found, generating breakdown..."
-            infracost breakdown --path=${TF_ROOT}/environments/staging \
+            infracost breakdown --path="${TF_ROOT}"/environments/staging \
                               --format=json \
                               --usage-file=.infracost/usage-staging.yml \
                               --out-file=/tmp/staging-infracost.json
@@ -149,18 +149,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           infracost comment github --path=/tmp/staging-infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --pull-request=${{github.event.pull_request.number}} \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --pull-request="${{github.event.pull_request.number}}" \
                                    --behavior=update
 
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
           infracost comment github --path=/tmp/staging-infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --commit=${{github.sha}} \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --commit="${{github.sha}}" \
                                    --behavior=update
 
   infracost-production:
@@ -184,7 +184,7 @@ jobs:
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
-          ref: '${{ github.event.pull_request.base.ref }}'
+          ref: "${{ github.event.pull_request.base.ref }}"
 
       - name: Verify base branch structure (production)
         id: check_base_prod
@@ -199,10 +199,10 @@ jobs:
 
           # Check if infrastructure exists in base branch
           if [ -d "${TF_ROOT}/environments/production" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "✅ Production infrastructure directory exists in base branch"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ Production infrastructure directory does not exist in base branch (first PR or empty main)"
           fi
 
@@ -211,25 +211,25 @@ jobs:
         run: |
           echo "Checking directory structure for production..."
           ls -la
-          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
-          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
-          ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/production/ || echo "production directory not found"
 
           echo "Changing to production directory..."
-          cd ${TF_ROOT}/environments/production
+          cd "${TF_ROOT}"/environments/production
           echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (base)
         if: steps.check_base_prod.outputs.exists == 'true'
         run: |
-          cd ${TF_ROOT}/environments/production
+          cd "${TF_ROOT}"/environments/production
           terraform validate
 
       - name: Generate Infracost cost baseline
         if: steps.check_base_prod.outputs.exists == 'true'
         run: |
-          infracost breakdown --path=${TF_ROOT}/environments/production \
+          infracost breakdown --path="${TF_ROOT}"/environments/production \
                             --format=json \
                             --usage-file=.infracost/usage-production.yml \
                             --out-file=/tmp/infracost-base.json
@@ -251,32 +251,32 @@ jobs:
         run: |
           echo "Checking directory structure for production after PR checkout..."
           ls -la
-          ls -la ${TF_ROOT}/ || echo "TF_ROOT directory not found"
-          ls -la ${TF_ROOT}/environments/ || echo "environments directory not found"
-          ls -la ${TF_ROOT}/environments/production/ || echo "production directory not found"
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/production/ || echo "production directory not found"
 
           echo "Changing to production directory..."
-          cd ${TF_ROOT}/environments/production
+          cd "${TF_ROOT}"/environments/production
           echo "Running terraform init..."
           terraform init -backend=false
 
       - name: Terraform Validate (PR)
         run: |
-          cd ${TF_ROOT}/environments/production
+          cd "${TF_ROOT}"/environments/production
           terraform validate
 
       - name: Generate Infracost diff
         run: |
           if [ "${{ steps.check_base_prod.outputs.exists }}" = "true" ]; then
             echo "Generating diff against base branch..."
-            infracost diff --path=${TF_ROOT}/environments/production \
+            infracost diff --path="${TF_ROOT}"/environments/production \
                           --format=json \
                           --usage-file=.infracost/usage-production.yml \
                           --compare-to=/tmp/infracost-base.json \
                           --out-file=/tmp/production-infracost.json
           else
             echo "No base branch infrastructure found, generating breakdown..."
-            infracost breakdown --path=${TF_ROOT}/environments/production \
+            infracost breakdown --path="${TF_ROOT}"/environments/production \
                               --format=json \
                               --usage-file=.infracost/usage-production.yml \
                               --out-file=/tmp/production-infracost.json
@@ -292,18 +292,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           infracost comment github --path=/tmp/production-infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --pull-request=${{github.event.pull_request.number}} \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --pull-request="${{github.event.pull_request.number}}" \
                                    --behavior=update
 
       - name: Post Infracost comment (commit)
         if: github.event_name == 'push'
         run: |
           infracost comment github --path=/tmp/production-infracost.json \
-                                   --repo=$GITHUB_REPOSITORY \
-                                   --github-token=${{github.token}} \
-                                   --commit=${{github.sha}} \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --commit="${{github.sha}}" \
                                    --behavior=update
 
   infracost-summary:
@@ -471,8 +471,8 @@ jobs:
           fi
 
           # Extract costs from downloaded reports with correct file names
-          STAGING_COST=$(cat /tmp/staging/staging-infracost.json | jq -r '.totalMonthlyCost // "0"')
-          PRODUCTION_COST=$(cat /tmp/production/production-infracost.json | jq -r '.totalMonthlyCost // "0"')
+          STAGING_COST=$(jq -r '.totalMonthlyCost // "0"' < /tmp/staging/staging-infracost.json)
+          PRODUCTION_COST=$(jq -r '.totalMonthlyCost // "0"' < /tmp/production/production-infracost.json)
 
           echo "Staging monthly cost: \$${STAGING_COST}"
           echo "Production monthly cost: \$${PRODUCTION_COST}"
@@ -480,12 +480,12 @@ jobs:
           # Alertas de presupuesto
           if (( $(echo "$STAGING_COST > 500" | bc -l) )); then
             echo "⚠️ STAGING BUDGET ALERT: Monthly cost (\$${STAGING_COST}) exceeds \$500 threshold"
-            echo "staging_budget_exceeded=true" >> $GITHUB_ENV
+            echo "staging_budget_exceeded=true" >> "$GITHUB_ENV"
           fi
 
           if (( $(echo "$PRODUCTION_COST > 1500" | bc -l) )); then
             echo "⚠️ PRODUCTION BUDGET ALERT: Monthly cost (\$${PRODUCTION_COST}) exceeds \$1500 threshold"
-            echo "production_budget_exceeded=true" >> $GITHUB_ENV
+            echo "production_budget_exceeded=true" >> "$GITHUB_ENV"
           fi
 
       - name: Send budget alert
