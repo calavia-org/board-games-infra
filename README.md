@@ -703,7 +703,7 @@ No inputs.
 
 No outputs.
 <!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
 No requirements.
@@ -727,4 +727,65 @@ No inputs.
 ## Outputs
 
 No outputs.
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+No inputs.
+
+## Outputs
+
+No outputs.
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+README.md updated successfully
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+## Requirements
+
+No requirements.
+## Providers
+
+## Providers
+
+No providers.
+## Modules
+
+## Modules
+
+No modules.
+## Resources
+
+## Resources
+
+No resources.
+## Inputs
+
+## Inputs
+
+No inputs.
+## Outputs
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->

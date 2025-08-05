@@ -63,7 +63,11 @@ repos:
     hooks:
       - id: markdownlint
         description: Linter para archivos Markdown
-        args: ["--fix", "--config", ".markdownlint.yml"]
+        args: ["--config", ".markdownlint.yml"]
+        exclude: |
+          (?x)^(
+            .*README\.md$
+          )$
 
   # Validación de workflows de GitHub Actions
   - repo: https://github.com/rhysd/actionlint

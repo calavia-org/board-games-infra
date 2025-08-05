@@ -9,34 +9,34 @@ To use this module, include it in your Terraform configuration as follows:
 ```hcl
 module "vpc" {
   source = "../modules/vpc"
-  
+
   cluster_name = "my-eks-cluster"
   vpc_cidr     = "10.0.0.0/16"
-  
+
   availability_zones = [
     "us-west-2a",
-    "us-west-2b", 
+    "us-west-2b",
     "us-west-2c"
   ]
-  
+
   public_subnet_cidrs = [
     "10.0.1.0/24",
     "10.0.2.0/24",
     "10.0.3.0/24"
   ]
-  
+
   private_subnet_cidrs = [
     "10.0.4.0/24",
     "10.0.5.0/24",
     "10.0.6.0/24"
   ]
-  
+
   database_subnet_cidrs = [
     "10.0.7.0/24",
     "10.0.8.0/24",
     "10.0.9.0/24"
   ]
-  
+
   tags = {
     Environment = "production"
     Project     = "calavia-eks"
@@ -65,6 +65,11 @@ module "vpc" {
 This module is licensed under the MIT License. See the LICENSE file for more details.
 
 <!-- BEGIN_TF_DOCS -->
+<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 | Name | Version |
@@ -131,4 +136,4 @@ No modules.
 | <a name="output_public_subnet_ids"></a> [public\_subnet\_ids](#output\_public\_subnet\_ids) | IDs of the public subnets |
 | <a name="output_vpc_cidr"></a> [vpc\_cidr](#output\_vpc\_cidr) | CIDR block of the VPC |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END_TF_DOCS -->
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
