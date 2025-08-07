@@ -1,9 +1,6 @@
 #!/bin/bash
 
-#=====# Configuración
-SCRIPT_DIR_VAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT_VAR="$(cd "${SCRIPT_DIR_VAR}/.." && pwd)"
-CACHE_DIR="${PROJECT_ROOT_VAR}/.terraform-validate-cache"==================================================================#
+#=============================================================================#
 # Script: scripts/verify-environment.sh
 # Descripción: Verifica que el entorno de desarrollo esté configurado
 #              correctamente para usar los hooks personalizados de pre-commit
@@ -21,11 +18,9 @@ readonly BLUE='\033[0;34m'
 readonly NC='\033[0m' # No Color
 
 # Configuración
-readonly SCRIPT_DIR
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-readonly CACHE_DIR="${PROJECT_ROOT}/.terraform-validate-cache"
+SCRIPT_DIR_VAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT_VAR="$(cd "${SCRIPT_DIR_VAR}/.." && pwd)"
+CACHE_DIR="${PROJECT_ROOT_VAR}/.terraform-validate-cache"
 
 # Funciones de utilidad
 log_info() {

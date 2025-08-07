@@ -18,7 +18,7 @@ permissions:
 # Variables de entorno globales - ALINEADAS CON PRE-COMMIT
 env:
   TERRAFORM_VERSION: "1.8.5"
-  TFLINT_VERSION: "0.47.0"
+  TFLINT_VERSION: "0.58.1"
   TRIVY_VERSION: "0.44.0"
   PYTHON_VERSION: "3.11"
   PRE_COMMIT_VERSION: "3.5.0"
