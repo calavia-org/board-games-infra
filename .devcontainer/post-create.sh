@@ -18,6 +18,7 @@ echo "  - Pre-commit: $(pre-commit --version)"
 echo "  - TFLint: $(tflint --version)"
 echo "  - Trivy: $(trivy --version | head -n1)"
 echo "  - Infracost: $(infracost --version)"
+echo "  - Hadolint: $(hadolint --version)"
 
 # Verificar Docker con configuración de permisos
 echo -n "  - Docker: "
@@ -77,4 +78,19 @@ fi
 
 echo ""
 echo "🎉 Devcontainer listo para usar!"
-echo "💡 Tip: Ejecuta 'pcra' para validar que todo funciona correctamente"
+
+# Ejecutar pre-commit en todos los archivos para verificar que todo funciona
+echo "� Ejecutando pre-commit en todos los archivos para verificar configuración..."
+export PATH="$HOME/.local/bin:$PATH"
+cd /workspace
+
+if pre-commit run --all-files; then
+    echo "✅ Pre-commit ejecutado exitosamente - todas las validaciones pasaron"
+else
+    echo "⚠️  Pre-commit encontró algunos problemas que requieren atención"
+    echo "   Esto es normal en la primera ejecución. Revisa los problemas reportados."
+    echo "   Puedes ejecutar 'pcra' nuevamente después de revisar los archivos."
+fi
+
+echo ""
+echo "💡 Tip: Usa 'pcra' para ejecutar todos los pre-commit hooks cuando necesites"

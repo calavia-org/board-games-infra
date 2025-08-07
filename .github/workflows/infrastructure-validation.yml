@@ -141,7 +141,7 @@ jobs:
       # Subir artefactos para debugging
       - name: Upload Terraform Cache Info
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-cache-info
           path: |

@@ -126,6 +126,16 @@ RUN ARCH=$(dpkg --print-architecture) && \
     && mv infracost-linux-${INFRACOST_ARCH} /usr/local/bin/infracost \
     && rm infracost.tar.gz
 
+# Instalar hadolint para linting de Dockerfiles
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then HADOLINT_ARCH="x86_64"; \
+    elif [ "$ARCH" = "arm64" ]; then HADOLINT_ARCH="arm64"; \
+    else HADOLINT_ARCH="x86_64"; fi && \
+    curl -L -o hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-${HADOLINT_ARCH}" \
+    && chmod +x hadolint \
+    && mv hadolint /usr/local/bin/ \
+    && echo "Hadolint instalado para arquitectura: ${HADOLINT_ARCH}"
+
 # Instalar herramientas NPM globalmente
 RUN npm install -g \
     markdownlint-cli@0.39.0 \
@@ -222,6 +232,7 @@ RUN export PATH="$HOME/.local/bin:$PATH" \
     && docker --version \
     && docker compose version \
     && pre-commit --version \
+    && hadolint --version \
     && echo "✅ Todas las herramientas instaladas correctamente"
 
 # Volver al directorio de trabajo por defecto

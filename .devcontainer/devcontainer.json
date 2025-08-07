@@ -41,7 +41,8 @@
         "ms-azuretools.vscode-containers",
         "ms-python.python",
         "Redis.redis-for-vscode",
-        "hashicorp.hcl"
+        "hashicorp.hcl",
+        "GitHub.vscode-github-actions"
       ],
       "settings": {
         "terraform.languageServer.enable": true,

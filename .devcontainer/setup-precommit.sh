@@ -142,7 +142,24 @@ fi
 # hadolint
 if ! command_exists hadolint; then
     print_status "Instalando hadolint..."
-    wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+
+    # Detectar arquitectura del sistema
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64)
+            HADOLINT_ARCH="x86_64"
+            ;;
+        aarch64|arm64)
+            HADOLINT_ARCH="arm64"
+            ;;
+        *)
+            print_warning "Arquitectura no soportada: $ARCH, usando x86_64 por defecto"
+            HADOLINT_ARCH="x86_64"
+            ;;
+    esac
+
+    print_status "Descargando hadolint para arquitectura: $HADOLINT_ARCH"
+    wget -O hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-${HADOLINT_ARCH}"
     chmod +x hadolint
     sudo mv hadolint /usr/local/bin/
     print_success "hadolint instalado"
