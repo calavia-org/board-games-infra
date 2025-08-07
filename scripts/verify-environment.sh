@@ -1,6 +1,9 @@
 #!/bin/bash
 
-#=============================================================================#
+#=====# Configuración
+SCRIPT_DIR_VAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT_VAR="$(cd "${SCRIPT_DIR_VAR}/.." && pwd)"
+CACHE_DIR="${PROJECT_ROOT_VAR}/.terraform-validate-cache"==================================================================#
 # Script: scripts/verify-environment.sh
 # Descripción: Verifica que el entorno de desarrollo esté configurado
 #              correctamente para usar los hooks personalizados de pre-commit
@@ -100,7 +103,7 @@ check_project_structure() {
     local missing_required=0
 
     for file in "${required_files[@]}"; do
-        if [[ -f "${PROJECT_ROOT}/${file}" ]]; then
+        if [[ -f "${PROJECT_ROOT_VAR}/${file}" ]]; then
             log_success "Archivo requerido encontrado: ${file}"
         else
             log_error "Archivo requerido faltante: ${file}"
@@ -109,7 +112,7 @@ check_project_structure() {
     done
 
     for file in "${optional_files[@]}"; do
-        if [[ -f "${PROJECT_ROOT}/${file}" ]]; then
+        if [[ -f "${PROJECT_ROOT_VAR}/${file}" ]]; then
             log_success "Archivo opcional encontrado: ${file}"
         else
             log_warning "Archivo opcional faltante: ${file}"
@@ -132,7 +135,7 @@ check_script_permissions() {
     local permission_errors=0
 
     for script in "${scripts[@]}"; do
-        local script_path="${PROJECT_ROOT}/${script}"
+        local script_path="${PROJECT_ROOT_VAR}/${script}"
         if [[ -f "$script_path" ]]; then
             if [[ -x "$script_path" ]]; then
                 log_success "Script ejecutable: ${script}"
@@ -151,7 +154,7 @@ check_script_permissions() {
 test_terraform_validate_wrapper() {
     log_info "Testeando terraform-validate-wrapper..."
 
-    local wrapper="${PROJECT_ROOT}/scripts/hooks/terraform-validate-wrapper.sh"
+    local wrapper="${PROJECT_ROOT_VAR}/scripts/hooks/terraform-validate-wrapper.sh"
 
     if [[ ! -x "$wrapper" ]]; then
         log_error "terraform-validate-wrapper.sh no es ejecutable"
@@ -162,7 +165,7 @@ test_terraform_validate_wrapper() {
     mkdir -p "$CACHE_DIR"
 
     # Test básico del wrapper
-    cd "${PROJECT_ROOT}/calavia-eks-infra/environments/staging" || {
+    cd "${PROJECT_ROOT_VAR}/calavia-eks-infra/environments/staging" || {
         log_error "No se puede acceder al directorio de staging"
         return 1
     }
@@ -195,7 +198,7 @@ test_terraform_validate_wrapper() {
 test_tflint_wrapper() {
     log_info "Testeando tflint-wrapper..."
 
-    local wrapper="${PROJECT_ROOT}/scripts/hooks/tflint-wrapper.sh"
+    local wrapper="${PROJECT_ROOT_VAR}/scripts/hooks/tflint-wrapper.sh"
 
     if [[ ! -x "$wrapper" ]]; then
         log_error "tflint-wrapper.sh no es ejecutable"
@@ -203,7 +206,7 @@ test_tflint_wrapper() {
     fi
 
     # Test básico del wrapper
-    cd "${PROJECT_ROOT}/calavia-eks-infra/environments/staging" || return 1
+    cd "${PROJECT_ROOT_VAR}/calavia-eks-infra/environments/staging" || return 1
 
     if "$wrapper" --version >/dev/null 2>&1; then
         log_success "tflint-wrapper funcional"
@@ -219,7 +222,7 @@ test_tflint_wrapper() {
 test_trivy_wrapper() {
     log_info "Testeando trivy-wrapper..."
 
-    local wrapper="${PROJECT_ROOT}/scripts/hooks/trivy-wrapper.sh"
+    local wrapper="${PROJECT_ROOT_VAR}/scripts/hooks/trivy-wrapper.sh"
 
     if [[ ! -x "$wrapper" ]]; then
         log_error "trivy-wrapper.sh no es ejecutable"
@@ -239,7 +242,7 @@ test_trivy_wrapper() {
 check_precommit_config() {
     log_info "Verificando configuración de pre-commit..."
 
-    local config_file="${PROJECT_ROOT}/.pre-commit-config.yaml"
+    local config_file="${PROJECT_ROOT_VAR}/.pre-commit-config.yaml"
 
     if [[ ! -f "$config_file" ]]; then
         log_error "Archivo .pre-commit-config.yaml no encontrado"
@@ -271,7 +274,7 @@ check_precommit_config() {
 test_precommit_execution() {
     log_info "Testeando ejecución de pre-commit..."
 
-    cd "$PROJECT_ROOT" || return 1
+    cd "$PROJECT_ROOT_VAR" || return 1
 
     # Instalar hooks si no están instalados
     if ! pre-commit install --install-hooks >/dev/null 2>&1; then
@@ -422,7 +425,7 @@ main() {
 }
 
 # Verificar que estamos en el directorio correcto
-if [[ ! -f "${PROJECT_ROOT}/.pre-commit-config.yaml" ]]; then
+if [[ ! -f "${PROJECT_ROOT_VAR}/.pre-commit-config.yaml" ]]; then
     log_error "Este script debe ejecutarse desde el directorio raíz del proyecto"
     log_error "Directorio actual: $(pwd)"
     log_error "Directorio esperado: directorio que contiene .pre-commit-config.yaml"

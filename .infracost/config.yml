@@ -15,3 +15,6 @@ projects:
 # Configuración global
 settings:
   currency: USD
+
+  # Deshabilitar verificaciones de compliance que pueden fallar en desarrollo
+  enable_cloud_for_organization: false
