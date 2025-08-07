@@ -411,16 +411,8 @@ aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::123456789012:
 ### Total Estimado: ~$15-20/mes
 
 Para 7 secretos con rotación mensual
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -545,4 +537,4 @@ No modules.
 | <a name="output_secrets_kms_alias_name"></a> [secrets\_kms\_alias\_name](#output\_secrets\_kms\_alias\_name) | KMS key alias name |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | KMS key ARN for secrets encryption |
 | <a name="output_secrets_kms_key_id"></a> [secrets\_kms\_key\_id](#output\_secrets\_kms\_key\_id) | KMS key ID for secrets encryption |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

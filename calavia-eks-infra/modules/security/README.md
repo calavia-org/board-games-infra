@@ -48,16 +48,8 @@ The module will output the following:
 ## License
 
 This module is licensed under the MIT License. See the LICENSE file for more information.
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -115,4 +107,4 @@ No modules.
 | <a name="output_eks_nodes_sg_id"></a> [eks\_nodes\_sg\_id](#output\_eks\_nodes\_sg\_id) | ID of the EKS nodes security group |
 | <a name="output_rds_sg_id"></a> [rds\_sg\_id](#output\_rds\_sg\_id) | ID of the RDS security group |
 | <a name="output_redis_sg_id"></a> [redis\_sg\_id](#output\_redis\_sg\_id) | ID of the Redis security group |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

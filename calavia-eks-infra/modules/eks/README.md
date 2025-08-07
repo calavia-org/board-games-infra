@@ -50,16 +50,8 @@ Las contribuciones son bienvenidas. Si deseas mejorar este módulo, por favor ab
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT.
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -136,4 +128,4 @@ No modules.
 | <a name="output_node_group_arn"></a> [node\_group\_arn](#output\_node\_group\_arn) | Amazon Resource Name (ARN) of the EKS Node Group |
 | <a name="output_node_group_status"></a> [node\_group\_status](#output\_node\_group\_status) | Status of the EKS Node Group |
 | <a name="output_oidc_provider_arn"></a> [oidc\_provider\_arn](#output\_oidc\_provider\_arn) | ARN of the OIDC Provider for IRSA |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

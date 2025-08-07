@@ -205,16 +205,8 @@ aws ce get-cost-and-usage \
   --group-by Type=TAG,Key=Component \
   --filter-by Tags,Key=Project,Values=board-games
 ```
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 No requirements.
@@ -261,4 +253,4 @@ No resources.
 | <a name="output_project_name"></a> [project\_name](#output\_project\_name) | Nombre del proyecto |
 | <a name="output_service"></a> [service](#output\_service) | Nombre del servicio |
 | <a name="output_tags"></a> [tags](#output\_tags) | Map completo de tags para aplicar a recursos |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

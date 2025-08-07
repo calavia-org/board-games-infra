@@ -49,16 +49,8 @@ module "elasticache_redis" {
 ## Licencia
 
 Este módulo se distribuye bajo la Licencia MIT.
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -141,4 +133,4 @@ No modules.
 | <a name="output_secret_name"></a> [secret\_name](#output\_secret\_name) | Name of the secret containing Redis credentials |
 | <a name="output_service_account_role_arn"></a> [service\_account\_role\_arn](#output\_service\_account\_role\_arn) | ARN of the IAM role for the Kubernetes service account |
 | <a name="output_subnet_group_name"></a> [subnet\_group\_name](#output\_subnet\_group\_name) | Name of the ElastiCache subnet group |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

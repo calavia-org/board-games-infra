@@ -5,7 +5,7 @@
 repos:
   # General hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         description: Elimina espacios en blanco al final de líneas
@@ -31,7 +31,7 @@ repos:
 
   # Terraform hooks optimizados
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.88.4
+    rev: v1.99.5
     hooks:
       # Formateo automático de código Terraform
       - id: terraform_fmt
@@ -59,7 +59,7 @@ repos:
 
   # Linting y formateo de archivos Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.45.0
     hooks:
       - id: markdownlint
         description: Linter para archivos Markdown
@@ -71,14 +71,14 @@ repos:
 
   # Validación de workflows de GitHub Actions
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.26
+    rev: v1.7.7
     hooks:
       - id: actionlint
         description: Linter para GitHub Actions workflows
 
   # Escaneo de seguridad para detectar secretos
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         description: Detecta secretos en el código

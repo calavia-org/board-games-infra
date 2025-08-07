@@ -69,16 +69,8 @@ module "rds_postgres" {
 - Ensure that the VPC and security groups are properly configured to allow access to the RDS instance.
 - The password must meet the RDS password policy requirements.
 - Backups are enabled by default with a retention period of 7 days, which can be adjusted as needed.
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -165,4 +157,4 @@ No modules.
 | <a name="output_secret_arn"></a> [secret\_arn](#output\_secret\_arn) | ARN of the secret containing database credentials |
 | <a name="output_secret_name"></a> [secret\_name](#output\_secret\_name) | Name of the secret containing database credentials |
 | <a name="output_service_account_role_arn"></a> [service\_account\_role\_arn](#output\_service\_account\_role\_arn) | ARN of the IAM role for the Kubernetes service account |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

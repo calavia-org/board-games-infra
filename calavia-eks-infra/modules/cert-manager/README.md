@@ -35,16 +35,8 @@ Este módulo puede proporcionar las siguientes salidas:
 ## Documentación Adicional
 
 Para más información sobre Cert-Manager, consulte la [documentación oficial](https://cert-manager.io/docs/).
-<!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 
-<!-- END_TF_DOCS -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -97,4 +89,4 @@ No modules.
 | <a name="output_helm_release_status"></a> [helm\_release\_status](#output\_helm\_release\_status) | Status of the Helm release |
 | <a name="output_letsencrypt_production_issuer"></a> [letsencrypt\_production\_issuer](#output\_letsencrypt\_production\_issuer) | Name of the Let's Encrypt production cluster issuer |
 | <a name="output_letsencrypt_staging_issuer"></a> [letsencrypt\_staging\_issuer](#output\_letsencrypt\_staging\_issuer) | Name of the Let's Encrypt staging cluster issuer |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

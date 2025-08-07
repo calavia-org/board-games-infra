@@ -15,17 +15,18 @@ permissions:
   security-events: write
   id-token: write
 
-# Variables de entorno globales - ALINEADAS CON PRE-COMMIT
+# Variables de entorno globales - ACTUALIZADAS A ÚLTIMAS VERSIONES ESTABLES
 env:
-  TERRAFORM_VERSION: "1.8.5"
+  TERRAFORM_VERSION: "1.12.2"
   TFLINT_VERSION: "0.58.1"
-  TRIVY_VERSION: "0.44.0"
+  TERRAFORM_DOCS_VERSION: "0.20.0"
+  TRIVY_VERSION: "0.65.0"
   PYTHON_VERSION: "3.11"
-  PRE_COMMIT_VERSION: "3.5.0"
+  PRE_COMMIT_VERSION: "4.0.1"
   YAMLLINT_VERSION: "1.35.1"
-  MARKDOWNLINT_VERSION: "0.39.0"
-  ACTIONLINT_VERSION: "1.6.26"
-  DETECT_SECRETS_VERSION: "1.4.0"
+  MARKDOWNLINT_VERSION: "0.45.0"
+  ACTIONLINT_VERSION: "1.7.7"
+  DETECT_SECRETS_VERSION: "1.5.0"
   AWS_DEFAULT_REGION: "us-west-2"
 
 jobs:
@@ -59,6 +60,15 @@ jobs:
           rm tflint.zip
           tflint --version
 
+      - name: Setup Terraform-docs
+        run: |
+          echo "🔧 Instalando terraform-docs v${{ env.TERRAFORM_DOCS_VERSION }}..."
+          curl -sSL "https://github.com/terraform-docs/terraform-docs/releases/download/v${{ env.TERRAFORM_DOCS_VERSION }}/terraform-docs-v${{ env.TERRAFORM_DOCS_VERSION }}-linux-amd64.tar.gz" -o terraform-docs.tar.gz
+          tar -xzf terraform-docs.tar.gz
+          sudo mv terraform-docs /usr/local/bin/
+          rm terraform-docs.tar.gz
+          terraform-docs --version
+
       - name: Setup Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
@@ -73,16 +83,16 @@ jobs:
         run: |
           # ShellCheck y unzip (ya vienen en Ubuntu)
           sudo apt-get update && sudo apt-get install -y shellcheck unzip
-          
+
           # Hadolint para Dockerfiles
           wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
           chmod +x hadolint
           sudo mv hadolint /usr/local/bin/
-          
+
           # Actionlint para GitHub Actions
           curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
           sudo mv actionlint /usr/local/bin/
-          
+
           # Markdownlint CLI
           npm install -g markdownlint-cli@${{ env.MARKDOWNLINT_VERSION }}
 
@@ -105,7 +115,7 @@ jobs:
         run: |
           # Hacer ejecutables los scripts personalizados
           chmod +x scripts/hooks/*.sh scripts/verify-environment.sh
-          
+
           # Crear directorios necesarios
           mkdir -p .terraform-validate-cache
 
@@ -191,7 +201,7 @@ jobs:
           echo "� Ejecutando Terraform Plan en Staging..."
           terraform init -no-color
           terraform plan -no-color -var-file="variables.tf" -detailed-exitcode || EXIT_CODE=$?
-          
+
           # Exit codes: 0=no changes, 1=error, 2=changes
           if [[ $EXIT_CODE -eq 1 ]]; then
             echo "❌ Error en Terraform Plan"
@@ -261,7 +271,7 @@ jobs:
         run: |
           echo "🔧 Inicializando Terraform para ${{ matrix.environment }}..."
           terraform init -no-color
-          
+
           echo "📋 Ejecutando plan para ${{ matrix.environment }}..."
           terraform plan -detailed-exitcode -no-color -out=tfplan
 

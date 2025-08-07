@@ -162,7 +162,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | n/a |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -258,7 +257,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -354,7 +352,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -450,7 +447,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -546,7 +542,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -642,7 +637,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -738,7 +732,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -834,7 +827,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -930,7 +922,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1026,7 +1017,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1122,7 +1112,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1218,7 +1207,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1314,7 +1302,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1410,7 +1397,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1506,7 +1492,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1602,7 +1587,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1698,7 +1682,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1794,7 +1777,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1890,7 +1872,6 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
 <!-- BEGINNING OF PRE-COMMIT-Terraform DOCS HOOK -->
 ## Requirements
 
@@ -1986,8 +1967,9 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [VPC\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -2082,4 +2064,4 @@ Este proyecto está bajo la licencia MIT.
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of all secret names for reference |
 | <a name="output_secrets_kms_key_arn"></a> [secrets\_kms\_key\_arn](#output\_secrets\_kms\_key\_arn) | ARN of the KMS key used for secrets encryption |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | ID of the VPC |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

@@ -191,8 +191,6 @@ output:
   file: ""
   mode: inject
   template: |-
-    <!-- BEGIN_TF_DOCS -->
-<!-- END_TF_DOCS -->
 
 output-values:
   enabled: false
@@ -428,13 +426,8 @@ MIT License - Copyright (c) 2021 The Terraform-docs Authors.
 [tfdocs-format-template]: https://github.com/terraform-docs/tfdocs-format-template
 [our website]: https://terraform-docs.io/
 [User Guide]: https://terraform-docs.io/user-guide/introduction/
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-Terraform DOCS HOOK -->
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -502,4 +495,4 @@ No modules.
 | <a name="output_monitoring_namespace"></a> [monitoring\_namespace](#output\_monitoring\_namespace) | Kubernetes namespace for monitoring |
 | <a name="output_prometheus_role_arn"></a> [prometheus\_role\_arn](#output\_prometheus\_role\_arn) | ARN of the IAM role for Prometheus |
 | <a name="output_sns_topic_arn"></a> [sns\_topic\_arn](#output\_sns\_topic\_arn) | ARN of the SNS topic for alerts |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

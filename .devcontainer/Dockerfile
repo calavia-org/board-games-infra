@@ -7,14 +7,14 @@ FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
 LABEL maintainer="Calavia Gaming Infrastructure Team"
 LABEL description="Devcontainer optimizado para Board Games Infrastructure con pre-commit hooks"
 
-# Variables de entorno
+# Variables de entorno - ACTUALIZADAS A ÚLTIMAS VERSIONES ESTABLES
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TERRAFORM_VERSION=1.8.5
-ENV TERRAFORM_DOCS_VERSION=v0.17.0
+ENV TERRAFORM_VERSION=1.12.2
+ENV TERRAFORM_DOCS_VERSION=v0.20.0
 ENV KUBECTL_VERSION=v1.31.0
-ENV TFLINT_VERSION=v0.47.0
-ENV TRIVY_VERSION=0.44.0
-ENV INFRACOST_VERSION=0.10.29
+ENV TFLINT_VERSION=v0.58.1
+ENV TRIVY_VERSION=0.65.0
+ENV INFRACOST_VERSION=0.10.42
 
 # Actualizar sistema e instalar dependencias base
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -138,7 +138,7 @@ RUN ARCH=$(dpkg --print-architecture) && \
 
 # Instalar herramientas NPM globalmente
 RUN npm install -g \
-    markdownlint-cli@0.39.0 \
+    markdownlint-cli@0.45.0 \
     @commitlint/cli@18.4.3 \
     @commitlint/config-conventional@18.4.3
 
@@ -148,8 +148,9 @@ WORKDIR /home/vscode
 
 # Instalar Python tools y pre-commit
 RUN pip install --no-cache-dir \
-    pre-commit==3.5.0 \
+    pre-commit==4.0.1 \
     yamllint==1.35.1 \
+    detect-secrets==1.5.0 \
     ansible-lint==6.22.2 \
     && echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc
 
