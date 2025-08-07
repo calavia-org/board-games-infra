@@ -1,0 +1,11 @@
+# Requirements para herramientas de CI/CD y pre-commit
+# Este archivo asegura compatibilidad entre entornos local y CI
+
+# Pre-commit y linting
+pre-commit==3.5.0
+yamllint==1.35.1
+detect-secrets==1.4.0
+
+# Opcional: Herramientas adicionales para desarrollo
+# infracost (se instalará en CI según necesidad)
+# awscli (normalmente se instala por separado)

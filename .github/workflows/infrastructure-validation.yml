@@ -26,6 +26,7 @@ env:
   MARKDOWNLINT_VERSION: "0.39.0"
   ACTIONLINT_VERSION: "1.6.26"
   DETECT_SECRETS_VERSION: "1.4.0"
+  AWS_DEFAULT_REGION: "us-west-2"
 
 jobs:
   # Job 1: Pre-commit validation (EXACTAMENTE COMO LOCAL)
@@ -43,7 +44,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -123,7 +123,13 @@ jobs:
           else
             echo "🚀 Ejecutando pre-commit en archivos del último commit..."
             # En push, solo archivos en el último commit para velocidad
-            pre-commit run --files $(git diff-tree --no-commit-id --name-only -r HEAD)
+            files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+            if [[ -n "$files" ]]; then
+              # shellcheck disable=SC2086
+              pre-commit run --files $files
+            else
+              echo "No hay archivos modificados para validar"
+            fi
           fi
 
       - name: Upload Pre-commit Results
@@ -263,30 +269,6 @@ jobs:
             calavia-eks-infra/environments/${{ matrix.environment }}/tfplan
             calavia-eks-infra/environments/${{ matrix.environment }}/.terraform/
           retention-days: 7
-
-      - name: Comment PR with Plan
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = `#### Terraform Plan - ${{ matrix.environment }} 🏗️
-
-            <details><summary>Show Plan Output</summary>
-
-            \`\`\`
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-
-            </details>
-
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
 
   # Job 4: Documentación y cleanup
   documentation-check:
