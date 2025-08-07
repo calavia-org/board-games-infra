@@ -2382,7 +2382,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Lista de zonas de disponibilidad para el clúster - reducidas para staging | `list(string)` | <pre>[<br>  "us-west-2a",<br>  "us-west-2b"<br>]</pre> | no |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Lista de zonas de disponibilidad para el clúster - reducidas para staging | `list(string)` | <pre>[<br/>  "us-west-2a",<br/>  "us-west-2b"<br/>]</pre> | no |
 | <a name="input_backup_retention_period"></a> [backup\_retention\_period](#input\_backup\_retention\_period) | Período de retención de backups - reducido para staging | `number` | `1` | no |
 | <a name="input_business_unit"></a> [business\_unit](#input\_business\_unit) | Unidad de negocio | `string` | `"Gaming-Platform"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Nombre del clúster EKS | `string` | `"calavia-eks-staging"` | no |
@@ -2400,7 +2400,7 @@
 | <a name="input_region"></a> [region](#input\_region) | Región de AWS donde se desplegará el clúster | `string` | `"us-west-2"` | no |
 | <a name="input_storage_size"></a> [storage\_size](#input\_storage\_size) | Tamaño de almacenamiento RDS en GB - mínimo para staging | `number` | `20` | no |
 | <a name="input_storage_type"></a> [storage\_type](#input\_storage\_type) | Tipo de almacenamiento RDS - más económico para staging | `string` | `"gp2"` | no |
-| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | Lista de CIDRs para las subredes - optimizado para staging | `list(string)` | <pre>[<br>  "10.0.0.0/20",<br>  "10.0.16.0/20"<br>]</pre> | no |
+| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | Lista de CIDRs para las subredes - optimizado para staging | `list(string)` | <pre>[<br/>  "10.0.0.0/20",<br/>  "10.0.16.0/20"<br/>]</pre> | no |
 | <a name="input_subnet_count"></a> [subnet\_count](#input\_subnet\_count) | Número de subredes a crear - reducido para staging | `number` | `2` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR de la VPC | `string` | `"10.0.0.0/16"` | no |
 

@@ -53,12 +53,15 @@ Este módulo se distribuye bajo la Licencia MIT.
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
+## Requirements
+
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
+## Providers
 
 ## Providers
 
@@ -67,10 +70,12 @@ Este módulo se distribuye bajo la Licencia MIT.
 | <a name="provider_archive"></a> [archive](#provider\_archive) | 2.7.1 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.7.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.7.2 |
+## Modules
 
 ## Modules
 
 No modules.
+## Resources
 
 ## Resources
 
@@ -97,6 +102,7 @@ No modules.
 | [archive_file.redis_token_rotation](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+## Inputs
 
 ## Inputs
 
@@ -117,6 +123,7 @@ No modules.
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet IDs for ElastiCache | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of the VPC | `string` | n/a | yes |
+## Outputs
 
 ## Outputs
 

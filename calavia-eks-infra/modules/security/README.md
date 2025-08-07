@@ -52,20 +52,25 @@ This module is licensed under the MIT License. See the LICENSE file for more inf
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
+## Requirements
+
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+## Providers
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.7.0 |
+## Modules
 
 ## Modules
 
 No modules.
+## Resources
 
 ## Resources
 
@@ -85,6 +90,7 @@ No modules.
 | [aws_security_group_rule.nodes_ingress_cluster_kubelet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.rds_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.redis_ingress_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
+## Inputs
 
 ## Inputs
 
@@ -97,6 +103,7 @@ No modules.
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to security resources | `map(string)` | `{}` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the VPC | `string` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of the VPC | `string` | n/a | yes |
+## Outputs
 
 ## Outputs
 

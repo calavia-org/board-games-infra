@@ -39,12 +39,15 @@ Para más información sobre Cert-Manager, consulte la [documentación oficial](
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
+## Requirements
+
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+## Providers
 
 ## Providers
 
@@ -53,10 +56,12 @@ Para más información sobre Cert-Manager, consulte la [documentación oficial](
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.7.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.38.0 |
+## Modules
 
 ## Modules
 
 No modules.
+## Resources
 
 ## Resources
 
@@ -69,6 +74,7 @@ No modules.
 | [kubernetes_manifest.letsencrypt_production](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
 | [kubernetes_manifest.letsencrypt_staging](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+## Inputs
 
 ## Inputs
 
@@ -80,6 +86,7 @@ No modules.
 | <a name="input_lets_encrypt_email"></a> [lets\_encrypt\_email](#input\_lets\_encrypt\_email) | Email for Let's Encrypt certificates | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+## Outputs
 
 ## Outputs
 

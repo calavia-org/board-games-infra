@@ -2611,7 +2611,7 @@ No outputs.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Zonas de disponibilidad para el clúster | `list(string)` | <pre>[<br>  "us-west-2a",<br>  "us-west-2b",<br>  "us-west-2c"<br>]</pre> | no |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Zonas de disponibilidad para el clúster | `list(string)` | <pre>[<br/>  "us-west-2a",<br/>  "us-west-2b",<br/>  "us-west-2c"<br/>]</pre> | no |
 | <a name="input_backup_retention_period"></a> [backup\_retention\_period](#input\_backup\_retention\_period) | Período de retención de backups en días | `number` | `7` | no |
 | <a name="input_business_unit"></a> [business\_unit](#input\_business\_unit) | Unidad de negocio | `string` | `"Gaming-Platform"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Nombre del clúster EKS | `string` | `"calavia-eks-cluster"` | no |
@@ -2632,12 +2632,12 @@ No outputs.
 | <a name="input_redis_node_type"></a> [redis\_node\_type](#input\_redis\_node\_type) | Tipo de instancia para Redis - Graviton2 ARM64 | `string` | `"cache.t4g.micro"` | no |
 | <a name="input_region"></a> [region](#input\_region) | Región de AWS donde se desplegará el clúster | `string` | `"us-west-2"` | no |
 | <a name="input_spot_desired_size"></a> [spot\_desired\_size](#input\_spot\_desired\_size) | Número deseado de nodos spot | `number` | `1` | no |
-| <a name="input_spot_instance_types"></a> [spot\_instance\_types](#input\_spot\_instance\_types) | Tipos de instancia para nodos spot - Graviton2 ARM64 | `list(string)` | <pre>[<br>  "t4g.small",<br>  "t4g.medium"<br>]</pre> | no |
+| <a name="input_spot_instance_types"></a> [spot\_instance\_types](#input\_spot\_instance\_types) | Tipos de instancia para nodos spot - Graviton2 ARM64 | `list(string)` | <pre>[<br/>  "t4g.small",<br/>  "t4g.medium"<br/>]</pre> | no |
 | <a name="input_spot_max_size"></a> [spot\_max\_size](#input\_spot\_max\_size) | Número máximo de nodos spot | `number` | `4` | no |
 | <a name="input_spot_min_size"></a> [spot\_min\_size](#input\_spot\_min\_size) | Número mínimo de nodos spot | `number` | `0` | no |
 | <a name="input_storage_size"></a> [storage\_size](#input\_storage\_size) | Tamaño de almacenamiento RDS en GB - optimizado | `number` | `20` | no |
 | <a name="input_storage_type"></a> [storage\_type](#input\_storage\_type) | Tipo de almacenamiento RDS | `string` | `"gp3"` | no |
-| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | CIDR blocks para las subnets | `list(string)` | <pre>[<br>  "10.0.1.0/24",<br>  "10.0.2.0/24",<br>  "10.0.3.0/24"<br>]</pre> | no |
+| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | CIDR blocks para las subnets | `list(string)` | <pre>[<br/>  "10.0.1.0/24",<br/>  "10.0.2.0/24",<br/>  "10.0.3.0/24"<br/>]</pre> | no |
 | <a name="input_subnet_count"></a> [subnet\_count](#input\_subnet\_count) | Número de subnets a crear | `number` | `3` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block para la VPC | `string` | `"10.0.0.0/16"` | no |
 

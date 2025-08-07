@@ -430,12 +430,15 @@ MIT License - Copyright (c) 2021 The Terraform-docs Authors.
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
+## Requirements
+
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 2.0 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.0 |
+## Providers
 
 ## Providers
 
@@ -444,10 +447,12 @@ MIT License - Copyright (c) 2021 The Terraform-docs Authors.
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.7.0 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | 3.0.2 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.38.0 |
+## Modules
 
 ## Modules
 
 No modules.
+## Resources
 
 ## Resources
 
@@ -465,6 +470,7 @@ No modules.
 | [helm_release.kube_prometheus_stack](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace.monitoring](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+## Inputs
 
 ## Inputs
 
@@ -483,6 +489,7 @@ No modules.
 | <a name="input_retention_days"></a> [retention\_days](#input\_retention\_days) | Number of days to retain monitoring data | `number` | `3` | no |
 | <a name="input_slack_webhook_url"></a> [slack\_webhook\_url](#input\_slack\_webhook\_url) | Slack webhook URL for alerts | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
+## Outputs
 
 ## Outputs
 

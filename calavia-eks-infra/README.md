@@ -2019,7 +2019,7 @@ Este proyecto está bajo la licencia MIT.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Lista de zonas de disponibilidad para el clúster | `list(string)` | <pre>[<br>  "us-west-2a",<br>  "us-west-2b",<br>  "us-west-2c"<br>]</pre> | no |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Lista de zonas de disponibilidad para el clúster | `list(string)` | <pre>[<br/>  "us-west-2a",<br/>  "us-west-2b",<br/>  "us-west-2c"<br/>]</pre> | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | Región de AWS donde se desplegará el clúster | `string` | `"us-west-2"` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Nombre del clúster EKS | `string` | n/a | yes |
 | <a name="input_db_password"></a> [db\_password](#input\_db\_password) | Contraseña para la base de datos | `string` | `null` | no |
@@ -2030,7 +2030,7 @@ Este proyecto está bajo la licencia MIT.
 | <a name="input_enable_external_dns"></a> [enable\_external\_dns](#input\_enable\_external\_dns) | Habilitar External DNS | `bool` | `true` | no |
 | <a name="input_enable_notifications"></a> [enable\_notifications](#input\_enable\_notifications) | Habilitar notificaciones para rotación de secretos | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Entorno de despliegue (staging/production) | `string` | n/a | yes |
-| <a name="input_instance_types"></a> [instance\_types](#input\_instance\_types) | Tipos de instancia para los nodos del clúster - Graviton3 ARM64 | `list(string)` | <pre>[<br>  "m7g.large",<br>  "m7g.xlarge",<br>  "m6g.large"<br>]</pre> | no |
+| <a name="input_instance_types"></a> [instance\_types](#input\_instance\_types) | Tipos de instancia para los nodos del clúster - Graviton3 ARM64 | `list(string)` | <pre>[<br/>  "m7g.large",<br/>  "m7g.xlarge",<br/>  "m6g.large"<br/>]</pre> | no |
 | <a name="input_lets_encrypt_email"></a> [lets\_encrypt\_email](#input\_lets\_encrypt\_email) | Email para certificados Let's Encrypt | `string` | `"admin@example.com"` | no |
 | <a name="input_max_size"></a> [max\_size](#input\_max\_size) | Número máximo de nodos en el clúster | `number` | `10` | no |
 | <a name="input_min_size"></a> [min\_size](#input\_min\_size) | Número mínimo de nodos en el clúster | `number` | `1` | no |

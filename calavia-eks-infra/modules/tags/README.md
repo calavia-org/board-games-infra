@@ -209,19 +209,25 @@ aws ce get-cost-and-usage \
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
+## Requirements
+
 No requirements.
+## Providers
 
 ## Providers
 
 No providers.
+## Modules
 
 ## Modules
 
 No modules.
+## Resources
 
 ## Resources
 
 No resources.
+## Inputs
 
 ## Inputs
 
@@ -242,6 +248,7 @@ No resources.
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | Name of the project | `string` | `"board-games"` | no |
 | <a name="input_purpose"></a> [purpose](#input\_purpose) | Purpose or description of the resource | `string` | `""` | no |
 | <a name="input_service"></a> [service](#input\_service) | Service or application name that uses this resource | `string` | `"board-games-platform"` | no |
+## Outputs
 
 ## Outputs
 

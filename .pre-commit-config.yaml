@@ -48,6 +48,7 @@ repos:
           - --hook-config=--add-to-existing-file=true
           - --hook-config=--create-file-if-not-exist=true
           - --hook-config=--template=<!-- BEGIN_TF_DOCS -->\n{{ .Content }}\n<!-- END_TF_DOCS -->
+          - --hook-config=--config=.terraform-docs.yml
 
   # Linting y formateo de archivos YAML
   - repo: https://github.com/adrienverge/yamllint
