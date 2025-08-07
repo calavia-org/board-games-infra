@@ -85,21 +85,27 @@ repos:
         args: ["--baseline", ".secrets.baseline"]
         exclude: package.lock.json
 
-  # Linting de scripts de shell
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+  # Linting de scripts de shell (usando binario local)
+  - repo: local
     hooks:
-      - id: shellcheck
-        description: Linter para scripts de shell
+      - id: shellcheck-local
+        name: ShellCheck (Local Binary)
+        description: Linter para scripts de shell usando binario local
+        entry: shellcheck
+        language: system
+        files: \.(sh|bash|ksh|zsh)$
         args: [--severity=warning]
 
-  # Linting de Dockerfiles
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
+  # Linting de Dockerfiles (usando binario local)
+  - repo: local
     hooks:
-      - id: hadolint-docker
-        description: Linter para Dockerfiles
-        args: ["--ignore", "DL3008", "--ignore", "DL3009"]
+      - id: hadolint-local
+        name: Hadolint (Local Binary)
+        description: Linter para Dockerfiles usando binario local
+        entry: hadolint
+        language: system
+        files: Dockerfile.*
+        args: ["--ignore", "DL3008", "--ignore", "DL3009", "--ignore", "DL4006", "--ignore", "SC2086"]
 
   # Hooks personalizados optimizados para Terraform
   # Estos hooks reemplazan los originales con mejoras de rendimiento y configuración

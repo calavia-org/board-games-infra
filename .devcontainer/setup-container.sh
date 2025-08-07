@@ -47,4 +47,15 @@ EOF
 
 mkdir -p ~/.terraform.d/plugin-cache
 
+# Instalar hadolint para linting de Dockerfiles
+echo "📦 Instalando hadolint..."
+if ! command -v hadolint &> /dev/null; then
+    curl -sL -o /tmp/hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64"
+    chmod +x /tmp/hadolint
+    sudo mv /tmp/hadolint /usr/local/bin/hadolint
+    echo "✅ Hadolint instalado correctamente"
+else
+    echo "✅ Hadolint ya está instalado"
+fi
+
 echo "✅ Devcontainer configurado correctamente"
