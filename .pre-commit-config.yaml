@@ -1,0 +1,160 @@
+# Pre-commit hooks configuration for Board Games Infrastructure
+# Instalar: pip install pre-commit && pre-commit install
+# Ejecutar manualmente: pre-commit run --all-files
+
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        description: Elimina espacios en blanco al final de líneas
+      - id: end-of-file-fixer
+        description: Asegura que los archivos terminen con nueva línea
+      - id: check-yaml
+        description: Verifica sintaxis YAML
+        args: ["--multi"]
+      - id: check-json
+        description: Verifica sintaxis JSON
+      - id: check-merge-conflict
+        description: Detecta marcadores de conflictos de merge
+      - id: check-case-conflict
+        description: Verifica conflictos de nombres de archivos
+      - id: check-added-large-files
+        description: Previene archivos grandes (>500KB)
+        args: ["--maxkb=500"]
+      - id: detect-private-key
+        description: Detecta claves privadas accidentales
+      - id: mixed-line-ending
+        description: Normaliza terminaciones de línea
+        args: ["--fix=lf"]
+
+  # Terraform hooks optimizados
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.99.5
+    hooks:
+      # Formateo automático de código Terraform
+      - id: terraform_fmt
+        description: Formatea archivos Terraform
+        args:
+          - --args=-recursive
+          - --args=-diff
+
+      # Generación automática de documentación
+      - id: terraform_docs
+        description: Genera documentación de módulos Terraform
+        args:
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
+          - --hook-config=--template=<!-- BEGIN_TF_DOCS -->\n{{ .Content }}\n<!-- END_TF_DOCS -->
+          - --hook-config=--config=.terraform-docs.yml
+
+  # Linting y formateo de archivos YAML
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        description: Linter para archivos YAML
+        args: [-c=.yamllint.yml]
+
+  # Linting y formateo de archivos Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.45.0
+    hooks:
+      - id: markdownlint
+        description: Linter para archivos Markdown
+        args: ["--config", ".markdownlint.yml"]
+        exclude: |
+          (?x)^(
+            .*README\.md$
+          )$
+
+  # Validación de workflows de GitHub Actions
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        description: Linter para GitHub Actions workflows
+
+  # Escaneo de seguridad para detectar secretos
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        description: Detecta secretos en el código
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: package.lock.json
+
+  # Linting de scripts de shell (usando binario local)
+  - repo: local
+    hooks:
+      - id: shellcheck-local
+        name: ShellCheck (Local Binary)
+        description: Linter para scripts de shell usando binario local
+        entry: shellcheck
+        language: system
+        files: \.(sh|bash|ksh|zsh)$
+        args: [--severity=warning]
+
+  # Linting de Dockerfiles (usando binario local)
+  - repo: local
+    hooks:
+      - id: hadolint-local
+        name: Hadolint (Local Binary)
+        description: Linter para Dockerfiles usando binario local
+        entry: hadolint
+        language: system
+        files: Dockerfile.*
+        args: ["--ignore", "DL3008", "--ignore", "DL3009", "--ignore", "DL4006", "--ignore", "SC2086"]
+
+  # Hooks personalizados optimizados para Terraform
+  # Estos hooks reemplazan los originales con mejoras de rendimiento y configuración
+  - repo: local
+    hooks:
+      # Validación rápida de Terraform con sistema de caché
+      # Mejora: 30-60x más rápido que terraform_validate original
+      - id: terraform-validate-fast
+        name: Terraform Validate (Fast)
+        description: Validación rápida de Terraform con caché inteligente
+        entry: scripts/hooks/terraform-validate-wrapper.sh
+        language: script
+        files: \.tf$
+        pass_filenames: false
+
+      # TFLint con configuración personalizada desde .tflint-simple.hcl
+      # Mejora: Usa configuración específica del proyecto
+      - id: tflint-custom
+        name: TFLint Custom with Configuration
+        description: Linter de Terraform usando configuración personalizada
+        entry: scripts/hooks/tflint-wrapper.sh
+        language: script
+        files: \.tf$
+        pass_filenames: false
+
+      # Trivy security scan respetando .trivyignore
+      # Mejora: Ignora warnings menores definidos en .trivyignore
+      - id: trivy-terraform-security
+        name: Trivy Terraform Security Scan
+        description: Escaneo de seguridad con configuración .trivyignore
+        entry: scripts/hooks/trivy-wrapper.sh
+        language: script
+        files: \.tf$
+        pass_filenames: false
+
+# Configuración global para pre-commit.ci
+# Servicio automatizado que ejecuta hooks en pull requests
+ci:
+  # Mensaje personalizado para commits automáticos
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+
+  # Configuración de automatización
+  autofix_prs: true # Aplica fixes automáticamente en PRs
+  autoupdate_branch: "" # Branch para actualizaciones automáticas
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: weekly # Frecuencia de actualizaciones
+  skip: [] # Hooks a omitir (ninguno)
+  submodules: false # No procesar submódulos

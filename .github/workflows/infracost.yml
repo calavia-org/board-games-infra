@@ -1,0 +1,543 @@
+name: Infracost Cost Analysis
+
+on:
+  pull_request:
+    paths:
+      - "calavia-eks-infra/**"
+      - ".infracost/**"
+  push:
+    branches:
+      - main
+      - setup
+    paths:
+      - "calavia-eks-infra/**"
+      - ".infracost/**"
+  workflow_dispatch:
+
+env:
+  TF_ROOT: calavia-eks-infra
+
+jobs:
+  infracost-staging:
+    name: Cost Analysis - Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ github.event.pull_request.base.ref }}"
+
+      - name: Verify base branch structure
+        id: check_base
+        run: |
+          echo "=== Verifying base branch structure ==="
+          echo "Current directory: $(pwd)"
+          echo "Branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" | head -20
+          echo "Key files:"
+          ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
+          ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
+
+          # Check if infrastructure exists in base branch
+          if [ -d "${TF_ROOT}/environments/staging" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Infrastructure directory exists in base branch"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Infrastructure directory does not exist in base branch (first PR or empty main)"
+          fi
+
+      - name: Terraform Init (base)
+        if: steps.check_base.outputs.exists == 'true'
+        run: |
+          echo "Checking directory structure..."
+          ls -la
+          ls -la "${TF_ROOT}/" || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}/environments/" || echo "environments directory not found"
+          ls -la "${TF_ROOT}/environments/staging/" || echo "staging directory not found"
+
+          echo "Changing to staging directory..."
+          cd "${TF_ROOT}/environments/staging"
+          echo "Running terraform init..."
+          terraform init -backend=false
+
+      - name: Terraform Validate (base)
+        if: steps.check_base.outputs.exists == 'true'
+        run: |
+          cd "${TF_ROOT}"/environments/staging
+          terraform validate
+
+      - name: Generate Infracost cost baseline
+        if: steps.check_base.outputs.exists == 'true'
+        run: |
+          infracost breakdown --path="${TF_ROOT}"/environments/staging \
+                            --format=json \
+                            --usage-file=.infracost/usage-staging.yml \
+                            --out-file=/tmp/infracost-base.json
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Verify PR branch structure
+        run: |
+          echo "=== Verifying PR branch structure ==="
+          echo "Current directory: $(pwd)"
+          echo "Branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" | head -20
+          echo "Key files:"
+          ls -la calavia-eks-infra/environments/staging/ 2>/dev/null || echo "staging directory not found"
+          ls -la calavia-eks-infra/environments/production/ 2>/dev/null || echo "production directory not found"
+
+      - name: Terraform Init (PR)
+        run: |
+          echo "Checking directory structure after PR checkout..."
+          ls -la
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/staging/ || echo "staging directory not found"
+
+          echo "Changing to staging directory..."
+          cd "${TF_ROOT}"/environments/staging
+          echo "Running terraform init..."
+          terraform init -backend=false
+
+      - name: Terraform Validate (PR)
+        run: |
+          cd "${TF_ROOT}"/environments/staging
+          terraform validate
+
+      - name: Generate Infracost diff
+        run: |
+          if [ "${{ steps.check_base.outputs.exists }}" = "true" ]; then
+            echo "Generating diff against base branch..."
+            infracost diff --path="${TF_ROOT}"/environments/staging \
+                          --format=json \
+                          --usage-file=.infracost/usage-staging.yml \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/staging-infracost.json
+          else
+            echo "No base branch infrastructure found, generating breakdown..."
+            infracost breakdown --path="${TF_ROOT}"/environments/staging \
+                              --format=json \
+                              --usage-file=.infracost/usage-staging.yml \
+                              --out-file=/tmp/staging-infracost.json
+          fi
+
+      - name: Upload staging cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/staging-infracost.json
+
+      - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost comment github --path=/tmp/staging-infracost.json \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --pull-request="${{github.event.pull_request.number}}" \
+                                   --behavior=update
+
+      - name: Post Infracost comment (commit)
+        if: github.event_name == 'push'
+        run: |
+          infracost comment github --path=/tmp/staging-infracost.json \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --commit="${{github.sha}}" \
+                                   --behavior=update
+
+  infracost-production:
+    name: Cost Analysis - Production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: "${{ github.event.pull_request.base.ref }}"
+
+      - name: Verify base branch structure (production)
+        id: check_base_prod
+        run: |
+          echo "=== PRODUCTION BASE BRANCH VERIFICATION ==="
+          echo "Current directory: $(pwd)"
+          echo "Git branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
+          echo "Detailed directory listing:"
+          ls -la
+
+          # Check if infrastructure exists in base branch
+          if [ -d "${TF_ROOT}/environments/production" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Production infrastructure directory exists in base branch"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Production infrastructure directory does not exist in base branch (first PR or empty main)"
+          fi
+
+      - name: Terraform Init (base)
+        if: steps.check_base_prod.outputs.exists == 'true'
+        run: |
+          echo "Checking directory structure for production..."
+          ls -la
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/production/ || echo "production directory not found"
+
+          echo "Changing to production directory..."
+          cd "${TF_ROOT}"/environments/production
+          echo "Running terraform init..."
+          terraform init -backend=false
+
+      - name: Terraform Validate (base)
+        if: steps.check_base_prod.outputs.exists == 'true'
+        run: |
+          cd "${TF_ROOT}"/environments/production
+          terraform validate
+
+      - name: Generate Infracost cost baseline
+        if: steps.check_base_prod.outputs.exists == 'true'
+        run: |
+          infracost breakdown --path="${TF_ROOT}"/environments/production \
+                            --format=json \
+                            --usage-file=.infracost/usage-production.yml \
+                            --out-file=/tmp/infracost-base.json
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Verify PR branch structure (production)
+        run: |
+          echo "=== PRODUCTION PR BRANCH VERIFICATION ==="
+          echo "Current directory: $(pwd)"
+          echo "Git branch: $(git branch --show-current || echo 'detached HEAD')"
+          echo "Repository structure:"
+          find . -type d -name "calavia-eks-infra" -o -name "environments" -o -name "staging" -o -name "production" 2>/dev/null || echo "No matching directories found"
+          echo "Detailed directory listing:"
+          ls -la
+
+      - name: Terraform Init (PR)
+        run: |
+          echo "Checking directory structure for production after PR checkout..."
+          ls -la
+          ls -la "${TF_ROOT}"/ || echo "TF_ROOT directory not found"
+          ls -la "${TF_ROOT}"/environments/ || echo "environments directory not found"
+          ls -la "${TF_ROOT}"/environments/production/ || echo "production directory not found"
+
+          echo "Changing to production directory..."
+          cd "${TF_ROOT}"/environments/production
+          echo "Running terraform init..."
+          terraform init -backend=false
+
+      - name: Terraform Validate (PR)
+        run: |
+          cd "${TF_ROOT}"/environments/production
+          terraform validate
+
+      - name: Generate Infracost diff
+        run: |
+          if [ "${{ steps.check_base_prod.outputs.exists }}" = "true" ]; then
+            echo "Generating diff against base branch..."
+            infracost diff --path="${TF_ROOT}"/environments/production \
+                          --format=json \
+                          --usage-file=.infracost/usage-production.yml \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/production-infracost.json
+          else
+            echo "No base branch infrastructure found, generating breakdown..."
+            infracost breakdown --path="${TF_ROOT}"/environments/production \
+                              --format=json \
+                              --usage-file=.infracost/usage-production.yml \
+                              --out-file=/tmp/production-infracost.json
+          fi
+
+      - name: Upload production cost report
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/production-infracost.json
+
+      - name: Post Infracost comment
+        if: github.event_name == 'pull_request'
+        run: |
+          infracost comment github --path=/tmp/production-infracost.json \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --pull-request="${{github.event.pull_request.number}}" \
+                                   --behavior=update
+
+      - name: Post Infracost comment (commit)
+        if: github.event_name == 'push'
+        run: |
+          infracost comment github --path=/tmp/production-infracost.json \
+                                   --repo="$GITHUB_REPOSITORY" \
+                                   --github-token="${{github.token}}" \
+                                   --commit="${{github.sha}}" \
+                                   --behavior=update
+
+  infracost-summary:
+    name: Monthly Cost Summary
+    runs-on: ubuntu-latest
+    needs: [infracost-staging, infracost-production]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
+
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download staging cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/staging/
+
+      - name: Download production cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/production/
+
+      - name: Generate combined cost report
+        run: |
+          # List downloaded files for debugging
+          echo "=== DEBUGGING ARTIFACT DOWNLOADS ==="
+          echo "Staging files:"
+          ls -la /tmp/staging/ || echo "Staging directory not found"
+          echo "Production files:"
+          ls -la /tmp/production/ || echo "Production directory not found"
+
+          # Check if infracost files exist with correct names
+          if [ -f "/tmp/staging/staging-infracost.json" ]; then
+            echo "✅ Staging staging-infracost.json found"
+            echo "Staging file size: $(wc -c < /tmp/staging/staging-infracost.json) bytes"
+          else
+            echo "❌ Staging staging-infracost.json NOT found"
+            exit 1
+          fi
+
+          if [ -f "/tmp/production/production-infracost.json" ]; then
+            echo "✅ Production production-infracost.json found"
+            echo "Production file size: $(wc -c < /tmp/production/production-infracost.json) bytes"
+          else
+            echo "❌ Production production-infracost.json NOT found"
+            exit 1
+          fi
+
+          # Use files directly without copying - pass multiple --path arguments
+          echo "Combining reports directly from downloaded artifacts..."
+          infracost output --path /tmp/staging/staging-infracost.json \
+                          --path /tmp/production/production-infracost.json \
+                          --format=slack-message \
+                          --out-file=/tmp/slack-message.json
+
+          echo "Combined report generated successfully"
+
+      - name: Send Slack notification
+        if: env.SLACK_WEBHOOK_URL != ''
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          custom_payload: |
+            {
+              "text": "📊 Monthly Infrastructure Cost Report",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "💰 Board Games Infrastructure - Cost Analysis"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "📈 *Cost breakdown has been updated.*\n\nView detailed breakdown in the GitHub Actions logs or Infracost dashboard."
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View GitHub Action"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  budget-alerts:
+    name: Budget Monitoring
+    runs-on: ubuntu-latest
+    needs: [infracost-staging, infracost-production]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
+
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download staging cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-infracost-report
+          path: /tmp/staging/
+
+      - name: Download production cost report
+        uses: actions/download-artifact@v4
+        with:
+          name: production-infracost-report
+          path: /tmp/production/
+
+      - name: Check budget thresholds
+        run: |
+          # Debug artifact downloads
+          echo "=== DEBUGGING BUDGET ALERTS ARTIFACTS ==="
+          echo "Staging directory contents:"
+          ls -la /tmp/staging/ || echo "Staging directory not found"
+          echo "Production directory contents:"
+          ls -la /tmp/production/ || echo "Production directory not found"
+
+          # Check if files exist before processing with correct names
+          if [ -f "/tmp/staging/staging-infracost.json" ]; then
+            echo "✅ Staging artifact found"
+          else
+            echo "❌ Staging artifact missing"
+            exit 1
+          fi
+
+          if [ -f "/tmp/production/production-infracost.json" ]; then
+            echo "✅ Production artifact found"
+          else
+            echo "❌ Production artifact missing"
+            exit 1
+          fi
+
+          # Extract costs from downloaded reports with correct file names
+          STAGING_COST=$(jq -r '.totalMonthlyCost // "0"' < /tmp/staging/staging-infracost.json)
+          PRODUCTION_COST=$(jq -r '.totalMonthlyCost // "0"' < /tmp/production/production-infracost.json)
+
+          echo "Staging monthly cost: \$${STAGING_COST}"
+          echo "Production monthly cost: \$${PRODUCTION_COST}"
+
+          # Alertas de presupuesto
+          if (( $(echo "$STAGING_COST > 500" | bc -l) )); then
+            echo "⚠️ STAGING BUDGET ALERT: Monthly cost (\$${STAGING_COST}) exceeds \$500 threshold"
+            echo "staging_budget_exceeded=true" >> "$GITHUB_ENV"
+          fi
+
+          if (( $(echo "$PRODUCTION_COST > 1500" | bc -l) )); then
+            echo "⚠️ PRODUCTION BUDGET ALERT: Monthly cost (\$${PRODUCTION_COST}) exceeds \$1500 threshold"
+            echo "production_budget_exceeded=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Send budget alert
+        if: env.staging_budget_exceeded == 'true' || env.production_budget_exceeded == 'true'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          custom_payload: |
+            {
+              "text": "🚨 BUDGET ALERT - Infrastructure Costs",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🚨 Budget Alert - Infrastructure Costs Exceeded"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repository:* ${{ github.repository }}\n*Alert Time:* $(date)\n\n⚠️ *One or more environments have exceeded their budget thresholds.*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Staging Threshold:* $500/month"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Production Threshold:* $1500/month"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Review Costs"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }

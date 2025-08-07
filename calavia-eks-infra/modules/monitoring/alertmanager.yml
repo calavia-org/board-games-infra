@@ -1,0 +1,197 @@
+# AlertManager Configuration
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alertmanager@${cluster_name}.local'
+  smtp_auth_username: ''
+  smtp_auth_password: ''
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+  routes:
+    # Null route for watchdog
+    - match:
+        alertname: Watchdog
+      receiver: 'null'
+    # Critical alerts for infrastructure
+    - match_re:
+        severity: critical
+      receiver: 'critical-alerts'
+      routes:
+        - match:
+            namespace: kube-system
+          receiver: 'kubernetes-critical'
+        - match_re:
+            alertname: '.*Database.*|.*Redis.*'
+          receiver: 'database-critical'
+        - match_re:
+            alertname: '.*Node.*|.*Instance.*'
+          receiver: 'infrastructure-critical'
+    # Warning alerts
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      repeat_interval: 4h
+    # Game server specific alerts
+    - match_re:
+        namespace: game-.*
+      receiver: 'game-server-alerts'
+      group_wait: 5s
+      repeat_interval: 30m
+
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal: ['alertname', 'instance']
+
+receivers:
+  # Null receiver for watchdog
+  - name: 'null'
+
+  # Default receiver
+  - name: 'default'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '[${cluster_name}] Alert Notification'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Instance: {{ .Labels.instance }}
+          Namespace: {{ .Labels.namespace }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+
+  # Critical alerts with immediate notification
+  - name: 'critical-alerts'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '🚨 [CRITICAL] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          CRITICAL ALERT DETECTED!
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Instance: {{ .Labels.instance }}
+          Namespace: {{ .Labels.namespace }}
+          Started: {{ .StartsAt }}
+
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    # Slack configuration (conditional)
+    slack_configs:
+      - api_url: '${slack_webhook_url}'
+        channel: '#alerts-critical'
+        color: 'danger'
+        title: '🚨 CRITICAL Alert - ${cluster_name}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Instance:* {{ .Labels.instance }}
+          *Namespace:* {{ .Labels.namespace }}
+          {{ end }}
+        actions:
+          - type: button
+            text: 'View in Grafana'
+            url: '${grafana_url}/alerting/list'
+
+  # Kubernetes system alerts
+  - name: 'kubernetes-critical'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '⚠️ [K8S-CRITICAL] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          KUBERNETES CRITICAL ISSUE!
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Node: {{ .Labels.node }}
+          Pod: {{ .Labels.pod }}
+          Container: {{ .Labels.container }}
+          {{ end }}
+
+  # Database alerts
+  - name: 'database-critical'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '💾 [DB-CRITICAL] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          DATABASE CRITICAL ISSUE!
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Database: {{ .Labels.database }}
+          {{ end }}
+
+  # Infrastructure alerts
+  - name: 'infrastructure-critical'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '🏗️ [INFRA-CRITICAL] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          INFRASTRUCTURE CRITICAL ISSUE!
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Instance: {{ .Labels.instance }}
+          {{ end }}
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '⚡ [WARNING] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          Warning Alert:
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          {{ end }}
+
+  # Game server specific alerts
+  - name: 'game-server-alerts'
+    email_configs:
+      - to: '${email_notifications}'
+        subject: '🎮 [GAME-SERVER] {{ .GroupLabels.alertname }} - ${cluster_name}'
+        body: |
+          Game Server Alert:
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Game Service: {{ .Labels.service }}
+          Namespace: {{ .Labels.namespace }}
+          Pod: {{ .Labels.pod }}
+          {{ end }}
+    # Slack configuration for game servers
+    slack_configs:
+      - api_url: '${slack_webhook_url}'
+        channel: '#game-servers'
+        color: 'warning'
+        title: '🎮 Game Server Alert - ${cluster_name}'
+        text: |
+          {{ range .Alerts }}
+          *Service:* {{ .Labels.service }}
+          *Alert:* {{ .Annotations.summary }}
+          *Pod:* {{ .Labels.pod }}
+          {{ end }}
+
+# Templates for reusable alert formatting
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'

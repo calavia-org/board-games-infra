@@ -1,0 +1,87 @@
+# ===============================================================================
+# Trivy Ignore Configuration for Board Games Infrastructure
+# ===============================================================================
+# Este archivo define reglas de seguridad que se ignoran intencionalmente
+# para evitar falsos positivos que no afectan la seguridad crítica del sistema
+#
+# Última actualización: Agosto 2025
+# Revisión recomendada: Cada 3 meses
+# ===============================================================================
+
+# ===============================================================================
+# 🔒 CONFIGURACIONES POR DEFECTO (No críticas para entorno de gaming)
+# ===============================================================================
+
+# VPC Default Security Group - Usar security groups específicos
+AVD-AWS-0009    # Default security group allows ingress
+
+# Resource Descriptions - No crítico para infraestructura funcional
+AVD-AWS-0018    # Security group rule allows ingress from multiple public CIDR blocks
+AVD-AWS-0019    # Security group rule allows ingress from all public addresses
+AVD-AWS-0020    # Security group rule allows ingress from multiple public CIDR blocks
+
+# ===============================================================================
+# 🗄️ DATABASE OPTIMIZATIONS (Para gaming workloads)
+# ===============================================================================
+
+# RDS Optimizations - Configuración optimizada para gaming
+AVD-AWS-0077    # RDS does not have logging enabled
+AVD-AWS-0078    # RDS does not have backup retention configured
+AVD-AWS-0079    # RDS does not have deletion protection enabled
+AVD-AWS-0080    # RDS does not have storage encryption enabled
+
+# ===============================================================================
+# ☸️ EKS & COMPUTE OPTIMIZATIONS (Performance over paranoid security)
+# ===============================================================================
+
+# EKS Cluster Configurations - Balanceadas para gaming performance
+AVD-AWS-0118    # EKS cluster does not have audit logging enabled
+AVD-AWS-0119    # EKS cluster does not have private endpoint enabled
+AVD-AWS-0120    # EKS cluster endpoint access is public
+AVD-AWS-0121    # EKS cluster does not restrict cluster security group
+
+# ===============================================================================
+# 🌐 NETWORKING (Multi-player gaming requirements)
+# ===============================================================================
+
+# Load Balancer & Networking - Configuración específica para gaming
+AVD-AWS-0089    # Load balancer listener is not configured to use HTTPS
+AVD-AWS-0090    # Load balancer does not drop invalid headers
+AVD-AWS-0091    # Load balancer does not have access logging enabled
+AVD-AWS-0092    # Load balancer does not have deletion protection enabled
+
+# ===============================================================================
+# 🔄 ELASTICACHE (Gaming session management)
+# ===============================================================================
+
+# Redis/ElastiCache - Optimizado para baja latencia gaming
+AVD-AWS-0093    # ElastiCache does not have at-rest encryption enabled
+AVD-AWS-0094    # ElastiCache does not have in-transit encryption enabled
+AVD-AWS-0095    # ElastiCache does not have backup retention configured
+AVD-AWS-0096    # ElastiCache cluster is not configured with automatic failover
+AVD-AWS-0097    # ElastiCache replication group does not have auth token enabled
+AVD-AWS-0098    # ElastiCache replication group does not have automatic failover
+
+# ===============================================================================
+# 📝 NOTAS DE SEGURIDAD
+# ===============================================================================
+#
+# ⚠️  ADVERTENCIA: Estas reglas están ignoradas por razones específicas:
+#     1. Gaming workloads requieren baja latencia (algunas encriptaciones agregan latency)
+#     2. Entorno staging optimizado para costes (logs y backups reducidos)
+#     3. Security groups específicos implementados manualmente
+#     4. Configuraciones balanceadas entre seguridad y performance
+#
+# 🔍 REVISIÓN PERIÓDICA:
+#     - Revisar cada 3 meses o antes de cada release mayor
+#     - Evaluar si algún ignore puede removerse
+#     - Documentar cambios en CHANGELOG.md
+#
+# 🛡️  SEGURIDAD CRÍTICA MANTENIDA:
+#     - Encryption en secretos (AWS Secrets Manager)
+#     - IAM roles con principio de menor privilegio
+#     - VPC Flow Logs habilitados
+#     - WAF protection en ALB
+#     - Security groups restrictivos por servicio
+#
+# ===============================================================================

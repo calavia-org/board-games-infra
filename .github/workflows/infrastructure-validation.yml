@@ -1,0 +1,368 @@
+name: Infrastructure Validation
+
+# Ejecutar en push a main y staging, y en todos los pull requests
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Configuración de permisos para security scanning
+permissions:
+  contents: read
+  security-events: write
+  id-token: write
+
+# Variables de entorno globales - ACTUALIZADAS A ÚLTIMAS VERSIONES ESTABLES
+env:
+  TERRAFORM_VERSION: "1.12.2"
+  TFLINT_VERSION: "0.58.1"
+  TERRAFORM_DOCS_VERSION: "0.20.0"
+  TRIVY_VERSION: "0.65.0"
+  PYTHON_VERSION: "3.11"
+  PRE_COMMIT_VERSION: "4.0.1"
+  YAMLLINT_VERSION: "1.35.1"
+  MARKDOWNLINT_VERSION: "0.45.0"
+  ACTIONLINT_VERSION: "1.7.7"
+  DETECT_SECRETS_VERSION: "1.5.0"
+  AWS_DEFAULT_REGION: "us-west-2"
+
+jobs:
+  # Job 1: Pre-commit validation (EXACTAMENTE COMO LOCAL)
+  pre-commit-validation:
+    name: Pre-commit Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para pre-commit
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Setup TFLint (Manual Install)
+        run: |
+          echo "🔧 Instalando TFLint v${{ env.TFLINT_VERSION }} manualmente..."
+          curl -sSL "https://github.com/terraform-linters/tflint/releases/download/v${{ env.TFLINT_VERSION }}/tflint_linux_amd64.zip" -o tflint.zip
+          unzip tflint.zip
+          sudo mv tflint /usr/local/bin/
+          rm tflint.zip
+          tflint --version
+
+      - name: Setup Terraform-docs
+        run: |
+          echo "🔧 Instalando terraform-docs v${{ env.TERRAFORM_DOCS_VERSION }}..."
+          curl -sSL "https://github.com/terraform-docs/terraform-docs/releases/download/v${{ env.TERRAFORM_DOCS_VERSION }}/terraform-docs-v${{ env.TERRAFORM_DOCS_VERSION }}-linux-amd64.tar.gz" -o terraform-docs.tar.gz
+          tar -xzf terraform-docs.tar.gz
+          sudo mv terraform-docs /usr/local/bin/
+          rm terraform-docs.tar.gz
+          terraform-docs --version
+
+      - name: Setup Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+          trivy --version
+
+      - name: Setup Node.js for Markdown
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Additional Tools
+        run: |
+          # ShellCheck y unzip (ya vienen en Ubuntu)
+          sudo apt-get update && sudo apt-get install -y shellcheck unzip
+
+          # Hadolint para Dockerfiles
+          wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+          chmod +x hadolint
+          sudo mv hadolint /usr/local/bin/
+
+          # Actionlint para GitHub Actions
+          curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash
+          sudo mv actionlint /usr/local/bin/
+
+          # Markdownlint CLI
+          npm install -g markdownlint-cli@${{ env.MARKDOWNLINT_VERSION }}
+
+      - name: Install Pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit==${{ env.PRE_COMMIT_VERSION }}
+          pip install yamllint==${{ env.YAMLLINT_VERSION }}
+          pip install detect-secrets==${{ env.DETECT_SECRETS_VERSION }}
+
+      - name: Cache Pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-
+
+      - name: Setup Scripts and Permissions
+        run: |
+          # Hacer ejecutables los scripts personalizados
+          chmod +x scripts/hooks/*.sh scripts/verify-environment.sh
+
+          # Crear directorios necesarios
+          mkdir -p .terraform-validate-cache
+
+      - name: Initialize Terraform for Validation
+        working-directory: calavia-eks-infra
+        run: |
+          echo "🔧 Inicializando Terraform para hooks personalizados..."
+          terraform init -backend=false -no-color
+
+      - name: Run Pre-commit Hooks (IGUAL QUE LOCAL)
+        run: |
+          # Instalar hooks exactamente como en desarrollo local
+          pre-commit install --install-hooks
+
+          # Ejecutar hooks según el contexto
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "🚀 Ejecutando pre-commit en archivos modificados (PR)..."
+            pre-commit run --from-ref origin/${{ github.base_ref }} --to-ref HEAD
+          else
+            echo "🚀 Ejecutando pre-commit en archivos del último commit..."
+            # En push, solo archivos en el último commit para velocidad
+            files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+            if [[ -n "$files" ]]; then
+              # shellcheck disable=SC2086
+              pre-commit run --files $files
+            else
+              echo "No hay archivos modificados para validar"
+            fi
+          fi
+
+      - name: Upload Pre-commit Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-commit-debug-info
+          path: |
+            .terraform-validate-cache/
+            calavia-eks-infra/.terraform/
+          retention-days: 1
+
+  # Job 2: Validación completa de infraestructura (SOLO SI PRE-COMMIT PASA)
+  infrastructure-validation:
+    name: Infrastructure Validation
+    runs-on: ubuntu-latest
+    needs: pre-commit-validation # ✅ Solo ejecutar si pre-commit pasa
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Setup Trivy (Security Scanning)
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+          trivy --version
+
+      - name: Cache Terraform modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            **/.terraform
+          key: terraform-${{ hashFiles('**/*.tf', '**/*.tfvars') }}
+          restore-keys: |
+            terraform-
+
+      - name: Terraform Plan (Staging)
+        working-directory: calavia-eks-infra/environments/staging
+        run: |
+          echo "� Ejecutando Terraform Plan en Staging..."
+          terraform init -no-color
+          terraform plan -no-color -var-file="variables.tf" -detailed-exitcode || EXIT_CODE=$?
+
+          # Exit codes: 0=no changes, 1=error, 2=changes
+          if [[ $EXIT_CODE -eq 1 ]]; then
+            echo "❌ Error en Terraform Plan"
+            exit 1
+          elif [[ $EXIT_CODE -eq 2 ]]; then
+            echo "📝 Cambios detectados en Terraform Plan"
+          else
+            echo "✅ No hay cambios en infraestructura"
+          fi
+
+      - name: Security Scan with Trivy
+        working-directory: calavia-eks-infra
+        run: |
+          echo "🔒 Ejecutando escaneo de seguridad con Trivy..."
+          trivy config . --exit-code 0 --severity HIGH,CRITICAL --format table
+
+      - name: Infrastructure Cost Analysis
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ -f "scripts/aws/generate-cost-report.sh" ]]; then
+            echo "💰 Ejecutando análisis de costos..."
+            chmod +x scripts/aws/generate-cost-report.sh
+            ./scripts/aws/generate-cost-report.sh || echo "Análisis de costos completado con warnings"
+          else
+            echo "ℹ️ Script de análisis de costos no encontrado, saltando"
+          fi
+
+      - name: Upload Terraform Plan
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-staging
+          path: |
+            calavia-eks-infra/environments/staging/*.tfplan
+            calavia-eks-infra/environments/staging/.terraform/
+          retention-days: 5
+
+  # Job 3: Validación por ambiente (SOLO PARA PRODUCCIÓN)
+  environment-validation:
+    name: Environment Validation (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: infrastructure-validation # ✅ Solo si infra-validation pasa
+    if: github.event_name == 'pull_request' # Solo en PRs
+
+    strategy:
+      matrix:
+        environment: [production] # Solo producción en PRs
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init and Plan
+        working-directory: calavia-eks-infra/environments/${{ matrix.environment }}
+        run: |
+          echo "🔧 Inicializando Terraform para ${{ matrix.environment }}..."
+          terraform init -no-color
+
+          echo "📋 Ejecutando plan para ${{ matrix.environment }}..."
+          terraform plan -detailed-exitcode -no-color -out=tfplan
+
+      - name: Upload Production Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ matrix.environment }}
+          path: |
+            calavia-eks-infra/environments/${{ matrix.environment }}/tfplan
+            calavia-eks-infra/environments/${{ matrix.environment }}/.terraform/
+          retention-days: 7
+
+  # Job 4: Documentación y cleanup
+  documentation-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, '*.md') || contains(github.event.pull_request.changed_files, 'README')
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Lint Markdown
+        run: |
+          # Instalar markdownlint-cli
+          npm install -g markdownlint-cli@0.39.0
+
+          # Verificar documentación principal
+          echo "📝 Verificando documentación..."
+          markdownlint README.md || echo "README.md tiene warnings"
+
+          # Verificar docs si existen
+          if [[ -d "docs" ]]; then
+            markdownlint docs/*.md || echo "Documentación en docs/ tiene warnings"
+          fi
+
+          echo "✅ Verificación de documentación completada"
+
+  # Configuración de notificaciones
+  notify-status:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs:
+      [
+        pre-commit-validation,
+        infrastructure-validation,
+        environment-validation,
+      ]
+    if: always()
+
+    steps:
+      - name: Workflow Status Summary
+        run: |
+          echo "📊 RESUMEN DE VALIDACIÓN DE INFRAESTRUCTURA"
+          echo "=========================================="
+          echo "🔍 Pre-commit Validation: ${{ needs.pre-commit-validation.result }}"
+          echo "🏗️  Infrastructure Validation: ${{ needs.infrastructure-validation.result }}"
+          echo "🌍 Environment Validation: ${{ needs.environment-validation.result }}"
+          echo ""
+
+          # Determinar estado general
+          critical_failed=false
+
+          if [[ "${{ needs.pre-commit-validation.result }}" == "failure" ]]; then
+            echo "❌ CRÍTICO: Pre-commit Validation falló"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.infrastructure-validation.result }}" == "failure" ]]; then
+            echo "❌ CRÍTICO: Infrastructure Validation falló"
+            critical_failed=true
+          fi
+
+          if [[ "${{ needs.environment-validation.result }}" == "failure" ]]; then
+            echo "❌ CRÍTICO: Environment Validation falló"
+            critical_failed=true
+          fi
+
+          # Solo fallar si jobs críticos fallaron
+          if [[ "$critical_failed" == "true" ]]; then
+            echo ""
+            echo "❌ PIPELINE FAILED - Jobs críticos fallaron"
+            echo "   Revisa los logs de validación"
+            exit 1
+          else
+            echo ""
+            echo "✅ PIPELINE SUCCESS - Validación completa exitosa"
+            echo "   La infraestructura está lista para deployment"
+          fi

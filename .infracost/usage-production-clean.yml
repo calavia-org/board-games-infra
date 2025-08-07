@@ -1,0 +1,4 @@
+# Archivo de uso para el entorno de producción
+# Los costos se calculan usando los valores por defecto de AWS
+
+version: 0.1

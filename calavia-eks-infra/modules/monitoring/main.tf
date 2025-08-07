@@ -1,0 +1,171 @@
+# Data source for current AWS account ID
+data "aws_caller_identity" "current" {}
+
+terraform {
+  required_version = ">= 1.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.0"
+    }
+  }
+}
+
+# Crear namespace para monitoring
+resource "kubernetes_namespace" "monitoring" {
+  metadata {
+    name = var.monitoring_namespace
+    labels = {
+      name = var.monitoring_namespace
+    }
+  }
+}
+
+# IAM Role for Prometheus service account
+resource "aws_iam_role" "prometheus" {
+  name = "${var.cluster_name}-prometheus"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(var.cluster_oidc_issuer_url, "https://", "")}"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(var.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:${var.monitoring_namespace}:prometheus-server"
+            "${replace(var.cluster_oidc_issuer_url, "https://", "")}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# IAM Policy for Prometheus to access CloudWatch
+resource "aws_iam_policy" "prometheus_cloudwatch" {
+  name        = "${var.cluster_name}-prometheus-cloudwatch"
+  description = "IAM policy for Prometheus to access CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:ListMetrics",
+          "cloudwatch:GetMetricStatistics",
+          "cloudwatch:GetMetricData",
+          "ec2:DescribeInstances",
+          "ec2:DescribeRegions",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeTags",
+          "autoscaling:DescribeAutoScalingGroups",
+          "eks:DescribeCluster",
+          "eks:ListClusters"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "prometheus_cloudwatch" {
+  policy_arn = aws_iam_policy.prometheus_cloudwatch.arn
+  role       = aws_iam_role.prometheus.name
+}
+
+# Helm Release for kube-prometheus-stack
+resource "helm_release" "kube_prometheus_stack" {
+  name       = "kube-prometheus-stack"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+  namespace  = var.monitoring_namespace
+  version    = "55.5.0"
+
+  create_namespace = false
+
+  values = [templatefile("${path.module}/values.yaml", {
+    cluster_name                        = var.cluster_name
+    retention_days                      = var.retention_days
+    slack_webhook_url                   = var.slack_webhook_url
+    email_notifications                 = var.email_notifications
+    prometheus_storage                  = var.prometheus_storage_size
+    alertmanager_storage                = var.alertmanager_storage_size
+    grafana_storage                     = var.grafana_storage_size
+    grafana_admin_password              = var.grafana_admin_password
+    prometheus_service_account_role_arn = aws_iam_role.prometheus.arn
+    enable_grafana                      = !var.enable_aws_managed_grafana
+  })]
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+# AWS Managed Grafana Workspace (if enabled)
+resource "aws_grafana_workspace" "main" {
+  count = var.enable_aws_managed_grafana ? 1 : 0
+
+  name                     = "${var.cluster_name}-grafana"
+  account_access_type      = "CURRENT_ACCOUNT"
+  authentication_providers = ["AWS_SSO"]
+  permission_type          = "SERVICE_MANAGED"
+  data_sources             = ["PROMETHEUS", "CLOUDWATCH"]
+
+  tags = var.tags
+}
+
+# SNS Topic for alerts
+resource "aws_sns_topic" "alerts" {
+  name              = "${var.cluster_name}-monitoring-alerts"
+  kms_master_key_id = aws_kms_key.sns_encryption.id
+
+  tags = var.tags
+}
+
+# KMS key for SNS encryption
+resource "aws_kms_key" "sns_encryption" {
+  description             = "KMS key for SNS topic encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+
+  tags = merge(var.tags, {
+    Name = "${var.cluster_name}-sns-encryption-key"
+  })
+}
+
+resource "aws_kms_alias" "sns_encryption" {
+  name          = "alias/${var.cluster_name}-sns-encryption"
+  target_key_id = aws_kms_key.sns_encryption.key_id
+}
+
+# SNS Topic Subscription for email alerts
+resource "aws_sns_topic_subscription" "email_alerts" {
+  count     = var.email_notifications != "" ? 1 : 0
+  topic_arn = aws_sns_topic.alerts.arn
+  protocol  = "email"
+  endpoint  = var.email_notifications
+}
+
+# CloudWatch Log Group for EKS cluster logs
+resource "aws_cloudwatch_log_group" "eks_cluster" {
+  name              = "/aws/eks/${var.cluster_name}/cluster"
+  retention_in_days = var.retention_days
+
+  tags = var.tags
+}

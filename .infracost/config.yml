@@ -1,0 +1,20 @@
+# Configuración de Infracost para board-games-infra
+version: 0.1
+
+projects:
+  # Staging Environment
+  - path: calavia-eks-infra/environments/staging
+    name: board-games-staging
+    usage_file: .infracost/usage-staging.yml
+
+  # Production Environment
+  - path: calavia-eks-infra/environments/production
+    name: board-games-production
+    usage_file: .infracost/usage-production.yml
+
+# Configuración global
+settings:
+  currency: USD
+
+  # Deshabilitar verificaciones de compliance que pueden fallar en desarrollo
+  enable_cloud_for_organization: false
