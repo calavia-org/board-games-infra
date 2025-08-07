@@ -32,6 +32,18 @@ echo "🔄 Validando configuración..."
 # Validar solo los módulos principales (más rápido)
 cd "$TERRAFORM_ROOT" || exit 1
 
+# Verificar si Terraform está inicializado
+if [[ ! -d ".terraform" ]] || [[ ! -f ".terraform.lock.hcl" ]]; then
+    echo "🔧 Terraform no inicializado, ejecutando terraform init..."
+    if terraform init -backend=false -no-color >/dev/null 2>&1; then
+        echo "✅ Terraform inicializado correctamente"
+    else
+        echo "❌ Error al inicializar Terraform"
+        terraform init -backend=false -no-color
+        exit 1
+    fi
+fi
+
 if terraform validate -no-color >/dev/null 2>&1; then
     echo "✅ Validación exitosa"
     # Actualizar cache
