@@ -50,10 +50,14 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: ${{ env.TFLINT_VERSION }}
+      - name: Setup TFLint (Manual Install)
+        run: |
+          echo "🔧 Instalando TFLint v${{ env.TFLINT_VERSION }} manualmente..."
+          curl -sSL "https://github.com/terraform-linters/tflint/releases/download/v${{ env.TFLINT_VERSION }}/tflint_linux_amd64.zip" -o tflint.zip
+          unzip tflint.zip
+          sudo mv tflint /usr/local/bin/
+          rm tflint.zip
+          tflint --version
 
       - name: Setup Trivy
         run: |
@@ -67,8 +71,8 @@ jobs:
 
       - name: Install Additional Tools
         run: |
-          # ShellCheck (ya viene en Ubuntu)
-          sudo apt-get update && sudo apt-get install -y shellcheck
+          # ShellCheck y unzip (ya vienen en Ubuntu)
+          sudo apt-get update && sudo apt-get install -y shellcheck unzip
           
           # Hadolint para Dockerfiles
           wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
