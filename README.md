@@ -1,2 +1,2 @@
 # board-games-infra
-Manage infrastructure to run game server 
+Manage infrastructure to run game server

@@ -1,0 +1,32 @@
+name: PR Check and Test
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+# contents: write is required by the reusable workflow's pre-release job, and
+# checks + pull-requests by its report job. GitHub validates the called
+# workflow's job permissions against this grant at startup (before any `if:` is
+# evaluated), so contents: write must be present even though ordinary PRs never
+# create a release. Granting only contents: read makes every run startup_fail.
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  pr-check-and-test:
+    uses: calavia-org/workflows-lib/.github/workflows/pr-check-and-test.yml@v0
+    with:
+      # Main is currently a stub; the setup branch carries the Terraform code.
+      # The reusable workflow runs pre-commit here; Terraform-specific
+      # validation lives in infrastructure-validation.yml on the setup branch.
+      run-build: false
+      run-unit-tests: false
+      run-integration-tests: false
+      run-tox: false
+      fail-on-missing: false
+      report-enabled: true
+      comment-on-pr: true
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
